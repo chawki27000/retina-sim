@@ -2,8 +2,8 @@ import enum
 import math
 
 FLIT_DEFAULT_SIZE = 32
-PACKET_DEFAULT_SIZE = 32
-
+PACKET_DEFAULT_SIZE = 128
+MESSAGE_DEFAULT_SIZE = 256
 
 class Packet:
     def __init__(self, id):
@@ -11,8 +11,7 @@ class Packet:
         self.flits = []
 
         # Flit construct
-        flitNumber = int(math.ceil(float(size / FLIT_DEFAULT_SIZE)))
-        print('flit Number : %d' % flitNumber)
+        flitNumber = int(math.ceil(float(PACKET_DEFAULT_SIZE / FLIT_DEFAULT_SIZE)))
 
         for i in range(flitNumber):
             if i == 0:  # Head Flit
@@ -55,11 +54,11 @@ class Message:
         self.dest = dest
         self.packets = []
 
-    # Packet construct
-    packetNumber = int(math.ceil(float(size / PACKET_DEFAULT_SIZE)))
+        # Packet construct
+        packetNumber = int(math.ceil(float(MESSAGE_DEFAULT_SIZE / PACKET_DEFAULT_SIZE)))
 
-    for i in range(packetNumber):
-        self.packets.append(Packet(i))
+        for i in range(packetNumber):
+            self.packets.append(Packet(i))
 
 #############################################################
 
