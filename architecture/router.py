@@ -16,5 +16,9 @@ class Router:
         self.outEast = outEast
         self.outWest = outWest
 
+    def proc_engine_setting(self, inPE, outPE):
+        self.inPE = inPE
+        self.outPE = outPE
+
     def __str__(self):
-        return 'Router (%d,%d)' % (self.coordinate.x, self.coordinate.y)
+        return 'Router (%d,%d)' % (self.coordinate.i, self.coordinate.j)

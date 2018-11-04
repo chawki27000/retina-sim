@@ -6,9 +6,10 @@ class Direction(enum.Enum):
     south = 2
     east = 3
     west = 4
+    pe = 5
 
 
 class Coordinate:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    def __init__(self, i, j):
+        self.i = i  # Row
+        self.j = j  # Column

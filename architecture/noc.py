@@ -27,12 +27,14 @@ class NoC:
         inSouth = InPort(Direction.south)
         inEast = InPort(Direction.east)
         inWest = InPort(Direction.west)
+        inPE = InPort(Direction.pe)
 
         # OutPort
         outNorth = OutPort(Direction.north)
         outSouth = OutPort(Direction.south)
         outEast = OutPort(Direction.east)
         outWest = OutPort(Direction.west)
+        outPE = InPort(Direction.pe)
 
         # ProcessingEngine
         proc_engine = ProcessingEngine()
@@ -42,6 +44,10 @@ class NoC:
         router = Router(id, coordinate, proc_engine)
         router.inport_setting(inNorth, inSouth, inEast, inWest)
         router.outport_setting(outNorth, outSouth, outEast, outWest)
+
+        # Processing Engine
+        proc_engine.router_bind(router)
+        router.proc_engine_setting(inPE, outPE)
 
         return router
 
@@ -91,3 +97,12 @@ class NoC:
                 temporary_list[i].outWest.inport_linking(temporary_router.inEast)
             else:
                 temporary_list[i].outWest.inport_linking(None)
+
+    def __str__(self):
+        string = ''
+        for i in range(self.square_size):
+            for j in range(self.square_size):
+                string += str(self.router_matrix[i][j]) + ' '
+            string += '\n'
+
+        return string
