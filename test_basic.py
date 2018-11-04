@@ -26,7 +26,7 @@ class TestNoC(unittest.TestCase):
     def setUp(self):
         env = simpy.Environment()
 
-        self.noc = NoC(env, "Network-On-Chip", 4)
+        self.noc = NoC(env, "Network-On-Chip", 4, 4, 12)
 
     def test_noc_initialisation(self):
         self.assertEqual(len(self.noc.router_matrix), 4)
@@ -58,6 +58,18 @@ class TestNoC(unittest.TestCase):
         self.assertEqual(self.noc.router_matrix[2][2].outWest.inPort, self.noc.router_matrix[2][1].inEast)
         self.assertEqual(self.noc.router_matrix[2][2].outSouth.inPort, self.noc.router_matrix[3][2].inNorth)
         self.assertEqual(self.noc.router_matrix[2][2].outEast.inPort, self.noc.router_matrix[2][3].inWest)
+
+
+class TestRouting(unittest.TestCase):
+
+    def setUp(self):
+        env = simpy.Environment()
+
+        self.noc = NoC(env, "Network-On-Chip", 4, 4, 12)
+
+    def test_proc_engine_to_router(self):
+        router = self.noc.router_matrix[0][0]
+        # router.proc_engine.
 
 
 if __name__ == '__main__':

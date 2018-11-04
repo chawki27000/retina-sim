@@ -6,10 +6,12 @@ from communication.routing import Coordinate, Direction
 
 
 class NoC:
-    def __init__(self, env, name, square_size):
+    def __init__(self, env, name, square_size, nbvc, vc_size):
         self.name = name
         self.router_matrix = []
         self.square_size = square_size
+        self.nbvc = nbvc
+        self.vc_size = vc_size
         self.env = env
 
         # Routers Initialisation
@@ -24,18 +26,18 @@ class NoC:
     def router_initialisation(self, id, x, y):
 
         # InPort
-        inNorth = InPort(Direction.north)
-        inSouth = InPort(Direction.south)
-        inEast = InPort(Direction.east)
-        inWest = InPort(Direction.west)
-        inPE = InPort(Direction.pe)
+        inNorth = InPort(Direction.north, self.nbvc, self.vc_size)
+        inSouth = InPort(Direction.south, self.nbvc, self.vc_size)
+        inEast = InPort(Direction.east, self.nbvc, self.vc_size)
+        inWest = InPort(Direction.west, self.nbvc, self.vc_size)
+        inPE = InPort(Direction.pe, self.nbvc, self.vc_size)
 
         # OutPort
         outNorth = OutPort(Direction.north)
         outSouth = OutPort(Direction.south)
         outEast = OutPort(Direction.east)
         outWest = OutPort(Direction.west)
-        outPE = InPort(Direction.pe)
+        outPE = OutPort(Direction.pe)
 
         # ProcessingEngine
         proc_engine = ProcessingEngine()

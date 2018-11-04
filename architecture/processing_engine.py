@@ -10,6 +10,7 @@ class ProcessingEngine:
         self.router = router
 
     def send_message(self, i, j, size, period, instance):
+
         # Coordinate Initialization
         dest = Coordinate(i, j)
         src = Coordinate(self.router.coordinate.i, self.router.coordinate.j)
