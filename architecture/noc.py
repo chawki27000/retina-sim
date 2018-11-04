@@ -6,10 +6,11 @@ from communication.routing import Coordinate, Direction
 
 
 class NoC:
-    def __init__(self, name, square_size):
+    def __init__(self, env, name, square_size):
         self.name = name
         self.router_matrix = []
         self.square_size = square_size
+        self.env = env
 
         # Routers Initialisation
         count = 1
@@ -97,6 +98,11 @@ class NoC:
                 temporary_list[i].outWest.inport_linking(temporary_router.inEast)
             else:
                 temporary_list[i].outWest.inport_linking(None)
+
+    def process(self):
+        for i in range(self.square_size):
+            for j in range(self.square_size):
+                self.env.process(self.router_matrix[i][j].proc_engine.process(self.env))
 
     def __str__(self):
         string = ''

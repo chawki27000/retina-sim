@@ -1,4 +1,6 @@
 import unittest
+import simpy
+
 from communication.structure import Packet, Message
 from communication.routing import Coordinate
 from architecture.noc import NoC
@@ -10,7 +12,7 @@ class TestPacket(unittest.TestCase):
         self.packet = Packet(1)
         self.src = Coordinate(1, 1)
         self.dest = Coordinate(2, 2)
-        self.message = Message(1, 23, 0, self.src, self.dest)
+        self.message = Message(23, 0, self.src, self.dest)
 
     def test_flit_number(self):
         self.assertEqual(len(self.packet.flits), 4)
@@ -22,7 +24,9 @@ class TestPacket(unittest.TestCase):
 class TestNoC(unittest.TestCase):
 
     def setUp(self):
-        self.noc = NoC("Network-On-Chip", 4)
+        env = simpy.Environment()
+
+        self.noc = NoC(env, "Network-On-Chip", 4)
 
     def test_noc_initialisation(self):
         self.assertEqual(len(self.noc.router_matrix), 4)
