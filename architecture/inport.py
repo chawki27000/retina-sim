@@ -1,5 +1,3 @@
-VC_NUMBER = 8
-
 from communication.routing import Direction
 from .virtual_channel import VirtualChannel
 
@@ -7,13 +5,15 @@ from .virtual_channel import VirtualChannel
 class InPort:
     def __init__(self, direction, nbvc, vc_size):
         self.direction = direction
+        self.nbvc = nbvc
+        self.vc_size = vc_size
         self.vcs = []
 
         # VCs construct
-        for i in range(VC_NUMBER):
-            self.vcs.append(VirtualChannel(i))
+        for i in range(self.nbvc):
+            self.vcs.append(VirtualChannel(i, self.vc_size))
 
-    def vc_allocation(self):
+    def get_first_idle_vc(self):
         for vc in self.vcs:
             if vc.isFree():
                 return vc

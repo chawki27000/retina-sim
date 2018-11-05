@@ -9,18 +9,23 @@ class ProcessingEngine:
     def router_bind(self, router):
         self.router = router
 
-    def send_message(self, i, j, size, period, instance):
+    def send_message(self, m_instance):
 
-        # Coordinate Initialization
-        dest = Coordinate(i, j)
-        src = Coordinate(self.router.coordinate.i, self.router.coordinate.j)
+        # Getting Packets from Message
+        packets = m_instance.packets
 
-        # Message Initialization
-        message = Message(period, size, src, dest)
+        while len(packets) > 0:
 
-        # Message Instance
-        m_instance = MessageInstance(message, instance)
+            packet = packets.pop()
 
+            # VC Allocation
+            vc_allotted = self.router.inPE.get_first_idle_vc
+            if vc_allotted is not None:
+                self.send_packet(packet, vc_allotted)
+            else:
+                pass
+
+        # LOG
         print('Sending message N°(%d) from R(%d,%d) to R(%d,%d)'
               % (m_instance.instance,
                  m_instance.src.i,
@@ -28,12 +33,29 @@ class ProcessingEngine:
                  m_instance.dest.i,
                  m_instance.dest.j))
 
-    def process(self, env):
-        while True:
-            inst = 1
-            print('at  : %d' % env.now)
+    def send_packet(self, packet, vc_allotted):
 
-            self.send_message(1, 1, 300, 20, inst)
+        # Getting Flits from Packet
+        flits = packet.flits
+
+        # sending to VC
+        while len(flits) > 0:
+            flit = flits.pop()
+            vc_allotted.push(flit)
+
+    def process(self, env, message):
+        while True:
+            # MessageInstance Counter
+            instance_count = 1
+
+            # MessageInstance Initialization
+            m_instance = MessageInstance(message, instance_count)
+
+            # Sending
+            self.send_message(m_instance)
+
+            # SIM
             yield env.timeout(20)
 
-            inst += 1
+            # Increment
+            instance_count += 1

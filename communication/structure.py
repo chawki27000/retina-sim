@@ -3,7 +3,6 @@ import math
 
 FLIT_DEFAULT_SIZE = 32
 PACKET_DEFAULT_SIZE = 128
-MESSAGE_DEFAULT_SIZE = 256
 
 
 class Packet:
@@ -17,13 +16,13 @@ class Packet:
         for i in range(flitNumber):
             if i == 0:  # Head Flit
                 self.flits.append(Flit(i, FlitType.head, 0))  # TODO : Clock
-            elif i == flitNumber - 2:  # Tail Flit
+            elif i == flitNumber - 1:  # Tail Flit
                 self.flits.append(Flit(i, FlitType.tail, 0))  # TODO : Clock
             else:  # Body Flit
                 self.flits.append(Flit(i, FlitType.body, 0))  # TODO : Clock
 
     def setHeadFlit(self, destination):
-        self.flits[O].setDestinationInfo(destination)
+        self.flits[0].setDestinationInfo(destination)
 
 
 #############################################################
@@ -57,7 +56,7 @@ class Message:
         self.packets = []
 
         # Packet construct
-        packetNumber = int(math.ceil(float(MESSAGE_DEFAULT_SIZE / PACKET_DEFAULT_SIZE)))
+        packetNumber = int(math.ceil(float(self.size / PACKET_DEFAULT_SIZE)))
 
         for i in range(packetNumber):
             self.packets.append(Packet(i))
