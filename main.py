@@ -11,7 +11,7 @@ if __name__ == "__main__":
     env = simpy.Environment()
 
     # NoC Initialization
-    noc = NoC(env, 'Network-On-Chip', 4)
+    noc = NoC(env, 'Network-On-Chip', 4, 6, 12)
     noc.process()
 
     # Simulation START

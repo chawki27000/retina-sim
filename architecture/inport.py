@@ -1,4 +1,3 @@
-from communication.routing import Direction
 from .virtual_channel import VirtualChannel
 
 
@@ -16,5 +15,6 @@ class InPort:
     def get_first_idle_vc(self):
         for vc in self.vcs:
             if vc.isFree():
+                vc.lock()
                 return vc
-            return None
+        return None

@@ -9,53 +9,62 @@ class ProcessingEngine:
     def router_bind(self, router):
         self.router = router
 
-    def send_message(self, m_instance):
-
+    def send_message(self, env, m_instance):
+        print('send_message : instance number (%d) ' % m_instance.instance)
         # Getting Packets from Message
         packets = m_instance.packets
 
         while len(packets) > 0:
-
             packet = packets.pop()
+            print('packet sending number : (%d) at : (%d)' % (packet.id, env.now))
 
             # VC Allocation
-            vc_allotted = self.router.inPE.get_first_idle_vc
+            vc_allotted = self.router.inPE.get_first_idle_vc()
+
             if vc_allotted is not None:
-                self.send_packet(packet, vc_allotted)
+                print('vc allotted number : %d' % vc_allotted.id)
+                while len(packet) > 0:
+                    flit = packet.pop()
+                    vc_allotted.push(flit)
             else:
                 pass
 
-        # LOG
-        print('Sending message N°(%d) from R(%d,%d) to R(%d,%d)'
-              % (m_instance.instance,
-                 m_instance.src.i,
-                 m_instance.src.j,
-                 m_instance.dest.i,
-                 m_instance.dest.j))
-
-    def send_packet(self, packet, vc_allotted):
-
-        # Getting Flits from Packet
-        flits = packet.flits
-
-        # sending to VC
-        while len(flits) > 0:
-            flit = flits.pop()
-            vc_allotted.push(flit)
+            yield env.timeout(1)
 
     def process(self, env, message):
+        # MessageInstance Counter
+        instance_count = 1
+        print('begin PE process at : %d' % env.now)
         while True:
-            # MessageInstance Counter
-            instance_count = 1
 
-            # MessageInstance Initialization
-            m_instance = MessageInstance(message, instance_count)
+            if env.now % message.period == 0:
+                print('periodic time : %d' % env.now)
+                # MessageInstance Initialization
+                m_instance = MessageInstance(message, instance_count)
 
-            # Sending
-            self.send_message(m_instance)
+                # START : Message Sending
+                print('send_message : instance number (%d) ' % m_instance.instance)
+                # Getting Packets from Message
+                packets = m_instance.packets
 
-            # SIM
-            yield env.timeout(20)
+                while len(packets) > 0:
+                    packet = packets.pop()
+                    print('packet sending number : (%d) at : (%d)' % (packet.id, env.now))
 
-            # Increment
-            instance_count += 1
+                    # VC Allocation
+                    vc_allotted = self.router.inPE.get_first_idle_vc()
+
+                    if vc_allotted is not None:
+                        print('vc allotted number : %d' % vc_allotted.id)
+                        while len(packet) > 0:
+                            flit = packet.pop()
+                            vc_allotted.push(flit)
+                    else:
+                        pass
+
+                    yield env.timeout(1)
+
+                # Increment
+                instance_count += 1
+                
+            yield env.timeout(1)

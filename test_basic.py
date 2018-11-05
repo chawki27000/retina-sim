@@ -73,9 +73,14 @@ class TestRouting(unittest.TestCase):
 
         self.noc = NoC(env, "Network-On-Chip", 4, 4, 12)
 
+        self.src = Coordinate(0, 0)
+        self.dest = Coordinate(2, 2)
+        self.message = Message(12, 256, self.src, self.dest)
+
+        self.proc_engine = self.noc.router_matrix[0][0].proc_engine
+
     def test_proc_engine_to_router(self):
-        router = self.noc.router_matrix[0][0]
-        # router.proc_engine.
+        self.proc_engine
 
 
 if __name__ == '__main__':

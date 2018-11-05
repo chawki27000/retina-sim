@@ -1,3 +1,4 @@
+from communication.structure import Message
 from .processing_engine import ProcessingEngine
 from .router import Router
 from .inport import InPort
@@ -102,9 +103,13 @@ class NoC:
                 temporary_list[i].outWest.inport_linking(None)
 
     def process(self):
-        for i in range(self.square_size):
-            for j in range(self.square_size):
-                self.env.process(self.router_matrix[i][j].proc_engine.process(self.env))
+        # for i in range(self.square_size):
+        #     for j in range(self.square_size):
+        #         self.env.process(self.router_matrix[i][j].proc_engine.process(self.env))
+        src = Coordinate(0, 0)
+        dest = Coordinate(2, 2)
+        message = Message(30, 256, src, dest)
+        self.env.process(self.router_matrix[0][0].proc_engine.process(self.env, message))
 
     def __str__(self):
         string = ''
