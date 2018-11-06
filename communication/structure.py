@@ -1,5 +1,7 @@
+import copy
 import enum
 import math
+
 
 FLIT_DEFAULT_SIZE = 32
 PACKET_DEFAULT_SIZE = 128
@@ -23,6 +25,11 @@ class Packet:
 
     def setHeadFlit(self, destination):
         self.flits[0].setDestinationInfo(destination)
+
+    def get_flit(self):
+        flit = copy.deepcopy(self.flits[0])
+        del self.flits[0]
+        return flit
 
 
 #############################################################
