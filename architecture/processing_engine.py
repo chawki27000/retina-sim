@@ -44,6 +44,7 @@ class ProcessingEngine:
                         self.send_packet(packet, vc_allotted)
                     else:
                         logging.debug('Not VC allowed')
+                        packets.insert(0, packet)
 
                     yield env.timeout(1)
 
