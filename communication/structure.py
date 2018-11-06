@@ -22,10 +22,11 @@ class Packet:
             else:  # Body Flit
                 self.flits.append(Flit(i, FlitType.body, 0))
 
-        self.set_head_flit(dest)
+        self.set_destination(dest)
 
-    def set_head_flit(self, destination):
-        self.flits[0].set_destination_info(destination)
+    def set_destination(self, dest):
+        for flit in self.flits:
+            flit.set_destination_info(dest)
 
     def get_flit(self):
         flit = copy.deepcopy(self.flits[0])
@@ -49,8 +50,7 @@ class Flit:
         self.destination = None
 
     def set_destination_info(self, destination):
-        if self.type is FlitType.head:
-            self.destination = destination
+        self.destination = destination
 
 
 #############################################################

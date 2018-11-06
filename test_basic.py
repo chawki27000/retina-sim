@@ -26,13 +26,11 @@ class TestPacket(unittest.TestCase):
     def test_packet_number(self):
         self.assertEqual(len(self.message.packets), 2)
 
-    def test_head_flit(self):
-        packet = self.message.packets[0]
-        packet1 = self.message.packets[1]
-        self.assertEqual(packet.flits[0].destination, self.dest)
-        self.assertEqual(packet1.flits[0].destination, self.dest)
-        self.assertIsNone(packet.flits[1].destination)
-        self.assertIsNone(packet1.flits[1].destination)
+    def test_destination_set(self):
+        self.assertEqual(self.packet.flits[0].destination, self.dest)
+        self.assertEqual(self.packet.flits[1].destination, self.dest)
+        self.assertEqual(self.packet.flits[2].destination, self.dest)
+        self.assertEqual(self.packet.flits[3].destination, self.dest)
 
 
 class TestNoC(unittest.TestCase):
@@ -113,6 +111,9 @@ class TestRouting(unittest.TestCase):
         self.src = Coordinate(0, 0)
         self.dest = Coordinate(2, 2)
         self.message = Message(12, 256, self.src, self.dest)
+        self.packet = Packet(1, self.dest)
+
+        self.flit = self.packet.flits[0]
 
         self.proc_engine = self.noc.router_matrix[0][0].proc_engine
         self.router = self.noc.router_matrix[0][0]
@@ -129,7 +130,7 @@ class TestRouting(unittest.TestCase):
         self.assertTrue(allotted_vc.lock)
         self.assertEqual(len(packets[0].flits), 0)
 
-    def test_xy_routing_direction(self):
+    def test_xy_routing_output(self):
         self.router = self.noc.router_matrix[2][2]
         dest1 = Coordinate(1, 2)
         dest2 = Coordinate(3, 2)
@@ -137,19 +138,50 @@ class TestRouting(unittest.TestCase):
         dest4 = Coordinate(0, 0)
         dest5 = Coordinate(2, 2)
 
-        self.assertEqual(self.router.get_xy_routing_direction(dest1), Direction.north)
-        self.assertEqual(self.router.get_xy_routing_direction(dest2), Direction.south)
-        self.assertEqual(self.router.get_xy_routing_direction(dest3), Direction.east)
-        self.assertEqual(self.router.get_xy_routing_direction(dest4), Direction.west)
-        self.assertIsNone(self.router.get_xy_routing_direction(dest5))
+        self.flit.set_destination_info(dest1)
+        self.assertEqual(self.router.get_xy_routing_output(self.flit), self.router.outNorth)
+        self.flit.set_destination_info(dest2)
+        self.assertEqual(self.router.get_xy_routing_output(self.flit), self.router.outSouth)
+        self.flit.set_destination_info(dest3)
+        self.assertEqual(self.router.get_xy_routing_output(self.flit), self.router.outEast)
+        self.flit.set_destination_info(dest4)
+        self.assertEqual(self.router.get_xy_routing_output(self.flit), self.router.outWest)
+        self.flit.set_destination_info(dest5)
+        self.assertEqual(self.router.get_xy_routing_output(self.flit), self.router.outPE)
 
-    def test_routing_output(self):
+    def test_vc_target_output(self):
         self.router = self.noc.router_matrix[2][2]
+        dest1 = Coordinate(1, 2)
+        dest4 = Coordinate(0, 0)
 
-        self.assertEqual(self.router.get_routing_output(Direction.north), self.router.outNorth)
-        self.assertEqual(self.router.get_routing_output(Direction.south), self.router.outSouth)
-        self.assertEqual(self.router.get_routing_output(Direction.east), self.router.outEast)
-        self.assertEqual(self.router.get_routing_output(Direction.west), self.router.outWest)
+        # North
+        vc_north = self.router.inNorth.vcs[0]
+        vc_north1 = self.router.inNorth.vcs[1]
+
+        self.flit.set_destination_info(dest1)
+        vc_north.flits.append(self.flit)
+        self.router.vc_target_outport(vc_north)
+
+        self.assertEqual(len(self.router.vcs_target_north), 1)
+
+        vc_north1.flits.append(self.flit)
+        self.router.vc_target_outport(vc_north1)
+        self.assertEqual(len(self.router.vcs_target_north), 2)
+
+        # West
+        vc_west = self.router.inWest.vcs[0]
+
+        self.flit.set_destination_info(dest4)
+        vc_west.flits.append(self.flit)
+        self.router.vc_target_outport(vc_west)
+
+        self.assertEqual(len(self.router.vcs_target_west), 1)
+
+
+class TestFlitSending(unittest.TestCase):
+
+    def setUp(self):
+        pass
 
 
 if __name__ == '__main__':
