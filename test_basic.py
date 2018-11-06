@@ -2,7 +2,7 @@ import unittest
 import simpy
 
 from communication.structure import Packet, Message, FlitType
-from communication.routing import Coordinate
+from communication.routing import Coordinate, Direction
 from architecture.noc import NoC
 
 
@@ -128,6 +128,20 @@ class TestRouting(unittest.TestCase):
         self.assertEqual(len(allotted_vc.flits), 4)
         self.assertTrue(allotted_vc.lock)
         self.assertEqual(len(packets[0].flits), 0)
+
+    def test_xy_routing_direction(self):
+        self.router = router = self.noc.router_matrix[2][2]
+        dest1 = Coordinate(1, 2)
+        dest2 = Coordinate(3, 2)
+        dest3 = Coordinate(0, 3)
+        dest4 = Coordinate(0, 0)
+        dest5 = Coordinate(2, 2)
+
+        self.assertEqual(self.router.get_xy_routing_direction(dest1), Direction.north)
+        self.assertEqual(self.router.get_xy_routing_direction(dest2), Direction.south)
+        self.assertEqual(self.router.get_xy_routing_direction(dest3), Direction.east)
+        self.assertEqual(self.router.get_xy_routing_direction(dest4), Direction.west)
+        self.assertIsNone(self.router.get_xy_routing_direction(dest5))
 
 
 if __name__ == '__main__':

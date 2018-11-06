@@ -16,11 +16,11 @@ class Packet:
 
         for i in range(flitNumber):
             if i == 0:  # Head Flit
-                self.flits.append(Flit(i, FlitType.head, 0))  # TODO : Clock
+                self.flits.append(Flit(i, FlitType.head, 0))
             elif i == flitNumber - 1:  # Tail Flit
-                self.flits.append(Flit(i, FlitType.tail, 0))  # TODO : Clock
+                self.flits.append(Flit(i, FlitType.tail, 0))
             else:  # Body Flit
-                self.flits.append(Flit(i, FlitType.body, 0))  # TODO : Clock
+                self.flits.append(Flit(i, FlitType.body, 0))
 
         self.set_head_flit(dest)
 
