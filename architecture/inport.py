@@ -15,6 +15,13 @@ class InPort:
     def get_first_idle_vc(self):
         for vc in self.vcs:
             if vc.isFree():
-                vc.lock()
+                vc.lock = True
                 return vc
         return None
+
+    def number_idle_vc(self):
+        count = 0
+        for vc in self.vcs:
+            if vc.isFree():
+                count += 1
+        return count

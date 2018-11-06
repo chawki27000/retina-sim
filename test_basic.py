@@ -66,6 +66,35 @@ class TestNoC(unittest.TestCase):
         self.assertEqual(self.noc.router_matrix[2][2].outEast.inPort, self.noc.router_matrix[2][3].inWest)
 
 
+class TestRouter(unittest.TestCase):
+
+    def setUp(self):
+        env = simpy.Environment()
+
+        self.noc = NoC(env, "Network-On-Chip", 4, 4, 12)
+
+        self.proc_engine = self.noc.router_matrix[0][0].proc_engine
+        self.router = self.noc.router_matrix[0][0]
+
+    def test_inport_vcs(self):
+        self.assertEqual(self.noc.router_matrix[3][3].inNorth.nbvc, 4)
+        self.assertEqual(self.noc.router_matrix[3][3].inNorth.vc_size, 12)
+        self.assertEqual(len(self.noc.router_matrix[3][3].inNorth.vcs[0].flits), 0)
+
+    def test_idle_lock_vc(self):
+        allotted_vc = self.router.inPE.get_first_idle_vc()
+        self.assertIsNotNone(allotted_vc)
+        self.assertEqual(self.router.inPE.number_idle_vc(), 3)
+        allotted_vc = self.router.inPE.get_first_idle_vc()
+        self.assertEqual(self.router.inPE.number_idle_vc(), 2)
+        allotted_vc = self.router.inPE.get_first_idle_vc()
+        self.assertEqual(self.router.inPE.number_idle_vc(), 1)
+        allotted_vc = self.router.inPE.get_first_idle_vc()
+        self.assertEqual(self.router.inPE.number_idle_vc(), 0)
+        allotted_vc = self.router.inPE.get_first_idle_vc()
+        self.assertIsNone(allotted_vc)
+
+
 class TestRouting(unittest.TestCase):
 
     def setUp(self):
@@ -78,9 +107,19 @@ class TestRouting(unittest.TestCase):
         self.message = Message(12, 256, self.src, self.dest)
 
         self.proc_engine = self.noc.router_matrix[0][0].proc_engine
+        self.router = self.noc.router_matrix[0][0]
 
     def test_proc_engine_to_router(self):
-        self.proc_engine
+        packets = self.message.packets
+        allotted_vc = self.router.inPE.get_first_idle_vc()
+
+        self.assertEqual(len(packets[0].flits), 4)
+
+        self.proc_engine.send_packet(packets[0], allotted_vc)
+
+        self.assertEqual(len(allotted_vc.flits), 4)
+        self.assertTrue(allotted_vc.lock)
+        self.assertEqual(len(packets[0].flits), 0)
 
 
 if __name__ == '__main__':
