@@ -2,13 +2,12 @@ import copy
 import enum
 import math
 
-
 FLIT_DEFAULT_SIZE = 32
 PACKET_DEFAULT_SIZE = 128
 
 
 class Packet:
-    def __init__(self, id):
+    def __init__(self, id, dest):
         self.id = id
         self.flits = []
 
@@ -23,8 +22,10 @@ class Packet:
             else:  # Body Flit
                 self.flits.append(Flit(i, FlitType.body, 0))  # TODO : Clock
 
-    def setHeadFlit(self, destination):
-        self.flits[0].setDestinationInfo(destination)
+        self.set_head_flit(dest)
+
+    def set_head_flit(self, destination):
+        self.flits[0].set_destination_info(destination)
 
     def get_flit(self):
         flit = copy.deepcopy(self.flits[0])
@@ -45,8 +46,9 @@ class Flit:
         self.id = id
         self.type = type
         self.timeBegin = timeBegin
+        self.destination = None
 
-    def setDestinationInfo(self, destination):
+    def set_destination_info(self, destination):
         if self.type is FlitType.head:
             self.destination = destination
 
@@ -66,7 +68,7 @@ class Message:
         packetNumber = int(math.ceil(float(self.size / PACKET_DEFAULT_SIZE)))
 
         for i in range(packetNumber):
-            self.packets.append(Packet(i))
+            self.packets.append(Packet(i, self.dest))
 
 
 #############################################################

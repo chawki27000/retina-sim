@@ -9,9 +9,9 @@ from architecture.noc import NoC
 class TestPacket(unittest.TestCase):
 
     def setUp(self):
-        self.packet = Packet(1)
         self.src = Coordinate(1, 1)
         self.dest = Coordinate(2, 2)
+        self.packet = Packet(1, self.dest)
         self.message = Message(23, 256, self.src, self.dest)
 
     def test_flit_number(self):
@@ -25,6 +25,14 @@ class TestPacket(unittest.TestCase):
 
     def test_packet_number(self):
         self.assertEqual(len(self.message.packets), 2)
+
+    def test_head_flit(self):
+        packet = self.message.packets[0]
+        packet1 = self.message.packets[1]
+        self.assertEqual(packet.flits[0].destination, self.dest)
+        self.assertEqual(packet1.flits[0].destination, self.dest)
+        self.assertIsNone(packet.flits[1].destination)
+        self.assertIsNone(packet1.flits[1].destination)
 
 
 class TestNoC(unittest.TestCase):
