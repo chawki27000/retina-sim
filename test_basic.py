@@ -130,7 +130,7 @@ class TestRouting(unittest.TestCase):
         self.assertEqual(len(packets[0].flits), 0)
 
     def test_xy_routing_direction(self):
-        self.router = router = self.noc.router_matrix[2][2]
+        self.router = self.noc.router_matrix[2][2]
         dest1 = Coordinate(1, 2)
         dest2 = Coordinate(3, 2)
         dest3 = Coordinate(0, 3)
@@ -142,6 +142,14 @@ class TestRouting(unittest.TestCase):
         self.assertEqual(self.router.get_xy_routing_direction(dest3), Direction.east)
         self.assertEqual(self.router.get_xy_routing_direction(dest4), Direction.west)
         self.assertIsNone(self.router.get_xy_routing_direction(dest5))
+
+    def test_routing_output(self):
+        self.router = self.noc.router_matrix[2][2]
+
+        self.assertEqual(self.router.get_routing_output(Direction.north), self.router.outNorth)
+        self.assertEqual(self.router.get_routing_output(Direction.south), self.router.outSouth)
+        self.assertEqual(self.router.get_routing_output(Direction.east), self.router.outEast)
+        self.assertEqual(self.router.get_routing_output(Direction.west), self.router.outWest)
 
 
 if __name__ == '__main__':

@@ -17,6 +17,7 @@ class ProcessingEngine:
             vc_allotted.enqueue(flit)
             logging.debug('sending Flit (%s)' % flit.type)
 
+    # SIMULATION PROCESS
     def process(self, env, message):
         # MessageInstance Counter
         instance_count = 1
