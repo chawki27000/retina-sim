@@ -109,16 +109,16 @@ class Router:
         if len(vc.flits) > 0:
             if self.get_xy_routing_output(vc.flits[0]) == self.outNorth \
                     and vc not in self.vcs_target_north:
-                self.vcs_target_north.append(vc)
+                self.vcs_target_north.insert(0, vc)
             elif self.get_xy_routing_output(vc.flits[0]) == self.outSouth \
                     and vc not in self.vcs_target_north:
-                self.vcs_target_south.append(vc)
+                self.vcs_target_south.insert(0, vc)
             elif self.get_xy_routing_output(vc.flits[0]) == self.outEast \
                     and vc not in self.vcs_target_north:
-                self.vcs_target_east.append(vc)
+                self.vcs_target_east.insert(0, vc)
             elif self.get_xy_routing_output(vc.flits[0]) == self.outWest \
                     and vc not in self.vcs_target_north:
-                self.vcs_target_west.append(vc)
+                self.vcs_target_west.insert(0, vc)
 
     # SIMULATION PROCESS
     def process(self, env):
