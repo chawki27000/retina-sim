@@ -16,11 +16,11 @@ class Packet:
 
         for i in range(flitNumber):
             if i == 0:  # Head Flit
-                self.flits.append(Flit(i, FlitType.head, 0))
+                self.flits.append(Flit(i, FlitType.head, 0, self))
             elif i == flitNumber - 1:  # Tail Flit
-                self.flits.append(Flit(i, FlitType.tail, 0))
+                self.flits.append(Flit(i, FlitType.tail, 0, self))
             else:  # Body Flit
-                self.flits.append(Flit(i, FlitType.body, 0))
+                self.flits.append(Flit(i, FlitType.body, 0, self))
 
         self.set_destination(dest)
 
@@ -33,6 +33,9 @@ class Packet:
         del self.flits[0]
         return flit
 
+    def __str__(self):
+        return 'Packet (%d)' % self.id
+
 
 #############################################################
 class FlitType(enum.Enum):
@@ -43,14 +46,18 @@ class FlitType(enum.Enum):
 
 #############################################################
 class Flit:
-    def __init__(self, id, type, timeBegin):
+    def __init__(self, id, type, timeBegin, packet):
         self.id = id
         self.type = type
         self.timeBegin = timeBegin
         self.destination = None
+        self.packet = packet
 
     def set_destination_info(self, destination):
         self.destination = destination
+
+    def __str__(self):
+        return 'Flit (%s) from %s' % (self.type, self.packet)
 
 
 #############################################################

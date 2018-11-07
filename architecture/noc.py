@@ -24,6 +24,9 @@ class NoC:
                 count += 1
             self.router_matrix.append(line)
 
+        # Routers linking
+        self.router_linking()
+
     def router_initialisation(self, id, x, y):
 
         # InPort
@@ -103,13 +106,12 @@ class NoC:
                 temporary_list[i].outWest.inport_linking(None)
 
     def process(self):
-        # for i in range(self.square_size):
-        #     for j in range(self.square_size):
-        #         self.env.process(self.router_matrix[i][j].proc_engine.process(self.env))
         src = Coordinate(0, 0)
-        dest = Coordinate(2, 2)
-        message = Message(30, 256, src, dest)
+        dest = Coordinate(0, 1)
+        message = Message(200, 256, src, dest)
         self.env.process(self.router_matrix[0][0].proc_engine.process(self.env, message))
+
+        self.env.process(self.router_matrix[0][0].process(self.env))
 
     def __str__(self):
         string = ''

@@ -4,7 +4,7 @@ import logging
 from architecture.noc import NoC
 
 # Simulation Setup
-SIM_DURATION = 100
+SIM_DURATION = 30
 
 
 def main():
