@@ -81,3 +81,29 @@ class MessageInstance(Message):
 
     def arrived(self, arr):
         self.arr = arr
+
+
+#############################################################
+class Node:
+    def __init__(self, vc_src, vc_target):
+        self.vc_src = vc_src
+        self.vc_target = vc_target
+
+
+class NodeArray:
+    def __init__(self):
+        self.array = []
+
+    def add(self, node):
+        self.array.append(node)
+
+    def remove(self, vc_src):
+        for node in self.array:
+            if node.vc_src == vc_src:
+                self.array.remove(node)
+
+    def get_target(self, vc_src):
+        for node in self.array:
+            if node.vc_src == vc_src:
+                return node.vc_target
+        return None

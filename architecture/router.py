@@ -1,4 +1,5 @@
 from communication.routing import Direction
+from communication.structure import FlitType
 
 
 class Router:
@@ -8,7 +9,7 @@ class Router:
         self.proc_engine = proc_engine
 
         # Process Attribute
-        self.vcs_dictionnary = dict()
+        self.vcs_dictionary = dict()
         self.vcs_target_north = []
         self.vcs_target_south = []
         self.vcs_target_east = []
@@ -52,16 +53,26 @@ class Router:
     def reserve_idle_vc(self, inport):
         return inport.get_first_idle_vc()
 
-    def send_head_flit(self, flit, output):
+    def send_flit(self, vc, output):
 
-        # Get idle VC from next Input
-        vc_allotted = output.inPort.get_first_idle_vc()
+        # getting the first flit in VC
+        flit = vc.dequeue()
 
-        if vc_allotted is not None:
-            vc_allotted.enqueue(flit)
-            return vc_allotted
-        else:
-            return None
+        # if is a Head Flit
+        if flit.type == FlitType.head:
+            # Get idle VC from next Input
+            vc_allotted = output.inPort.get_first_idle_vc()
+            if vc_allotted is not None:
+                # send flit
+                vc_allotted.enqueue(flit)
+                # registering VC allotted in dictionary
+
+        # if is a Body Flit
+        elif flit.type == FlitType.body:
+            pass
+        # if is a Tail Flit
+        elif flit.type == FlitType.tail:
+            pass
 
     def vc_target_outport(self, vc):
         if len(vc.flits) > 0:
@@ -97,7 +108,8 @@ class Router:
                 self.vc_target_outport(vc)
 
             # VC targeting -> North
-
+            if len(self.vcs_target_north) > 1:  # TODO : Arbitration
+                pass
 
             # Simulation Cycle
             yield env.timeout(1)

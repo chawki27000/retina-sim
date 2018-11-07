@@ -1,7 +1,8 @@
 import unittest
 import simpy
 
-from communication.structure import Packet, Message, FlitType
+from architecture.virtual_channel import VirtualChannel
+from communication.structure import Packet, Message, FlitType, NodeArray, Node
 from communication.routing import Coordinate, Direction
 from architecture.noc import NoC
 
@@ -182,6 +183,47 @@ class TestFlitSending(unittest.TestCase):
 
     def setUp(self):
         pass
+
+
+class TestNode(unittest.TestCase):
+
+    def setUp(self):
+        self.nodeArray = NodeArray()
+        self.vc_src = VirtualChannel(1, 13)
+        self.vc_target = VirtualChannel(2, 13)
+
+    def test_add(self):
+        node = Node(self.vc_src, self.vc_target)
+        self.nodeArray.add(node)
+
+        self.assertEqual(len(self.nodeArray.array), 1)
+
+        node2 = Node(self.vc_src, self.vc_target)
+        self.nodeArray.add(node2)
+
+        self.assertEqual(len(self.nodeArray.array), 2)
+
+    def test_remove(self):
+        node = Node(self.vc_src, self.vc_target)
+        self.nodeArray.add(node)
+        node2 = Node(self.vc_src, self.vc_target)
+        self.nodeArray.add(node2)
+
+        self.nodeArray.remove(self.vc_src)
+        self.assertEqual(len(self.nodeArray.array), 1)
+
+        self.nodeArray.remove(self.vc_src)
+        self.assertEqual(len(self.nodeArray.array), 0)
+
+    def test_get_target(self):
+        node = Node(self.vc_src, self.vc_target)
+        self.nodeArray.add(node)
+
+        self.assertEqual(self.nodeArray.get_target(self.vc_src), self.vc_target)
+
+        self.nodeArray.remove(self.vc_src)
+
+        self.assertIsNone(self.nodeArray.get_target(self.vc_src))
 
 
 if __name__ == '__main__':
