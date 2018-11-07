@@ -107,6 +107,16 @@ class Router:
                 vc.lock = False
                 self.logger.debug('VC (%s) - released' % vc_allotted)
 
+    def arrived_flit(self, vc, env):
+        flit = vc.dequeue()
+
+        if flit.type == FlitType.tail:
+            self.vcs_dictionary.remove(vc)
+            vc.lock = False
+
+        flit.set_arrival_time(env.now)
+        self.logger.debug('%s arrived at : %d' % (flit, env.now))
+
     def vc_target_outport(self, vc):
         if len(vc.flits) > 0:
             if self.get_xy_routing_output(vc.flits[0]) == self.outNorth \
@@ -123,7 +133,7 @@ class Router:
                 self.vcs_target_west.insert(0, vc)
             elif self.get_xy_routing_output(vc.flits[0]) == self.outPE \
                     and vc not in self.vcs_target_pe:
-                self.vcs_target_west.insert(0, vc)
+                self.vcs_target_pe.insert(0, vc)
 
     # SIMULATION PROCESS
     def process(self, env):
@@ -171,6 +181,14 @@ class Router:
                 vc = self.vcs_target_west.pop()
                 self.logger.debug('VC (%s) poped at : %d' % (vc, env.now))
                 self.send_flit(vc, self.outWest)
+
+            # VC targeting -> PE
+            if len(self.vcs_target_pe) > 0:  # TODO : Arbitration --> Quantum == 1
+                self.logger.debug('VC Target PE non empty at : %d' % env.now)
+                vc = self.vcs_target_pe.pop()
+                self.logger.debug('VC (%s) poped at : %d' % (vc, env.now))
+                self.arrived_flit(vc, env)
+
 
             # Simulation Cycle
             yield env.timeout(1)

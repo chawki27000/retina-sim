@@ -112,6 +112,7 @@ class NoC:
         self.env.process(self.router_matrix[0][0].proc_engine.process(self.env, message))
 
         self.env.process(self.router_matrix[0][0].process(self.env))
+        self.env.process(self.router_matrix[0][1].process(self.env))
 
     def __str__(self):
         string = ''

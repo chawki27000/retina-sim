@@ -46,15 +46,18 @@ class FlitType(enum.Enum):
 
 #############################################################
 class Flit:
-    def __init__(self, id, type, timeBegin, packet):
+    def __init__(self, id, type, begin_time, packet):
         self.id = id
         self.type = type
-        self.timeBegin = timeBegin
+        self.begin_time = begin_time
         self.destination = None
         self.packet = packet
 
     def set_destination_info(self, destination):
         self.destination = destination
+
+    def set_arrival_time(self, arrival_time):
+        self.arrival_time = arrival_time
 
     def __str__(self):
         return 'Flit (%s) from %s' % (self.type, self.packet)
