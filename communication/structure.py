@@ -7,8 +7,9 @@ PACKET_DEFAULT_SIZE = 128
 
 
 class Packet:
-    def __init__(self, id, dest):
+    def __init__(self, id, dest, message):
         self.id = id
+        self.message = message
         self.flits = []
 
         # Flit construct
@@ -34,7 +35,7 @@ class Packet:
         return flit
 
     def __str__(self):
-        return 'Packet (%d)' % self.id
+        return 'Packet(%d) from Message(%d)' % (self.id, self.message.id)
 
 
 #############################################################
@@ -60,14 +61,15 @@ class Flit:
         self.arrival_time = arrival_time
 
     def __str__(self):
-        return 'Flit (%s) from %s' % (self.type, self.packet)
+        return 'Flit(%s) from %s' % (self.type, self.packet)
 
 
 #############################################################
 
 
 class Message:
-    def __init__(self, period, size, src, dest):
+    def __init__(self, id, period, size, src, dest):
+        self.id = id
         self.period = period
         self.src = src
         self.dest = dest
@@ -78,7 +80,7 @@ class Message:
         packetNumber = int(math.ceil(float(self.size / PACKET_DEFAULT_SIZE)))
 
         for i in range(packetNumber):
-            self.packets.append(Packet(i, self.dest))
+            self.packets.append(Packet(i, self.dest, self))
 
 
 #############################################################
@@ -86,7 +88,7 @@ class Message:
 
 class MessageInstance(Message):
     def __init__(self, message, instance):
-        super().__init__(message.period, message.size, message.src, message.dest)
+        super().__init__(message.id, message.period, message.size, message.src, message.dest)
         self.instance = instance
 
     def arrived(self, arr):

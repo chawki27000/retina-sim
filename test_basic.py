@@ -12,8 +12,8 @@ class TestPacket(unittest.TestCase):
     def setUp(self):
         self.src = Coordinate(1, 1)
         self.dest = Coordinate(2, 2)
-        self.packet = Packet(1, self.dest)
-        self.message = Message(23, 256, self.src, self.dest)
+        self.message = Message(1, 23, 256, self.src, self.dest)
+        self.packet = Packet(1, self.dest, self.message)
 
     def test_flit_number(self):
         self.assertEqual(len(self.packet.flits), 4)
@@ -111,8 +111,8 @@ class TestRouting(unittest.TestCase):
 
         self.src = Coordinate(0, 0)
         self.dest = Coordinate(2, 2)
-        self.message = Message(12, 256, self.src, self.dest)
-        self.packet = Packet(1, self.dest)
+        self.message = Message(1, 12, 256, self.src, self.dest)
+        self.packet = Packet(1, self.dest, self.message)
 
         self.flit = self.packet.flits[0]
 
