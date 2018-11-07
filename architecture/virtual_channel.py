@@ -28,3 +28,6 @@ class VirtualChannel:
 
     def release(self):
         self.lock = False
+
+    def __str__(self):
+        return 'VC (%d) with size (%d)' % (self.id, len(self.flits))
