@@ -1,5 +1,4 @@
-from communication.routing import Direction
-from communication.structure import FlitType
+from communication.structure import FlitType, NodeArray, Node
 
 
 class Router:
@@ -9,7 +8,7 @@ class Router:
         self.proc_engine = proc_engine
 
         # Process Attribute
-        self.vcs_dictionary = dict()
+        self.vcs_dictionary = NodeArray()
         self.vcs_target_north = []
         self.vcs_target_south = []
         self.vcs_target_east = []
@@ -66,13 +65,26 @@ class Router:
                 # send flit
                 vc_allotted.enqueue(flit)
                 # registering VC allotted in dictionary
+                self.vcs_dictionary.add(Node(vc, vc_allotted))
+            else:  # No idle VC
+                vc.append(flit)
 
         # if is a Body Flit
         elif flit.type == FlitType.body:
-            pass
+            # Getting the alloted vc
+            vc_allotted = self.vcs_dictionary.get_target(vc)
+            if not vc_allotted.enqueue(flit):  # No Place
+                vc.append(flit)
+
         # if is a Tail Flit
         elif flit.type == FlitType.tail:
-            pass
+            # Getting the alloted vc
+            vc_allotted = self.vcs_dictionary.get_target(vc)
+            if not vc_allotted.enqueue(flit):  # No Place
+                vc.append(flit)
+            else:
+                self.vcs_dictionary.remove(vc)
+                vc.lock = False
 
     def vc_target_outport(self, vc):
         if len(vc.flits) > 0:
@@ -108,8 +120,24 @@ class Router:
                 self.vc_target_outport(vc)
 
             # VC targeting -> North
-            if len(self.vcs_target_north) > 1:  # TODO : Arbitration
-                pass
+            if len(self.vcs_target_north) > 0:  # TODO : Arbitration --> Quantum == 1
+                vc = self.vcs_target_north.pop()
+                self.send_flit(vc, self.outNorth)
+
+            # VC targeting -> South
+            if len(self.vcs_target_south) > 0:  # TODO : Arbitration --> Quantum == 1
+                vc = self.vcs_target_south.pop()
+                self.send_flit(vc, self.outSouth)
+
+            # VC targeting -> East
+            if len(self.vcs_target_east) > 0:  # TODO : Arbitration --> Quantum == 1
+                vc = self.vcs_target_east.pop()
+                self.send_flit(vc, self.outEast)
+
+            # VC targeting -> West
+            if len(self.vcs_target_west) > 0:  # TODO : Arbitration --> Quantum == 1
+                vc = self.vcs_target_west.pop()
+                self.send_flit(vc, self.outWest)
 
             # Simulation Cycle
             yield env.timeout(1)
