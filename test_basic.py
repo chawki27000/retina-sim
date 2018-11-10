@@ -90,16 +90,16 @@ class TestRouter(unittest.TestCase):
         self.assertEqual(len(self.noc.router_matrix[3][3].inNorth.vcs[0].flits), 0)
 
     def test_idle_lock_vc(self):
-        allotted_vc = self.router.inPE.get_first_idle_vc()
+        allotted_vc = self.router.inPE.vc_allocator()
         self.assertIsNotNone(allotted_vc)
         self.assertEqual(self.router.inPE.number_idle_vc(), 3)
-        allotted_vc = self.router.inPE.get_first_idle_vc()
+        allotted_vc = self.router.inPE.vc_allocator()
         self.assertEqual(self.router.inPE.number_idle_vc(), 2)
-        allotted_vc = self.router.inPE.get_first_idle_vc()
+        allotted_vc = self.router.inPE.vc_allocator()
         self.assertEqual(self.router.inPE.number_idle_vc(), 1)
-        allotted_vc = self.router.inPE.get_first_idle_vc()
+        allotted_vc = self.router.inPE.vc_allocator()
         self.assertEqual(self.router.inPE.number_idle_vc(), 0)
-        allotted_vc = self.router.inPE.get_first_idle_vc()
+        allotted_vc = self.router.inPE.vc_allocator()
         self.assertIsNone(allotted_vc)
 
 
@@ -121,7 +121,7 @@ class TestRouting(unittest.TestCase):
 
     def test_proc_engine_to_router(self):
         packets = self.message.packets
-        allotted_vc = self.router.inPE.get_first_idle_vc()
+        allotted_vc = self.router.inPE.vc_allocator()
 
         self.assertEqual(len(packets[0].flits), 4)
 
@@ -140,15 +140,15 @@ class TestRouting(unittest.TestCase):
         dest5 = Coordinate(2, 2)
 
         self.flit.set_destination_info(dest1)
-        self.assertEqual(self.router.get_xy_routing_output(self.flit), self.router.outNorth)
+        self.assertEqual(self.router.route_computation(self.flit), self.router.outNorth)
         self.flit.set_destination_info(dest2)
-        self.assertEqual(self.router.get_xy_routing_output(self.flit), self.router.outSouth)
+        self.assertEqual(self.router.route_computation(self.flit), self.router.outSouth)
         self.flit.set_destination_info(dest3)
-        self.assertEqual(self.router.get_xy_routing_output(self.flit), self.router.outEast)
+        self.assertEqual(self.router.route_computation(self.flit), self.router.outEast)
         self.flit.set_destination_info(dest4)
-        self.assertEqual(self.router.get_xy_routing_output(self.flit), self.router.outWest)
+        self.assertEqual(self.router.route_computation(self.flit), self.router.outWest)
         self.flit.set_destination_info(dest5)
-        self.assertEqual(self.router.get_xy_routing_output(self.flit), self.router.outPE)
+        self.assertEqual(self.router.route_computation(self.flit), self.router.outPE)
 
     def test_vc_target_output(self):
         self.router = self.noc.router_matrix[2][2]

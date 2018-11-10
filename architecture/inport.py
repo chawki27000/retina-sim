@@ -12,7 +12,7 @@ class InPort:
         for i in range(self.nbvc):
             self.vcs.append(VirtualChannel(i, self.vc_size))
 
-    def get_first_idle_vc(self):
+    def vc_allocator(self):
         for vc in self.vcs:
             if vc.isFree():
                 vc.lock = True

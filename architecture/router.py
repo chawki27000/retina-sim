@@ -34,7 +34,7 @@ class Router:
         self.inPE = inPE
         self.outPE = outPE
 
-    def get_xy_routing_output(self, flit):
+    def route_computation(self, flit):
         # On X axe (Column)
         # By the West
         if self.coordinate.j > flit.destination.j:
@@ -54,7 +54,7 @@ class Router:
                 return self.outPE
 
     def reserve_idle_vc(self, inport):
-        return inport.get_first_idle_vc()
+        return inport.vc_allocator()
 
     def send_flit(self, vc, outport):
 
@@ -68,7 +68,7 @@ class Router:
             self.logger.debug('%s ready to be sent' % flit)
 
             # Get idle VC from next Input
-            vc_allotted = outport.inPort.get_first_idle_vc()
+            vc_allotted = outport.inPort.vc_allocator()
 
             if vc_allotted is not None:
                 self.logger.debug('VC (%s) allotted' % vc_allotted)
@@ -119,21 +119,24 @@ class Router:
 
     def vc_target_outport(self, vc):
         if len(vc.flits) > 0:
-            if self.get_xy_routing_output(vc.flits[0]) == self.outNorth \
+            if self.route_computation(vc.flits[0]) == self.outNorth \
                     and vc not in self.vcs_target_north:
                 self.vcs_target_north.insert(0, vc)
-            elif self.get_xy_routing_output(vc.flits[0]) == self.outSouth \
+            elif self.route_computation(vc.flits[0]) == self.outSouth \
                     and vc not in self.vcs_target_south:
                 self.vcs_target_south.insert(0, vc)
-            elif self.get_xy_routing_output(vc.flits[0]) == self.outEast \
+            elif self.route_computation(vc.flits[0]) == self.outEast \
                     and vc not in self.vcs_target_east:
                 self.vcs_target_east.insert(0, vc)
-            elif self.get_xy_routing_output(vc.flits[0]) == self.outWest \
+            elif self.route_computation(vc.flits[0]) == self.outWest \
                     and vc not in self.vcs_target_west:
                 self.vcs_target_west.insert(0, vc)
-            elif self.get_xy_routing_output(vc.flits[0]) == self.outPE \
+            elif self.route_computation(vc.flits[0]) == self.outPE \
                     and vc not in self.vcs_target_pe:
                 self.vcs_target_pe.insert(0, vc)
+
+    def arbiter(self):
+        pass
 
     # SIMULATION PROCESS
     def process(self, env):
@@ -188,7 +191,6 @@ class Router:
                 vc = self.vcs_target_pe.pop()
                 self.logger.debug('VC (%s) poped at : %d' % (vc, env.now))
                 self.arrived_flit(vc, env)
-
 
             # Simulation Cycle
             yield env.timeout(1)

@@ -28,7 +28,7 @@ class ProcessingEngine:
             self.logger.debug('packet sending number (%d) at : (%d)' % (packet.id, time))
 
             # VC Allocation
-            vc_allotted = self.router.inPE.get_first_idle_vc()
+            vc_allotted = self.router.inPE.vc_allocator()
 
             if vc_allotted is not None:
                 self.send_packet(packet, vc_allotted)
@@ -58,7 +58,7 @@ class ProcessingEngine:
                     self.logger.debug('packet sending number (%d) at : (%d)' % (packet.id, env.now))
 
                     # VC Allocation
-                    vc_allotted = self.router.inPE.get_first_idle_vc()
+                    vc_allotted = self.router.inPE.vc_allocator()
 
                     if vc_allotted is not None:
                         self.send_packet(packet, vc_allotted)
