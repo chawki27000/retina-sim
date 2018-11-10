@@ -11,13 +11,15 @@ class EventList:
         self.queue = []
 
     def isEmpty(self):
-        return len(self.queue) == []
+        return len(self.queue) == 0
 
     def push(self, event):
         self.queue.append(event)
         self.queue = sorted(self.queue, key=lambda ev: ev.time, reverse=True)
 
     def pull(self):
+        if self.isEmpty():
+            return None
         return self.queue.pop()
 
     def cancel(self, event):
