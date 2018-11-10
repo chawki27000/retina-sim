@@ -189,8 +189,8 @@ class TestNode(unittest.TestCase):
 
     def setUp(self):
         self.nodeArray = NodeArray()
-        self.vc_src = VirtualChannel(1, 13)
-        self.vc_target = VirtualChannel(2, 13)
+        self.vc_src = VirtualChannel(1, 13, 1)
+        self.vc_target = VirtualChannel(2, 13, 1)
 
     def test_add(self):
         node = Node(self.vc_src, self.vc_target)

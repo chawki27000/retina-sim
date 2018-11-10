@@ -1,8 +1,9 @@
 class VirtualChannel:
-    def __init__(self, id, max_size):
+    def __init__(self, id, max_size, quantum):
         self.id = id
         self.lock = False
         self.max_size = max_size
+        self.quantum = quantum
         self.flits = []
 
     def enqueue(self, flit):

@@ -32,6 +32,7 @@ class ProcessingEngine:
 
             if vc_allotted is not None:
                 self.send_packet(packet, vc_allotted)
+
             else:
                 self.logger.debug('Not VC allowed')
                 packets.insert(0, packet)

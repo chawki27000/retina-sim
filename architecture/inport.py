@@ -10,7 +10,7 @@ class InPort:
 
         # VCs construct
         for i in range(self.nbvc):
-            self.vcs.append(VirtualChannel(i, self.vc_size))
+            self.vcs.append(VirtualChannel(i, self.vc_size, 1))
 
     def vc_allocator(self):
         for vc in self.vcs:

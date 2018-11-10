@@ -6,9 +6,9 @@ from engine.event_list import EventList, EventType
 
 class Simulation:
     CLOCK = 0
+    event_list = EventList()
 
     def __init__(self):
-        self.event_list = EventList()
         self.max_sim_time = 100  # HyperPeriod
         self.noc = NoC('Network-On-Chip', 4, 6, 12)
 
@@ -18,12 +18,12 @@ class Simulation:
             if i % message.period == 0:
                 message_instance = MessageInstance(message, i)
                 event = Event(EventType.SEND_MESSAGE, message_instance, i)  # TODO : replace i by the task offset
-                self.event_list.push(event)
+                Simulation.event_list.push(event)
 
     def simulate(self):
 
         while not self.event_list.isEmpty() and Simulation.CLOCK < self.max_sim_time:
-            current_event = self.event_list.pull()
+            current_event = Simulation.event_list.pull()
 
             Simulation.CLOCK = current_event.time
 
@@ -33,7 +33,6 @@ class Simulation:
 
                 # get source and destination message
                 src = message.src
-                dest = message.dest
 
                 # get Processing Engine
                 proc_engine = self.noc.router_matrix[src.i][src.j].proc_engine
