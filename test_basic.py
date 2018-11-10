@@ -40,9 +40,8 @@ class TestPacket(unittest.TestCase):
 class TestNoC(unittest.TestCase):
 
     def setUp(self):
-        env = simpy.Environment()
 
-        self.noc = NoC(env, "Network-On-Chip", 4, 4, 12)
+        self.noc = NoC("Network-On-Chip", 4, 4, 12)
 
     def test_noc_initialisation(self):
         self.assertEqual(len(self.noc.router_matrix), 4)
@@ -79,9 +78,8 @@ class TestNoC(unittest.TestCase):
 class TestRouter(unittest.TestCase):
 
     def setUp(self):
-        env = simpy.Environment()
 
-        self.noc = NoC(env, "Network-On-Chip", 4, 4, 12)
+        self.noc = NoC("Network-On-Chip", 4, 4, 12)
 
         self.proc_engine = self.noc.router_matrix[0][0].proc_engine
         self.router = self.noc.router_matrix[0][0]
@@ -108,9 +106,8 @@ class TestRouter(unittest.TestCase):
 class TestRouting(unittest.TestCase):
 
     def setUp(self):
-        env = simpy.Environment()
 
-        self.noc = NoC(env, "Network-On-Chip", 4, 4, 12)
+        self.noc = NoC("Network-On-Chip", 4, 4, 12)
 
         self.src = Coordinate(0, 0)
         self.dest = Coordinate(2, 2)
@@ -237,10 +234,10 @@ class TestEventList(unittest.TestCase):
         self.simulation = Simulation()
 
     def test_list_sorting(self):
-        event1 = Event(EventType.send_message, None, 2)
-        event2 = Event(EventType.send_message, None, 1)
-        event3 = Event(EventType.send_message, None, 6)
-        event4 = Event(EventType.send_message, None, 3)
+        event1 = Event(EventType.SEND_MESSAGE, None, 2)
+        event2 = Event(EventType.SEND_MESSAGE, None, 1)
+        event3 = Event(EventType.SEND_MESSAGE, None, 6)
+        event4 = Event(EventType.SEND_MESSAGE, None, 3)
 
         self.event_list.push(event1)
         self.event_list.push(event2)
@@ -260,9 +257,9 @@ class TestEventList(unittest.TestCase):
         self.simulation.send_message(self.message)
 
         self.assertEqual(len(self.simulation.event_list.queue), 3)
-        self.assertEqual(self.simulation.event_list.pull().event_type, EventType.send_message)
-        self.assertEqual(self.simulation.event_list.pull().event_type, EventType.send_message)
-        self.assertEqual(self.simulation.event_list.pull().event_type, EventType.send_message)
+        self.assertEqual(self.simulation.event_list.pull().event_type, EventType.SEND_MESSAGE)
+        self.assertEqual(self.simulation.event_list.pull().event_type, EventType.SEND_MESSAGE)
+        self.assertEqual(self.simulation.event_list.pull().event_type, EventType.SEND_MESSAGE)
         self.assertTrue(self.simulation.event_list.isEmpty())
 
 

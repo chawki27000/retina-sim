@@ -1,9 +1,12 @@
-import simpy
 import logging
 
 from architecture.noc import NoC
 
 # Simulation Setup
+from communication.routing import Coordinate
+from communication.structure import Message
+from engine.Simulation import Simulation
+
 SIM_DURATION = 30
 
 
@@ -13,15 +16,16 @@ def main():
 
     logging.info('### ReTiNAS - Real-Time Network-on-chip Analysis and Simulation ###')
 
-    # Simulation Environment Initialization
-    env = simpy.Environment()
+    # Simulator Settings
+    simulation = Simulation()
 
-    # NoC Initialization
-    noc = NoC(env, 'Network-On-Chip', 4, 6, 12)
-    noc.process()
+    src = Coordinate(0, 0)
+    dest = Coordinate(2, 2)
+    message = Message(1, 40, 256, src, dest)
 
     # Simulation START
-    env.run(until=SIM_DURATION)
+    simulation.send_message(message)
+    simulation.simulate()
 
 
 if __name__ == "__main__":

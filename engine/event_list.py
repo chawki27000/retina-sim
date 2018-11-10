@@ -2,8 +2,8 @@ import enum
 
 
 class EventType(enum.Enum):
-    send_message = 1
-    send_flit = 2
+    SEND_MESSAGE = 1
+    SEND_FLIT = 2
 
 
 class EventList:

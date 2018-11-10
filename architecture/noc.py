@@ -7,13 +7,12 @@ from communication.routing import Coordinate, Direction
 
 
 class NoC:
-    def __init__(self, env, name, square_size, nbvc, vc_size):
+    def __init__(self, name, square_size, nbvc, vc_size):
         self.name = name
         self.router_matrix = []
         self.square_size = square_size
         self.nbvc = nbvc
         self.vc_size = vc_size
-        self.env = env
 
         # Routers Initialisation
         count = 1
@@ -109,10 +108,10 @@ class NoC:
         src = Coordinate(0, 0)
         dest = Coordinate(0, 1)
         message = Message(200, 256, src, dest)
-        self.env.process(self.router_matrix[0][0].proc_engine.process(self.env, message))
-
-        self.env.process(self.router_matrix[0][0].process(self.env))
-        self.env.process(self.router_matrix[0][1].process(self.env))
+        # self.env.process(self.router_matrix[0][0].proc_engine.process(self.env, message))
+        #
+        # self.env.process(self.router_matrix[0][0].process(self.env))
+        # self.env.process(self.router_matrix[0][1].process(self.env))
 
     def __str__(self):
         string = ''

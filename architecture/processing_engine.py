@@ -18,6 +18,24 @@ class ProcessingEngine:
             vc_allotted.enqueue(flit)
             self.logger.debug('sending Flit (%s)' % flit.type)
 
+    def send_to_router(self, message_instance, time):
+
+        # Getting Packets from Message
+        packets = message_instance.packets
+
+        while len(packets) > 0:
+            packet = packets.pop()
+            self.logger.debug('packet sending number (%d) at : (%d)' % (packet.id, time))
+
+            # VC Allocation
+            vc_allotted = self.router.inPE.get_first_idle_vc()
+
+            if vc_allotted is not None:
+                self.send_packet(packet, vc_allotted)
+            else:
+                self.logger.debug('Not VC allowed')
+                packets.insert(0, packet)
+
     # SIMULATION PROCESS
     def process(self, env, message):
         # MessageInstance Counter
