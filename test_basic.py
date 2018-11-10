@@ -5,6 +5,8 @@ from architecture.virtual_channel import VirtualChannel
 from communication.structure import Packet, Message, FlitType, NodeArray, Node
 from communication.routing import Coordinate, Direction
 from architecture.noc import NoC
+from engine.event import Event
+from engine.event_list import EventList, EventType
 
 
 class TestPacket(unittest.TestCase):
@@ -224,6 +226,28 @@ class TestNode(unittest.TestCase):
         self.nodeArray.remove(self.vc_src)
 
         self.assertIsNone(self.nodeArray.get_target(self.vc_src))
+
+
+class TestEventList(unittest.TestCase):
+
+    def setUp(self):
+        self.event_list = EventList()
+
+    def test_list_sorting(self):
+        event1 = Event(EventType.send_message, None, 2)
+        event2 = Event(EventType.send_message, None, 1)
+        event3 = Event(EventType.send_message, None, 6)
+        event4 = Event(EventType.send_message, None, 3)
+
+        self.event_list.push(event1)
+        self.event_list.push(event2)
+        self.event_list.push(event3)
+        self.event_list.push(event4)
+
+        self.assertEqual(self.event_list.pull(), event2)
+        self.assertEqual(self.event_list.pull(), event1)
+        self.assertEqual(self.event_list.pull(), event4)
+        self.assertEqual(self.event_list.pull(), event3)
 
 
 if __name__ == '__main__':
