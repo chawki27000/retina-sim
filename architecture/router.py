@@ -1,6 +1,9 @@
 import logging
 
 from communication.structure import FlitType, NodeArray, Node
+from engine.event import Event
+from engine.event_list import EventType
+from engine.global_obj import CLOCK, EVENT_LIST
 
 
 class Router:
@@ -56,7 +59,7 @@ class Router:
     def reserve_idle_vc(self, inport):
         return inport.vc_allocator()
 
-    def send_flit(self, vc, outport):
+    def send_flit(self, vc, outport, time):
 
         # getting the first flit in VC
         flit = vc.dequeue()
@@ -135,8 +138,79 @@ class Router:
                     and vc not in self.vcs_target_pe:
                 self.vcs_target_pe.insert(0, vc)
 
-    def arbiter(self):
-        pass
+    def arbiter(self, time):
+        # Checking North VC
+        for vc in self.inPE.vcs:
+            self.vc_target_outport(vc)
+        for vc in self.inNorth.vcs:
+            self.vc_target_outport(vc)
+        # Checking South VC
+        for vc in self.inSouth.vcs:
+            self.vc_target_outport(vc)
+        # Checking East VC
+        for vc in self.inEast.vcs:
+            self.vc_target_outport(vc)
+        # Checking West VC
+        for vc in self.inWest.vcs:
+            self.vc_target_outport(vc)
+
+        # VC targeting -> North
+        if len(self.vcs_target_north) > 0:
+            vc = self.vcs_target_north.pop()
+            quantum = vc.quantum
+            # event push
+            for i in range(quantum):
+                event = Event(EventType.SEND_FLIT, {'router': self,
+                                                    'vc': vc,
+                                                    'outport': self.outNorth}, time + 1 + i)
+                EVENT_LIST.push(event)
+            # self.send_flit(vc, self.outNorth)
+
+        # VC targeting -> South
+        if len(self.vcs_target_south) > 0:
+            vc = self.vcs_target_south.pop()
+            quantum = vc.quantum
+            # event push
+            for i in range(quantum):
+                event = Event(EventType.SEND_FLIT, {'router': self,
+                                                    'vc': vc,
+                                                    'outport': self.outSouth}, time + 1 + i)
+                EVENT_LIST.push(event)
+            # self.send_flit(vc, self.outSouth)
+
+        # VC targeting -> East
+        if len(self.vcs_target_east) > 0:
+            vc = self.vcs_target_east.pop()
+            quantum = vc.quantum
+            # event push
+            for i in range(quantum):
+                event = Event(EventType.SEND_FLIT, {'router': self,
+                                                    'vc': vc,
+                                                    'outport': self.outEast}, time + 1 + i)
+                EVENT_LIST.push(event)
+            # self.send_flit(vc, self.outEast)
+
+        # VC targeting -> West
+        if len(self.vcs_target_west) > 0:
+            vc = self.vcs_target_west.pop()
+            quantum = vc.quantum
+            # event push
+            for i in range(quantum):
+                event = Event(EventType.SEND_FLIT, {'router': self,
+                                                    'vc': vc,
+                                                    'outport': self.outWest}, time + 1 + i)
+                EVENT_LIST.push(event)
+            # self.send_flit(vc, self.outWest)
+
+        # VC targeting -> PE
+        # if len(self.vcs_target_pe) > 0:
+        #     vc = self.vcs_target_pe.pop()
+        #     quantum = vc.quantum
+        #     # event push
+        #     for i in range(quantum):
+        #         event = Event(EventType.SEND_FLIT, {'vc': vc, 'outport': self.outNorth}, time + 1 + i)
+        #         EVENT_LIST.push(event)
+        #     self.arrived_flit(vc, env)
 
     # SIMULATION PROCESS
     def process(self, env):
@@ -158,42 +232,39 @@ class Router:
                 self.vc_target_outport(vc)
 
             # VC targeting -> North
-            if len(self.vcs_target_north) > 0:  # TODO : Arbitration --> Quantum == 1
+            if len(self.vcs_target_north) > 0:
                 self.logger.debug('VC Target North non empty at : %d' % env.now)
                 vc = self.vcs_target_north.pop()
                 self.logger.debug('VC (%s) poped at : %d' % (vc, env.now))
                 self.send_flit(vc, self.outNorth)
 
             # VC targeting -> South
-            if len(self.vcs_target_south) > 0:  # TODO : Arbitration --> Quantum == 1
+            if len(self.vcs_target_south) > 0:
                 self.logger.debug('VC Target South non empty at : %d' % env.now)
                 vc = self.vcs_target_south.pop()
                 self.logger.debug('VC (%s) poped at : %d' % (vc, env.now))
                 self.send_flit(vc, self.outSouth)
 
             # VC targeting -> East
-            if len(self.vcs_target_east) > 0:  # TODO : Arbitration --> Quantum == 1
+            if len(self.vcs_target_east) > 0:
                 self.logger.debug('VC Target East non empty at : %d' % env.now)
                 vc = self.vcs_target_east.pop()
                 self.logger.debug('VC (%s) poped at : %d' % (vc, env.now))
                 self.send_flit(vc, self.outEast)
 
             # VC targeting -> West
-            if len(self.vcs_target_west) > 0:  # TODO : Arbitration --> Quantum == 1
+            if len(self.vcs_target_west) > 0:
                 self.logger.debug('VC Target West non empty at : %d' % env.now)
                 vc = self.vcs_target_west.pop()
                 self.logger.debug('VC (%s) poped at : %d' % (vc, env.now))
                 self.send_flit(vc, self.outWest)
 
             # VC targeting -> PE
-            if len(self.vcs_target_pe) > 0:  # TODO : Arbitration --> Quantum == 1
+            if len(self.vcs_target_pe) > 0:
                 self.logger.debug('VC Target PE non empty at : %d' % env.now)
                 vc = self.vcs_target_pe.pop()
                 self.logger.debug('VC (%s) poped at : %d' % (vc, env.now))
                 self.arrived_flit(vc, env)
-
-            # Simulation Cycle
-            yield env.timeout(1)
 
     def __str__(self):
         return 'Router (%d,%d)' % (self.coordinate.i, self.coordinate.j)

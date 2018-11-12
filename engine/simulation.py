@@ -20,11 +20,9 @@ class Simulation:
                 EVENT_LIST.push(event)
 
     def simulate(self):
-
+        global CLOCK
         while not EVENT_LIST.isEmpty() and CLOCK < self.max_sim_time:
             current_event = EVENT_LIST.pull()
-
-            Simulation.CLOCK = current_event.time
 
             if current_event.event_type == EventType.SEND_MESSAGE:
                 # get Event Entity
@@ -40,7 +38,18 @@ class Simulation:
                 proc_engine.send_to_router(message, current_event.time)
 
             elif current_event.event_type == EventType.SEND_FLIT:
-                pass
+                # get Event Entity
+                router = current_event.entity['router']
+                vc = current_event.entity['vc']
+                outport = current_event.entity['outport']
+
+                router.send_flit(vc, outport, current_event.time)
+                CLOCK += 1
+
 
             elif current_event.event_type == EventType.VC_ELECTION:
-                print('EventType.VC_ELECTION')
+                # Get Event Entity
+                router = current_event.entity
+
+                # VC Election
+                router.arbiter(current_event.time)

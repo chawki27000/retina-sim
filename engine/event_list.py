@@ -6,6 +6,7 @@ class EventType(enum.Enum):
     SEND_FLIT = 2
     VC_ELECTION = 3
 
+
 class EventList:
     def __init__(self):
         self.queue = []

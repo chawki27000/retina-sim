@@ -26,6 +26,7 @@ class ProcessingEngine:
         # Getting Packets from Message
         packets = message_instance.packets
 
+        # We assume that we have more place in VCs than packets
         while len(packets) > 0:
             packet = packets.pop()
             self.logger.debug('packet sending number (%d) at : (%d)' % (packet.id, time))
@@ -35,12 +36,12 @@ class ProcessingEngine:
 
             if vc_allotted is not None:
                 self.send_packet(packet, vc_allotted)
+                # event push
                 event = Event(EventType.VC_ELECTION, self.router, time + 1)
                 EVENT_LIST.push(event)
 
             else:
                 self.logger.debug('Not VC allowed')
-                packets.insert(0, packet)
 
     # SIMULATION PROCESS
     def process(self, env, message):
