@@ -6,7 +6,7 @@ from engine.event_list import EventList, EventType
 
 class Simulation:
     CLOCK = 0
-    event_list = EventList()
+    EVENT_LIST = EventList()
 
     def __init__(self):
         self.max_sim_time = 100  # HyperPeriod
@@ -18,12 +18,12 @@ class Simulation:
             if i % message.period == 0:
                 message_instance = MessageInstance(message, i)
                 event = Event(EventType.SEND_MESSAGE, message_instance, i)  # TODO : replace i by the task offset
-                Simulation.event_list.push(event)
+                Simulation.EVENT_LIST.push(event)
 
     def simulate(self):
 
-        while not self.event_list.isEmpty() and Simulation.CLOCK < self.max_sim_time:
-            current_event = Simulation.event_list.pull()
+        while not Simulation.EVENT_LIST.isEmpty() and Simulation.CLOCK < self.max_sim_time:
+            current_event = Simulation.EVENT_LIST.pull()
 
             Simulation.CLOCK = current_event.time
 
@@ -42,3 +42,6 @@ class Simulation:
 
             elif current_event.event_type == EventType.SEND_FLIT:
                 pass
+
+            elif current_event.event_type == EventType.VC_ELECTION:
+                print('ventType.VC_ELECTION')

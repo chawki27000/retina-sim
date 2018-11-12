@@ -1,11 +1,9 @@
 import logging
 
-from architecture.noc import NoC
-
 # Simulation Setup
 from communication.routing import Coordinate
 from communication.structure import Message
-from engine.Simulation import Simulation
+from engine.simulation import Simulation
 
 SIM_DURATION = 30
 
