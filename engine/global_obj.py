@@ -1,1 +1,4 @@
-NEW_CLOCK = 0
+from engine.event_list import EventList
+
+CLOCK = 0
+EVENT_LIST = EventList()

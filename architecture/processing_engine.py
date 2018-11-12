@@ -1,6 +1,9 @@
 import logging
 
 from communication.structure import MessageInstance
+from engine.event import Event
+from engine.event_list import EventType
+from engine.global_obj import CLOCK, EVENT_LIST
 
 
 class ProcessingEngine:
@@ -32,6 +35,8 @@ class ProcessingEngine:
 
             if vc_allotted is not None:
                 self.send_packet(packet, vc_allotted)
+                event = Event(EventType.VC_ELECTION, self.router, time + 1)
+                EVENT_LIST.push(event)
 
             else:
                 self.logger.debug('Not VC allowed')

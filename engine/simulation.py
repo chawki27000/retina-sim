@@ -1,13 +1,11 @@
 from architecture.noc import NoC
 from communication.structure import MessageInstance
 from engine.event import Event
-from engine.event_list import EventList, EventType
-from engine.global_obj import NEW_CLOCK
+from engine.event_list import EventType
+from engine.global_obj import CLOCK, EVENT_LIST
 
 
 class Simulation:
-    CLOCK = 0
-    EVENT_LIST = EventList()
 
     def __init__(self):
         self.max_sim_time = 100  # HyperPeriod
@@ -19,13 +17,12 @@ class Simulation:
             if i % message.period == 0:
                 message_instance = MessageInstance(message, i)
                 event = Event(EventType.SEND_MESSAGE, message_instance, i)  # TODO : replace i by the task offset
-                Simulation.EVENT_LIST.push(event)
-                print(NEW_CLOCK)
+                EVENT_LIST.push(event)
 
     def simulate(self):
 
-        while not Simulation.EVENT_LIST.isEmpty() and Simulation.CLOCK < self.max_sim_time:
-            current_event = Simulation.EVENT_LIST.pull()
+        while not EVENT_LIST.isEmpty() and CLOCK < self.max_sim_time:
+            current_event = EVENT_LIST.pull()
 
             Simulation.CLOCK = current_event.time
 
@@ -46,4 +43,4 @@ class Simulation:
                 pass
 
             elif current_event.event_type == EventType.VC_ELECTION:
-                print('ventType.VC_ELECTION')
+                print('EventType.VC_ELECTION')

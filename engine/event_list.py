@@ -4,7 +4,7 @@ import enum
 class EventType(enum.Enum):
     SEND_MESSAGE = 1
     SEND_FLIT = 2
-
+    VC_ELECTION = 3
 
 class EventList:
     def __init__(self):
