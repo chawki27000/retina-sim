@@ -82,6 +82,7 @@ class Router:
                 # registering VC allotted in dictionary
                 self.vcs_dictionary.add(Node(vc, vc_allotted))
             else:  # No idle VC
+                vc.enqueue(flit)  # restore
                 # event push
                 event = Event(EventType.SEND_FLIT, {'router': self,
                                                     'vc': vc,
@@ -99,16 +100,17 @@ class Router:
             vc_allotted = self.vcs_dictionary.get_target(vc)
             self.logger.debug('Time : (%d) - Retreiving allotted VC (%s)' % (time, vc_allotted))
             if not vc_allotted.enqueue(flit):  # No Place
+                vc.enqueue(flit)  # restore
                 # event push
                 event = Event(EventType.SEND_FLIT, {'router': self,
                                                     'vc': vc,
                                                     'outport': self.outNorth}, time + 1)
                 EVENT_LIST.push(event)
+                self.logger.debug('Time : (%d) - %s was not sent - No Place in VC (%s)' % (time, flit, vc_allotted))
+            else:
                 # Next routing
                 event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
                 EVENT_LIST.push(event)
-                self.logger.debug('Time : (%d) - %s was not sent - No Place in VC (%s)' % (time, flit, vc_allotted))
-            else:
                 self.logger.info('Time : (%d) - %s : sent' % (time, flit))
                 vc.credit_out()
 
@@ -118,6 +120,7 @@ class Router:
             # Getting the alloted vc
             vc_allotted = self.vcs_dictionary.get_target(vc)
             if not vc_allotted.enqueue(flit):  # No Place
+                vc.enqueue(flit)  # restore
                 # event push
                 event = Event(EventType.SEND_FLIT, {'router': self,
                                                     'vc': vc,
@@ -133,11 +136,19 @@ class Router:
                 vc.lock = False
                 self.logger.debug('Time : (%d) - VC (%s) - released' % (time, vc_allotted))
 
-        # If quantum is finished
+        # If Quantum is finished
         if vc.quantum <= 0:
             self.logger.debug('Time : (%d) - VC (%s) - quantum finished' % (time, vc))
             # new VC Election - event push
             event = Event(EventType.VC_ELECTION, self, time + 1)
+            EVENT_LIST.push(event)
+
+        # Another Quantum
+        else:
+            self.logger.debug('Time : (%d) - VC (%s) - quantum NOT finished' % (time, vc))
+            event = Event(EventType.SEND_FLIT, {'router': self,
+                                                'vc': vc,
+                                                'outport': self.outNorth}, time + 1)
             EVENT_LIST.push(event)
 
     def arrived_flit(self, vc, time):
@@ -219,60 +230,6 @@ class Router:
                                                 'vc': vc,
                                                 'outport': self.outWest}, time + 1)
             EVENT_LIST.push(event)
-
-    # SIMULATION PROCESS
-    # def process(self, env):
-    #     while True:
-    #
-    #         # Checking North VC
-    #         for vc in self.inPE.vcs:
-    #             self.vc_target_outport(vc)
-    #         for vc in self.inNorth.vcs:
-    #             self.vc_target_outport(vc)
-    #         # Checking South VC
-    #         for vc in self.inSouth.vcs:
-    #             self.vc_target_outport(vc)
-    #         # Checking East VC
-    #         for vc in self.inEast.vcs:
-    #             self.vc_target_outport(vc)
-    #         # Checking West VC
-    #         for vc in self.inWest.vcs:
-    #             self.vc_target_outport(vc)
-    #
-    #         # VC targeting -> North
-    #         if len(self.vcs_target_north) > 0:
-    #             self.logger.debug('VC Target North non empty at : %d' % env.now)
-    #             vc = self.vcs_target_north.pop()
-    #             self.logger.debug('VC (%s) poped at : %d' % (vc, env.now))
-    #             self.send_flit(vc, self.outNorth)
-    #
-    #         # VC targeting -> South
-    #         if len(self.vcs_target_south) > 0:
-    #             self.logger.debug('VC Target South non empty at : %d' % env.now)
-    #             vc = self.vcs_target_south.pop()
-    #             self.logger.debug('VC (%s) poped at : %d' % (vc, env.now))
-    #             self.send_flit(vc, self.outSouth)
-    #
-    #         # VC targeting -> East
-    #         if len(self.vcs_target_east) > 0:
-    #             self.logger.debug('VC Target East non empty at : %d' % env.now)
-    #             vc = self.vcs_target_east.pop()
-    #             self.logger.debug('VC (%s) poped at : %d' % (vc, env.now))
-    #             self.send_flit(vc, self.outEast)
-    #
-    #         # VC targeting -> West
-    #         if len(self.vcs_target_west) > 0:
-    #             self.logger.debug('VC Target West non empty at : %d' % env.now)
-    #             vc = self.vcs_target_west.pop()
-    #             self.logger.debug('VC (%s) poped at : %d' % (vc, env.now))
-    #             self.send_flit(vc, self.outWest)
-    #
-    #         # VC targeting -> PE
-    #         if len(self.vcs_target_pe) > 0:
-    #             self.logger.debug('VC Target PE non empty at : %d' % env.now)
-    #             vc = self.vcs_target_pe.pop()
-    #             self.logger.debug('VC (%s) poped at : %d' % (vc, env.now))
-    #             self.arrived_flit(vc, env)
 
     def __str__(self):
         return 'Router (%d,%d)' % (self.coordinate.i, self.coordinate.j)

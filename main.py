@@ -5,7 +5,7 @@ from communication.routing import Coordinate
 from communication.structure import Message
 from engine.simulation import Simulation
 
-SIM_DURATION = 80
+SIM_DURATION = 30
 
 
 def main():

@@ -50,6 +50,7 @@ class Simulation:
                 router.send_flit(vc, outport, CLOCK)
 
             elif current_event.event_type == EventType.VC_ELECTION:
+                print('NOUVELLE ELECTION')
                 # Get Event Entity
                 router = current_event.entity
 
