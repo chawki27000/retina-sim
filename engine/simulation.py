@@ -7,13 +7,13 @@ from engine.global_obj import CLOCK, EVENT_LIST
 
 class Simulation:
 
-    def __init__(self):
-        self.max_sim_time = 100  # HyperPeriod
+    def __init__(self, hyperiod):
+        self.hyperiod = hyperiod  # HyperPeriod
         self.noc = NoC('Network-On-Chip', 4, 6, 12)
 
     def send_message(self, message):
 
-        for i in range(self.max_sim_time):
+        for i in range(self.hyperiod):
             if i % message.period == 0:
                 message_instance = MessageInstance(message, i)
                 event = Event(EventType.SEND_MESSAGE, message_instance, i)  # TODO : replace i by the task offset
@@ -21,7 +21,7 @@ class Simulation:
 
     def simulate(self):
         global CLOCK
-        while not EVENT_LIST.isEmpty() and CLOCK < self.max_sim_time:
+        while not EVENT_LIST.isEmpty() and CLOCK < self.hyperiod:
             current_event = EVENT_LIST.pull()
 
             if current_event.event_type == EventType.SEND_MESSAGE:
@@ -37,6 +37,8 @@ class Simulation:
                 # Send Message
                 proc_engine.send_to_router(message, current_event.time)
 
+                CLOCK = current_event.time
+
             elif current_event.event_type == EventType.SEND_FLIT:
                 # get Event Entity
                 router = current_event.entity['router']
@@ -44,8 +46,8 @@ class Simulation:
                 outport = current_event.entity['outport']
 
                 router.send_flit(vc, outport, current_event.time)
-                CLOCK += 1
 
+                CLOCK = current_event.time
 
             elif current_event.event_type == EventType.VC_ELECTION:
                 # Get Event Entity
@@ -53,3 +55,5 @@ class Simulation:
 
                 # VC Election
                 router.arbiter(current_event.time)
+
+                CLOCK = current_event.time

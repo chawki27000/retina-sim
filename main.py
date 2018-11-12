@@ -3,7 +3,6 @@ import logging
 # Simulation Setup
 from communication.routing import Coordinate
 from communication.structure import Message
-from engine.global_obj import EVENT_LIST
 from engine.simulation import Simulation
 
 SIM_DURATION = 30
@@ -16,7 +15,7 @@ def main():
     logging.info('### ReTiNAS - Real-Time Network-on-chip Analysis and Simulation ###')
 
     # Simulator Settings
-    simulation = Simulation()
+    simulation = Simulation(SIM_DURATION)
 
     src = Coordinate(0, 0)
     dest = Coordinate(2, 2)

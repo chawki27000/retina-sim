@@ -77,11 +77,16 @@ class Router:
                 self.logger.debug('VC (%s) allotted' % vc_allotted)
                 # send flit
                 vc_allotted.enqueue(flit)
-                self.logger.debug('%s : sent' % flit)
+                self.logger.debug('%s : sent at %d' % (flit, time))
+                vc.credit_out()
                 # registering VC allotted in dictionary
                 self.vcs_dictionary.add(Node(vc, vc_allotted))
             else:  # No idle VC
-                vc.append(flit)
+                # event push
+                event = Event(EventType.SEND_FLIT, {'router': self,
+                                                    'vc': vc,
+                                                    'outport': self.outNorth}, time + 1)
+                EVENT_LIST.push(event)
                 self.logger.debug('%s was not sent - VC not allotted' % flit)
 
         # if is a Body Flit
@@ -91,10 +96,15 @@ class Router:
             vc_allotted = self.vcs_dictionary.get_target(vc)
             self.logger.debug('Retreiving allotted VC (%s)' % vc_allotted)
             if not vc_allotted.enqueue(flit):  # No Place
-                vc.append(flit)
+                # event push
+                event = Event(EventType.SEND_FLIT, {'router': self,
+                                                    'vc': vc,
+                                                    'outport': self.outNorth}, time + 1)
+                EVENT_LIST.push(event)
                 self.logger.debug('%s was not sent - No Place in VC (%s)' % (flit, vc_allotted))
             else:
-                self.logger.debug('%s : sent' % flit)
+                self.logger.debug('%s : sent at %d' % (flit, time))
+                vc.credit_out()
 
         # if is a Tail Flit
         elif flit.type == FlitType.tail:
@@ -102,13 +112,24 @@ class Router:
             # Getting the alloted vc
             vc_allotted = self.vcs_dictionary.get_target(vc)
             if not vc_allotted.enqueue(flit):  # No Place
-                vc.append(flit)
+                # event push
+                event = Event(EventType.SEND_FLIT, {'router': self,
+                                                    'vc': vc,
+                                                    'outport': self.outNorth}, time + 1)
+                EVENT_LIST.push(event)
                 self.logger.debug('%s was not sent - No Place in VC (%s)' % (flit, vc_allotted))
             else:
-                self.logger.debug('%s : sent' % flit)
+                self.logger.debug('%s : sent at %d' % (flit, time))
                 self.vcs_dictionary.remove(vc)
                 vc.lock = False
                 self.logger.debug('VC (%s) - released' % vc_allotted)
+
+        # If quantum is finished
+        if vc.quantum <= 0:
+            self.logger.debug('VC (%s) - quantum finished' % vc)
+            # new VC Election - event push
+            event = Event(EventType.VC_ELECTION, self, time + 1)
+            EVENT_LIST.push(event)
 
     def arrived_flit(self, vc, env):
         flit = vc.dequeue()
@@ -157,60 +178,38 @@ class Router:
         # VC targeting -> North
         if len(self.vcs_target_north) > 0:
             vc = self.vcs_target_north.pop()
-            quantum = vc.quantum
             # event push
-            for i in range(quantum):
-                event = Event(EventType.SEND_FLIT, {'router': self,
-                                                    'vc': vc,
-                                                    'outport': self.outNorth}, time + 1 + i)
-                EVENT_LIST.push(event)
-            # self.send_flit(vc, self.outNorth)
+            event = Event(EventType.SEND_FLIT, {'router': self,
+                                                'vc': vc,
+                                                'outport': self.outNorth}, time + 1)
+            EVENT_LIST.push(event)
 
         # VC targeting -> South
         if len(self.vcs_target_south) > 0:
             vc = self.vcs_target_south.pop()
-            quantum = vc.quantum
             # event push
-            for i in range(quantum):
-                event = Event(EventType.SEND_FLIT, {'router': self,
-                                                    'vc': vc,
-                                                    'outport': self.outSouth}, time + 1 + i)
-                EVENT_LIST.push(event)
-            # self.send_flit(vc, self.outSouth)
+            event = Event(EventType.SEND_FLIT, {'router': self,
+                                                'vc': vc,
+                                                'outport': self.outSouth}, time + 1)
+            EVENT_LIST.push(event)
 
         # VC targeting -> East
         if len(self.vcs_target_east) > 0:
             vc = self.vcs_target_east.pop()
-            quantum = vc.quantum
             # event push
-            for i in range(quantum):
-                event = Event(EventType.SEND_FLIT, {'router': self,
-                                                    'vc': vc,
-                                                    'outport': self.outEast}, time + 1 + i)
-                EVENT_LIST.push(event)
-            # self.send_flit(vc, self.outEast)
+            event = Event(EventType.SEND_FLIT, {'router': self,
+                                                'vc': vc,
+                                                'outport': self.outEast}, time + 1)
+            EVENT_LIST.push(event)
 
         # VC targeting -> West
         if len(self.vcs_target_west) > 0:
             vc = self.vcs_target_west.pop()
-            quantum = vc.quantum
             # event push
-            for i in range(quantum):
-                event = Event(EventType.SEND_FLIT, {'router': self,
-                                                    'vc': vc,
-                                                    'outport': self.outWest}, time + 1 + i)
-                EVENT_LIST.push(event)
-            # self.send_flit(vc, self.outWest)
-
-        # VC targeting -> PE
-        # if len(self.vcs_target_pe) > 0:
-        #     vc = self.vcs_target_pe.pop()
-        #     quantum = vc.quantum
-        #     # event push
-        #     for i in range(quantum):
-        #         event = Event(EventType.SEND_FLIT, {'vc': vc, 'outport': self.outNorth}, time + 1 + i)
-        #         EVENT_LIST.push(event)
-        #     self.arrived_flit(vc, env)
+            event = Event(EventType.SEND_FLIT, {'router': self,
+                                                'vc': vc,
+                                                'outport': self.outWest}, time + 1)
+            EVENT_LIST.push(event)
 
     # SIMULATION PROCESS
     def process(self, env):

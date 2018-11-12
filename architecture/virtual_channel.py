@@ -3,6 +3,7 @@ class VirtualChannel:
         self.id = id
         self.lock = False
         self.max_size = max_size
+        self.default_quantum = quantum
         self.quantum = quantum
         self.flits = []
 
@@ -29,6 +30,15 @@ class VirtualChannel:
 
     def release(self):
         self.lock = False
+
+    def credit_out(self):
+        if self.quantum <= 0:
+            return False
+
+        self.quantum -= 1
+
+    def reset_credit(self):
+        self.quantum = self.default_quantum
 
     def __str__(self):
         return 'VC (%d) with size (%d)' % (self.id, len(self.flits))
