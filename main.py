@@ -18,7 +18,7 @@ def main():
     simulation = Simulation(SIM_DURATION)
 
     src = Coordinate(0, 0)
-    dest = Coordinate(2, 2)
+    dest = Coordinate(0, 1)
     message = Message(1, 40, 256, src, dest)
 
     # Simulation START

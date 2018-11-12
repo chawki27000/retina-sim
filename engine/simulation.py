@@ -34,10 +34,10 @@ class Simulation:
                 # get Processing Engine
                 proc_engine = self.noc.router_matrix[src.i][src.j].proc_engine
 
-                # Send Message
-                proc_engine.send_to_router(message, current_event.time)
-
                 CLOCK = current_event.time
+
+                # Send Message
+                proc_engine.send_to_router(message, CLOCK)
 
             elif current_event.event_type == EventType.SEND_FLIT:
                 # get Event Entity
@@ -45,15 +45,13 @@ class Simulation:
                 vc = current_event.entity['vc']
                 outport = current_event.entity['outport']
 
-                router.send_flit(vc, outport, current_event.time)
-
                 CLOCK = current_event.time
+
+                router.send_flit(vc, outport, CLOCK)
 
             elif current_event.event_type == EventType.VC_ELECTION:
                 # Get Event Entity
                 router = current_event.entity
 
                 # VC Election
-                router.arbiter(current_event.time)
-
-                CLOCK = current_event.time
+                router.arbiter(CLOCK)

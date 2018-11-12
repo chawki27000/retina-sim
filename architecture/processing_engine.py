@@ -1,9 +1,8 @@
 import logging
 
-from communication.structure import MessageInstance
 from engine.event import Event
 from engine.event_list import EventType
-from engine.global_obj import CLOCK, EVENT_LIST
+from engine.global_obj import EVENT_LIST
 
 
 class ProcessingEngine:
@@ -27,9 +26,10 @@ class ProcessingEngine:
         packets = message_instance.packets
 
         # We assume that we have more place in VCs than packets
+        i = 0  # event counter
         while len(packets) > 0:
             packet = packets.pop()
-            self.logger.debug('packet sending number (%d) at : (%d)' % (packet.id, time))
+            self.logger.debug('Time : (%d) - packet sending number (%d)' % (time, packet.id))
 
             # VC Allocation
             vc_allotted = self.router.inPE.vc_allocator()
@@ -37,48 +37,48 @@ class ProcessingEngine:
             if vc_allotted is not None:
                 self.send_packet(packet, vc_allotted)
                 # event push
-                event = Event(EventType.VC_ELECTION, self.router, time + 1)
+                event = Event(EventType.VC_ELECTION, self.router, time + i)
                 EVENT_LIST.push(event)
-
+                i += 1
             else:
-                self.logger.debug('Not VC allowed')
+                self.logger.debug('Time : (%d) - Not VC allowed' % time)
 
     # SIMULATION PROCESS
-    def process(self, env, message):
-        # MessageInstance Counter
-        instance_count = 1
-        self.logger.debug('begin PE process at : %d' % env.now)
-        while True:
-
-            if env.now % message.period == 0:
-                self.logger.debug('periodic time : %d' % env.now)
-                # MessageInstance Initialization
-                m_instance = MessageInstance(message, instance_count)
-
-                # START : Message Sending
-                self.logger.debug('send_message : instance number (%d) ' % m_instance.instance)
-                # Getting Packets from Message
-                packets = m_instance.packets
-
-                while len(packets) > 0:
-                    packet = packets.pop()
-                    self.logger.debug('packet sending number (%d) at : (%d)' % (packet.id, env.now))
-
-                    # VC Allocation
-                    vc_allotted = self.router.inPE.vc_allocator()
-
-                    if vc_allotted is not None:
-                        self.send_packet(packet, vc_allotted)
-                    else:
-                        self.logger.debug('Not VC allowed')
-                        packets.insert(0, packet)
-
-                    yield env.timeout(1)
-
-                # Increment
-                instance_count += 1
-
-            yield env.timeout(1)
+    # def process(self, env, message):
+    #     # MessageInstance Counter
+    #     instance_count = 1
+    #     self.logger.debug('begin PE process at : %d' % env.now)
+    #     while True:
+    #
+    #         if env.now % message.period == 0:
+    #             self.logger.debug('periodic time : %d' % env.now)
+    #             # MessageInstance Initialization
+    #             m_instance = MessageInstance(message, instance_count)
+    #
+    #             # START : Message Sending
+    #             self.logger.debug('send_message : instance number (%d) ' % m_instance.instance)
+    #             # Getting Packets from Message
+    #             packets = m_instance.packets
+    #
+    #             while len(packets) > 0:
+    #                 packet = packets.pop()
+    #                 self.logger.debug('packet sending number (%d) at : (%d)' % (packet.id, env.now))
+    #
+    #                 # VC Allocation
+    #                 vc_allotted = self.router.inPE.vc_allocator()
+    #
+    #                 if vc_allotted is not None:
+    #                     self.send_packet(packet, vc_allotted)
+    #                 else:
+    #                     self.logger.debug('Not VC allowed')
+    #                     packets.insert(0, packet)
+    #
+    #                 yield env.timeout(1)
+    #
+    #             # Increment
+    #             instance_count += 1
+    #
+    #         yield env.timeout(1)
 
     def __str__(self):
         return 'ProcessingEngine (%d,%d)' % (self.router.coordinate.i, self.router.coordinate.j)
