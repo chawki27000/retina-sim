@@ -1,7 +1,8 @@
 class VirtualChannel:
-    def __init__(self, id, max_size, quantum):
+    def __init__(self, id, router, max_size, quantum):
         self.id = id
         self.lock = False
+        self.router = router
         self.max_size = max_size
         self.default_quantum = quantum
         self.quantum = quantum

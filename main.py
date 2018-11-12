@@ -5,12 +5,12 @@ from communication.routing import Coordinate
 from communication.structure import Message
 from engine.simulation import Simulation
 
-SIM_DURATION = 30
+SIM_DURATION = 80
 
 
 def main():
     # Log Configuration
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
     logging.info('### ReTiNAS - Real-Time Network-on-chip Analysis and Simulation ###')
 

@@ -77,7 +77,7 @@ class Router:
                 self.logger.debug('VC (%s) allotted' % vc_allotted)
                 # send flit
                 vc_allotted.enqueue(flit)
-                self.logger.debug('%s : sent at %d' % (flit, time))
+                self.logger.info('%s : sent at %d' % (flit, time))
                 vc.credit_out()
                 # registering VC allotted in dictionary
                 self.vcs_dictionary.add(Node(vc, vc_allotted))
@@ -86,6 +86,9 @@ class Router:
                 event = Event(EventType.SEND_FLIT, {'router': self,
                                                     'vc': vc,
                                                     'outport': self.outNorth}, time + 1)
+                EVENT_LIST.push(event)
+                # Next routing
+                event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
                 EVENT_LIST.push(event)
                 self.logger.debug('%s was not sent - VC not allotted' % flit)
 
@@ -101,9 +104,12 @@ class Router:
                                                     'vc': vc,
                                                     'outport': self.outNorth}, time + 1)
                 EVENT_LIST.push(event)
+                # Next routing
+                event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
+                EVENT_LIST.push(event)
                 self.logger.debug('%s was not sent - No Place in VC (%s)' % (flit, vc_allotted))
             else:
-                self.logger.debug('%s : sent at %d' % (flit, time))
+                self.logger.info('%s : sent at %d' % (flit, time))
                 vc.credit_out()
 
         # if is a Tail Flit
@@ -119,7 +125,10 @@ class Router:
                 EVENT_LIST.push(event)
                 self.logger.debug('%s was not sent - No Place in VC (%s)' % (flit, vc_allotted))
             else:
-                self.logger.debug('%s : sent at %d' % (flit, time))
+                self.logger.info('%s : sent at %d' % (flit, time))
+                # Next routing
+                event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
+                EVENT_LIST.push(event)
                 self.vcs_dictionary.remove(vc)
                 vc.lock = False
                 self.logger.debug('VC (%s) - released' % vc_allotted)

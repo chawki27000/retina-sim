@@ -28,12 +28,19 @@ class NoC:
 
     def router_initialisation(self, id, x, y):
 
+        # ProcessingEngine
+        proc_engine = ProcessingEngine()
+
+        # Routers construct
+        coordinate = Coordinate(x, y)
+        router = Router(id, coordinate, proc_engine)
+
         # InPort
-        inNorth = InPort(Direction.north, self.nbvc, self.vc_size)
-        inSouth = InPort(Direction.south, self.nbvc, self.vc_size)
-        inEast = InPort(Direction.east, self.nbvc, self.vc_size)
-        inWest = InPort(Direction.west, self.nbvc, self.vc_size)
-        inPE = InPort(Direction.pe, self.nbvc, self.vc_size)
+        inNorth = InPort(router, Direction.north, self.nbvc, self.vc_size)
+        inSouth = InPort(router, Direction.south, self.nbvc, self.vc_size)
+        inEast = InPort(router, Direction.east, self.nbvc, self.vc_size)
+        inWest = InPort(router, Direction.west, self.nbvc, self.vc_size)
+        inPE = InPort(router, Direction.pe, self.nbvc, self.vc_size)
 
         # OutPort
         outNorth = OutPort(Direction.north)
@@ -42,12 +49,7 @@ class NoC:
         outWest = OutPort(Direction.west)
         outPE = OutPort(Direction.pe)
 
-        # ProcessingEngine
-        proc_engine = ProcessingEngine()
-
-        # Routers construct
-        coordinate = Coordinate(x, y)
-        router = Router(id, coordinate, proc_engine)
+        # In/Out Port settings
         router.inport_setting(inNorth, inSouth, inEast, inWest)
         router.outport_setting(outNorth, outSouth, outEast, outWest)
 
