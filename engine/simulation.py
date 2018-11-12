@@ -2,6 +2,7 @@ from architecture.noc import NoC
 from communication.structure import MessageInstance
 from engine.event import Event
 from engine.event_list import EventList, EventType
+from engine.global_obj import NEW_CLOCK
 
 
 class Simulation:
@@ -19,6 +20,7 @@ class Simulation:
                 message_instance = MessageInstance(message, i)
                 event = Event(EventType.SEND_MESSAGE, message_instance, i)  # TODO : replace i by the task offset
                 Simulation.EVENT_LIST.push(event)
+                print(NEW_CLOCK)
 
     def simulate(self):
 
