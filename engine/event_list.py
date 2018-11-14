@@ -7,24 +7,55 @@ class EventType(enum.Enum):
     VC_ELECTION = 3
 
 
+# TODO : build a key-value dictionary (timestamp -> events) instead of FIFO list
 class EventList:
     def __init__(self):
-        self.queue = []
+        self.queue = dict()
+        self.register = dict()  # has a purpose to avoid duplicate event in the same timestamp
 
     def isEmpty(self):
         return len(self.queue) == 0
 
     def push(self, event):
-        self.queue.append(event)
-        self.queue = sorted(self.queue, key=lambda ev: ev.time, reverse=True)
+        # Avoiding duplicate event
+        if self.double_event(event):
+            event.time += 1
 
-    def pull(self):
-        if self.isEmpty():
+        else:
+            # check if key is in dict
+            if event.time in self.queue:
+                self.queue[event.time].append(event)
+            else:
+                self.queue[event.time] = []
+                self.queue[event.time].append(event)
+
+    def pull(self, time):
+        if time in self.queue:
+            return self.queue[time]
+        else:
             return None
-        return self.queue.pop()
 
-    def cancel(self, event):
-        self.queue.remove(event)
+    def double_event(self, event):
+        if event.event_type == EventType.VC_ELECTION:
+            if event.time in self.register:
+                if event.entity in self.register[event.time]:
+                    return True
+                else:
+                    self.register[event.time].append(event.entity)
+                    return False
+            else:
+                self.register[event.time] = []
+                self.register[event.time].append(event.entity)
+                return False
+
+        # if event.time not in self.queue:
+        #     return False
+        # for ev in self.queue[event.time]:
+        #     if event.event_type == ev.event_type \
+        #             and event.time == ev.time \
+        #             and event.entity == ev.entity:
+        #         return True
+        # return False
 
     def __str__(self):
         return '\n'.join([str(i) for i in self.queue])

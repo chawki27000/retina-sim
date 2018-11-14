@@ -10,6 +10,7 @@ SIM_DURATION = 30
 
 def main():
     # Log Configuration
+    # logging.basicConfig(filename='sim.txt', level=logging.INFO)
     logging.basicConfig(level=logging.INFO)
 
     logging.info('### ReTiNAS - Real-Time Network-on-chip Analysis and Simulation ###')
@@ -18,11 +19,17 @@ def main():
     simulation = Simulation(SIM_DURATION)
 
     src = Coordinate(0, 0)
-    dest = Coordinate(0, 1)
-    message = Message(1, 40, 256, src, dest)
+    dest = Coordinate(0, 2)
+    message = Message(1, 40, 128, src, dest)
+
+    # src2 = Coordinate(2, 2)
+    # dest2 = Coordinate(2, 3)
+    # message2 = Message(2, 40, 128, src2, dest2)
 
     # Simulation START
     simulation.send_message(message)
+    # simulation.send_message(message2)
+
     simulation.simulate()
 
 

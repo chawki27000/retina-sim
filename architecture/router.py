@@ -3,7 +3,7 @@ import logging
 from communication.structure import FlitType, NodeArray, Node
 from engine.event import Event
 from engine.event_list import EventType
-from engine.global_obj import CLOCK, EVENT_LIST
+from engine.global_obj import EVENT_LIST
 
 
 class Router:
@@ -77,7 +77,7 @@ class Router:
                 self.logger.debug('Time : (%d) - VC (%s) allotted' % (time, vc_allotted))
                 # send flit
                 vc_allotted.enqueue(flit)
-                self.logger.info('Time : (%d) - %s : sent' % (time, flit))
+                self.logger.info('Time : (%d) - %s -> sent to %s' % (time, flit, vc_allotted.router))
                 vc.credit_out()
                 # registering VC allotted in dictionary
                 self.vcs_dictionary.add(Node(vc, vc_allotted))
@@ -87,11 +87,13 @@ class Router:
                 event = Event(EventType.SEND_FLIT, {'router': self,
                                                     'vc': vc,
                                                     'outport': self.outNorth}, time + 1)
+
                 EVENT_LIST.push(event)
                 # Next routing
-                event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
+                event = Event(EventType.VC_ELECTION, vc_allotted.router, time)
                 EVENT_LIST.push(event)
                 self.logger.debug('Time : (%d) - %s was not sent - VC not allotted' % (time, flit))
+                return None
 
         # if is a Body Flit
         elif flit.type == FlitType.body:
@@ -107,11 +109,13 @@ class Router:
                                                     'outport': self.outNorth}, time + 1)
                 EVENT_LIST.push(event)
                 self.logger.debug('Time : (%d) - %s was not sent - No Place in VC (%s)' % (time, flit, vc_allotted))
+                return None
+
             else:
                 # Next routing
-                event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
+                event = Event(EventType.VC_ELECTION, vc_allotted.router, time)
                 EVENT_LIST.push(event)
-                self.logger.info('Time : (%d) - %s : sent' % (time, flit))
+                self.logger.info('Time : (%d) - %s -> sent to %s' % (time, flit, vc_allotted.router))
                 vc.credit_out()
 
         # if is a Tail Flit
@@ -127,10 +131,12 @@ class Router:
                                                     'outport': self.outNorth}, time + 1)
                 EVENT_LIST.push(event)
                 self.logger.debug('Time : (%d) - %s was not sent - No Place in VC (%s)' % (time, flit, vc_allotted))
+                return None
+
             else:
-                self.logger.info('Time : (%d) - %s : sent' % (time, flit))
+                self.logger.info('Time : (%d) - %s -> sent to %s' % (time, flit, vc_allotted.router))
                 # Next routing
-                event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
+                event = Event(EventType.VC_ELECTION, vc_allotted.router, time)
                 EVENT_LIST.push(event)
                 self.vcs_dictionary.remove(vc)
                 vc.lock = False
@@ -166,6 +172,7 @@ class Router:
             if self.route_computation(vc.flits[0]) == self.outNorth \
                     and vc not in self.vcs_target_north:
                 self.vcs_target_north.insert(0, vc)
+                vc.reset_credit()
             elif self.route_computation(vc.flits[0]) == self.outSouth \
                     and vc not in self.vcs_target_south:
                 self.vcs_target_south.insert(0, vc)
@@ -175,9 +182,9 @@ class Router:
             elif self.route_computation(vc.flits[0]) == self.outWest \
                     and vc not in self.vcs_target_west:
                 self.vcs_target_west.insert(0, vc)
-            elif self.route_computation(vc.flits[0]) == self.outPE \
-                    and vc not in self.vcs_target_pe:
-                self.vcs_target_pe.insert(0, vc)
+            # elif self.route_computation(vc.flits[0]) == self.outPE \
+            #         and vc not in self.vcs_target_pe:
+            #     self.vcs_target_pe.insert(0, vc)
 
     def arbiter(self, time):
         # Checking North VC
@@ -201,8 +208,9 @@ class Router:
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
-                                                'outport': self.outNorth}, time + 1)
+                                                'outport': self.outNorth}, time)
             EVENT_LIST.push(event)
+            return None
 
         # VC targeting -> South
         if len(self.vcs_target_south) > 0:
@@ -210,8 +218,9 @@ class Router:
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
-                                                'outport': self.outSouth}, time + 1)
+                                                'outport': self.outSouth}, time)
             EVENT_LIST.push(event)
+            return None
 
         # VC targeting -> East
         if len(self.vcs_target_east) > 0:
@@ -219,8 +228,9 @@ class Router:
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
-                                                'outport': self.outEast}, time + 1)
+                                                'outport': self.outEast}, time)
             EVENT_LIST.push(event)
+            return None
 
         # VC targeting -> West
         if len(self.vcs_target_west) > 0:
@@ -228,8 +238,9 @@ class Router:
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
-                                                'outport': self.outWest}, time + 1)
+                                                'outport': self.outWest}, time)
             EVENT_LIST.push(event)
+            return None
 
     def __str__(self):
         return 'Router (%d,%d)' % (self.coordinate.i, self.coordinate.j)
