@@ -61,7 +61,7 @@ class Flit:
         self.arrival_time = arrival_time
 
     def __str__(self):
-        return 'Flit(%s) from %s' % (self.type, self.packet)
+        return 'Flit(%d-%s) from %s' % (self.id, self.type, self.packet)
 
 
 #############################################################

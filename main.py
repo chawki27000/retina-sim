@@ -18,17 +18,17 @@ def main():
     # Simulator Settings
     simulation = Simulation(SIM_DURATION)
 
-    src = Coordinate(0, 0)
-    dest = Coordinate(0, 2)
+    src = Coordinate(1, 1)
+    dest = Coordinate(2, 2)
     message = Message(1, 40, 128, src, dest)
 
-    # src2 = Coordinate(2, 2)
-    # dest2 = Coordinate(2, 3)
-    # message2 = Message(2, 40, 128, src2, dest2)
+    src2 = Coordinate(0, 2)
+    dest2 = Coordinate(2, 2)
+    message2 = Message(2, 40, 128, src2, dest2)
 
     # Simulation START
     simulation.send_message(message)
-    # simulation.send_message(message2)
+    simulation.send_message(message2)
 
     simulation.simulate()
 

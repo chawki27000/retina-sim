@@ -61,6 +61,9 @@ class Router:
 
     def send_flit(self, vc, outport, time):
 
+        if len(vc.flits) <= 0:
+            return
+
         # getting the first flit in VC
         flit = vc.dequeue()
         if flit is None:
@@ -81,6 +84,9 @@ class Router:
                 vc.credit_out()
                 # registering VC allotted in dictionary
                 self.vcs_dictionary.add(Node(vc, vc_allotted))
+                # Next routing
+                event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
+                EVENT_LIST.push(event)
             else:  # No idle VC
                 vc.enqueue(flit)  # restore
                 # event push
@@ -88,9 +94,6 @@ class Router:
                                                     'vc': vc,
                                                     'outport': self.outNorth}, time + 1)
 
-                EVENT_LIST.push(event)
-                # Next routing
-                event = Event(EventType.VC_ELECTION, vc_allotted.router, time)
                 EVENT_LIST.push(event)
                 self.logger.debug('Time : (%d) - %s was not sent - VC not allotted' % (time, flit))
                 return None
@@ -101,7 +104,11 @@ class Router:
             # Getting the alloted vc
             vc_allotted = self.vcs_dictionary.get_target(vc)
             self.logger.debug('Time : (%d) - Retreiving allotted VC (%s)' % (time, vc_allotted))
-            if not vc_allotted.enqueue(flit):  # No Place
+
+            # Sending to the next router
+            sent = vc_allotted.enqueue(flit)
+
+            if not sent:  # No Place
                 vc.enqueue(flit)  # restore
                 # event push
                 event = Event(EventType.SEND_FLIT, {'router': self,
@@ -113,7 +120,7 @@ class Router:
 
             else:
                 # Next routing
-                event = Event(EventType.VC_ELECTION, vc_allotted.router, time)
+                event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
                 EVENT_LIST.push(event)
                 self.logger.info('Time : (%d) - %s -> sent to %s' % (time, flit, vc_allotted.router))
                 vc.credit_out()
@@ -121,9 +128,14 @@ class Router:
         # if is a Tail Flit
         elif flit.type == FlitType.tail:
             self.logger.debug('Time : (%d) - %s ready to be sent' % (time, flit))
+
             # Getting the alloted vc
             vc_allotted = self.vcs_dictionary.get_target(vc)
-            if not vc_allotted.enqueue(flit):  # No Place
+
+            # Sending to the next router
+            sent = vc_allotted.enqueue(flit)
+
+            if not sent:  # No Place
                 vc.enqueue(flit)  # restore
                 # event push
                 event = Event(EventType.SEND_FLIT, {'router': self,
@@ -136,15 +148,23 @@ class Router:
             else:
                 self.logger.info('Time : (%d) - %s -> sent to %s' % (time, flit, vc_allotted.router))
                 # Next routing
-                event = Event(EventType.VC_ELECTION, vc_allotted.router, time)
+                event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
                 EVENT_LIST.push(event)
+
                 self.vcs_dictionary.remove(vc)
                 vc.lock = False
+                vc.credit_out()
                 self.logger.debug('Time : (%d) - VC (%s) - released' % (time, vc_allotted))
 
         # If Quantum is finished
         if vc.quantum <= 0:
+            # print('Quantum or VC finished for : %s' % vc)
             self.logger.debug('Time : (%d) - VC (%s) - quantum finished' % (time, vc))
+            # new VC Election - event push
+            event = Event(EventType.VC_ELECTION, self, time + 1)
+            EVENT_LIST.push(event)
+        elif len(vc.flits) <= 0:
+            self.logger.debug('Time : (%d) - VC (%s) - NO Flits' % (time, vc))
             # new VC Election - event push
             event = Event(EventType.VC_ELECTION, self, time + 1)
             EVENT_LIST.push(event)
@@ -176,12 +196,15 @@ class Router:
             elif self.route_computation(vc.flits[0]) == self.outSouth \
                     and vc not in self.vcs_target_south:
                 self.vcs_target_south.insert(0, vc)
+                vc.reset_credit()
             elif self.route_computation(vc.flits[0]) == self.outEast \
                     and vc not in self.vcs_target_east:
                 self.vcs_target_east.insert(0, vc)
+                vc.reset_credit()
             elif self.route_computation(vc.flits[0]) == self.outWest \
                     and vc not in self.vcs_target_west:
                 self.vcs_target_west.insert(0, vc)
+                vc.reset_credit()
             # elif self.route_computation(vc.flits[0]) == self.outPE \
             #         and vc not in self.vcs_target_pe:
             #     self.vcs_target_pe.insert(0, vc)

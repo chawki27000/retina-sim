@@ -39,7 +39,8 @@ class VirtualChannel:
         self.quantum -= 1
 
     def reset_credit(self):
-        self.quantum = self.default_quantum
+        if self.quantum <= 0:
+            self.quantum = self.default_quantum
 
     def __str__(self):
         return 'VC (%d) with size (%d)' % (self.id, len(self.flits))

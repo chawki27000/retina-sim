@@ -36,17 +36,42 @@ class EventList:
             return None
 
     def double_event(self, event):
-        if event.event_type == EventType.VC_ELECTION:
+        # if event.event_type == EventType.VC_ELECTION:
+        #     if event.time in self.register:
+        #         if event.entity in self.register[event.time]:
+        #             return True
+        #         else:
+        #             self.register[event.time].append(event.entity)
+        #             return False
+        #     else:
+        #         self.register[event.time] = []
+        #         self.register[event.time].append(event.entity)
+        #         return False
+
+        if event.event_type == EventType.SEND_FLIT:
+            entity = event.entity['router']
             if event.time in self.register:
-                if event.entity in self.register[event.time]:
+                if entity in self.register[event.time]:
                     return True
                 else:
-                    self.register[event.time].append(event.entity)
+                    self.register[event.time].append(entity)
                     return False
             else:
                 self.register[event.time] = []
-                self.register[event.time].append(event.entity)
+                self.register[event.time].append(entity)
                 return False
+
+        # if event.event_type == EventType.VC_ELECTION:
+        #     if event.time in self.register:
+        #         if event.entity in self.register[event.time]:
+        #             return True
+        #         else:
+        #             self.register[event.time].append(event.entity)
+        #             return False
+        #     else:
+        #         self.register[event.time] = []
+        #         self.register[event.time].append(event.entity)
+        #         return False
 
         # if event.time not in self.queue:
         #     return False
