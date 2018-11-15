@@ -1,7 +1,8 @@
 class VirtualChannel:
-    def __init__(self, id, router, max_size, quantum):
+    def __init__(self, id, direction, router, max_size, quantum):
         self.id = id
         self.lock = False
+        self.direction = direction
         self.router = router
         self.max_size = max_size
         self.default_quantum = quantum
@@ -43,4 +44,4 @@ class VirtualChannel:
             self.quantum = self.default_quantum
 
     def __str__(self):
-        return 'VC (%d) with size (%d)' % (self.id, len(self.flits))
+        return 'VC (%d)(%s) ' % (self.id, self.direction.value)

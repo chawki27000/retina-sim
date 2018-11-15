@@ -2,11 +2,11 @@ import enum
 
 
 class Direction(enum.Enum):
-    north = 1
-    south = 2
-    east = 3
-    west = 4
-    pe = 5
+    north = 'North'
+    south = 'South'
+    east = 'East'
+    west = 'West'
+    pe = 'PE'
 
 
 class Coordinate:

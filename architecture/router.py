@@ -78,15 +78,18 @@ class Router:
 
             if vc_allotted is not None:
                 self.logger.debug('Time : (%d) - VC (%s) allotted' % (time, vc_allotted))
+
                 # send flit
                 vc_allotted.enqueue(flit)
-                self.logger.info('Time : (%d) - %s -> sent to %s' % (time, flit, vc_allotted.router))
+                self.logger.info('Time : (%d) - %s -> sent through %s to %s' % (time, flit,
+                                                                                vc_allotted, vc_allotted.router))
                 vc.credit_out()
                 # registering VC allotted in dictionary
                 self.vcs_dictionary.add(Node(vc, vc_allotted))
                 # Next routing
                 event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
                 EVENT_LIST.push(event)
+
             else:  # No idle VC
                 vc.enqueue(flit)  # restore
                 # event push
@@ -122,7 +125,8 @@ class Router:
                 # Next routing
                 event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
                 EVENT_LIST.push(event)
-                self.logger.info('Time : (%d) - %s -> sent to %s' % (time, flit, vc_allotted.router))
+                self.logger.info('Time : (%d) - %s -> sent through %s to %s' % (time, flit,
+                                                                                vc_allotted, vc_allotted.router))
                 vc.credit_out()
 
         # if is a Tail Flit
@@ -146,7 +150,8 @@ class Router:
                 return None
 
             else:
-                self.logger.info('Time : (%d) - %s -> sent to %s' % (time, flit, vc_allotted.router))
+                self.logger.info('Time : (%d) - %s -> sent through %s to %s' % (time, flit,
+                                                                                vc_allotted, vc_allotted.router))
                 # Next routing
                 event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
                 EVENT_LIST.push(event)
