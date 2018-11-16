@@ -1,21 +1,22 @@
-{
-  "scenario":
-  [
-    {
-      "src": {"i": 0, "j": 0},
-      "dest": {"i": 0, "j": 1},
-      "size": 64,
-      "offset": 3,
-      "deadline": 3,
-      "period": 100
-    },
-    {
-      "src": {"i": 0, "j": 0},
-      "dest": {"i": 0, "j": 1},
-      "size": 64,
-      "offset": 3,
-      "deadline": 3,
-      "period": 100
-    }
-  ]
-}
+scenario:
+    - src:
+          i: 0
+          j: 0
+      dest:
+          i: 1
+          j: 1
+      size: 64
+      offset: 0
+      deadline: 4
+      period: 40
+
+    - src:
+          i: 2
+          j: 0
+      dest:
+          i: 2
+          j: 2
+      size: 64
+      offset: 0
+      deadline: 4
+      period: 40

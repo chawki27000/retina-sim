@@ -27,6 +27,11 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     logging.info('### ReTiNAS - Real-Time Network-on-chip Analysis and Simulation ###')
+    logging.info('------ NoC Configuration ------')
+    logging.info('\tDimension : %d x %d' % (square_size, square_size))
+    logging.info('\tVC Number per Input : %d' % nbvc)
+    logging.info('\tVC Buffer size : %d' % vc_size)
+    logging.info('\tVC Quantum setting : %s' % vc_quantum)
 
     # Simulator Settings
     simulation = Simulation(noc, SIM_DURATION)
@@ -43,7 +48,9 @@ def main():
     simulation.send_message(message)
     simulation.send_message(message2)
 
+    logging.info('### Simulation --> START ###')
     simulation.simulate()
+    logging.info('### Simulation --> END ###')
 
 
 if __name__ == "__main__":
