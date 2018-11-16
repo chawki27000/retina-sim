@@ -7,12 +7,13 @@ from communication.routing import Coordinate, Direction
 
 
 class NoC:
-    def __init__(self, name, square_size, nbvc, vc_size):
+    def __init__(self, name, square_size, nbvc, vc_size, vc_quantum):
         self.name = name
         self.router_matrix = []
         self.square_size = square_size
         self.nbvc = nbvc
         self.vc_size = vc_size
+        self.vc_quantum = vc_quantum
 
         # Routers Initialisation
         count = 1
@@ -36,11 +37,11 @@ class NoC:
         router = Router(id, coordinate, proc_engine)
 
         # InPort
-        inNorth = InPort(router, Direction.north, self.nbvc, self.vc_size)
-        inSouth = InPort(router, Direction.south, self.nbvc, self.vc_size)
-        inEast = InPort(router, Direction.east, self.nbvc, self.vc_size)
-        inWest = InPort(router, Direction.west, self.nbvc, self.vc_size)
-        inPE = InPort(router, Direction.pe, self.nbvc, self.vc_size)
+        inNorth = InPort(router, Direction.north, self.nbvc, self.vc_size, self.vc_quantum)
+        inSouth = InPort(router, Direction.south, self.nbvc, self.vc_size, self.vc_quantum)
+        inEast = InPort(router, Direction.east, self.nbvc, self.vc_size, self.vc_quantum)
+        inWest = InPort(router, Direction.west, self.nbvc, self.vc_size, self.vc_quantum)
+        inPE = InPort(router, Direction.pe, self.nbvc, self.vc_size, self.vc_quantum)
 
         # OutPort
         outNorth = OutPort(Direction.north)

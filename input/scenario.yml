@@ -1,0 +1,21 @@
+{
+  "scenario":
+  [
+    {
+      "src": {"i": 0, "j": 0},
+      "dest": {"i": 0, "j": 1},
+      "size": 64,
+      "offset": 3,
+      "deadline": 3,
+      "period": 100
+    },
+    {
+      "src": {"i": 0, "j": 0},
+      "dest": {"i": 0, "j": 1},
+      "size": 64,
+      "offset": 3,
+      "deadline": 3,
+      "period": 100
+    }
+  ]
+}

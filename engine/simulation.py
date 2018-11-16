@@ -9,9 +9,9 @@ CLOCK = 0
 
 class Simulation:
 
-    def __init__(self, hyperiod):
+    def __init__(self, noc, hyperiod):
         self.hyperiod = hyperiod  # HyperPeriod
-        self.noc = NoC('Network-On-Chip', 4, 6, 12)
+        self.noc = noc
 
     def send_message(self, message):
 
@@ -26,6 +26,7 @@ class Simulation:
         while not EVENT_LIST.isEmpty() and CLOCK < self.hyperiod:
 
             events = EVENT_LIST.pull(CLOCK)
+
             # print('------------------- %d -------------------' % CLOCK)
             # if events is not None:
             #     for ev in events:

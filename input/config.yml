@@ -1,0 +1,10 @@
+noc:
+  dimension: 8
+  numberOfVC: 4
+  VCBufferSize: 4
+
+quantum:
+  1: 2
+  2: 2
+  3: 2
+  4: 2
