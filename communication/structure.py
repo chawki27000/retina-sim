@@ -65,12 +65,12 @@ class Flit:
 
 
 #############################################################
-
-
 class Message:
-    def __init__(self, id, period, size, src, dest):
+    def __init__(self, id, period, size, offset, deadline, src, dest):
         self.id = id
         self.period = period
+        self.offset = offset
+        self.deadline = deadline
         self.src = src
         self.dest = dest
         self.size = size
@@ -88,7 +88,8 @@ class Message:
 
 class MessageInstance(Message):
     def __init__(self, message, instance):
-        super().__init__(message.id, message.period, message.size, message.src, message.dest)
+        super().__init__(message.id, message.period, message.size, message.offset,
+                         message.deadline, message.src, message.dest)
         self.instance = instance
 
     def arrived(self, arr):

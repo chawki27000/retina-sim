@@ -1,5 +1,5 @@
 noc:
-  dimension: 8
+  dimension: 4
   numberOfVC: 4
   VCBufferSize: 4
 

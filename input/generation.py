@@ -7,7 +7,7 @@ class Generation:
     def __init__(self):
         self._quantum_tab = []
 
-    def parse(self, link):
+    def config(self, link):
         with open(link, 'r') as stream:
             try:
                 data = yaml.load(stream)
@@ -25,6 +25,19 @@ class Generation:
                 else:
                     for q in quantum.items():
                         self._quantum_tab.append(q[1])
+
+            except yaml.YAMLError as exc:
+                print(exc)
+
+    def scenario(self, link):
+        with open(link, 'r') as stream:
+            try:
+                data = yaml.load(stream)
+
+                # Messages
+                messages = data['scenario']
+                for m in messages:
+                    print(m)
 
             except yaml.YAMLError as exc:
                 print(exc)
