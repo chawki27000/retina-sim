@@ -7,7 +7,7 @@ from engine.global_obj import EVENT_LIST
 
 class ProcessingEngine:
     def __init__(self):
-        pass
+        self.flit_arr_queue = []
 
     def router_bind(self, router):
         self.router = router
@@ -41,6 +41,9 @@ class ProcessingEngine:
         # event push
         event = Event(EventType.VC_ELECTION, self.router, time)
         EVENT_LIST.push(event)
+
+    def flit_receiving(self, flit):
+        self.flit_arr_queue.append(flit)
 
     def __str__(self):
         return 'ProcessingEngine (%d,%d)' % (self.router.coordinate.i, self.router.coordinate.j)

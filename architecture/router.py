@@ -190,7 +190,11 @@ class Router:
             vc.lock = False
 
         flit.set_arrival_time(time)
-        self.logger.debug('Time : (%d) - %s arrived' % (time, flit))
+
+        # Flit store
+        self.proc_engine.flit_receiving(flit)
+
+        self.logger.debug('Time : (%d) - %s arrived to %s' % (time, flit, self))
 
     def vc_target_outport(self, vc):
         if len(vc.flits) > 0:
@@ -210,14 +214,15 @@ class Router:
                     and vc not in self.vcs_target_west:
                 self.vcs_target_west.insert(0, vc)
                 vc.reset_credit()
-            # elif self.route_computation(vc.flits[0]) == self.outPE \
-            #         and vc not in self.vcs_target_pe:
-            #     self.vcs_target_pe.insert(0, vc)
+            elif self.route_computation(vc.flits[0]) == self.outPE \
+                    and vc not in self.vcs_target_pe:
+                self.vcs_target_pe.insert(0, vc)
 
     def arbiter(self, time):
-        # Checking North VC
+
         for vc in self.inPE.vcs:
             self.vc_target_outport(vc)
+        # Checking North VC
         for vc in self.inNorth.vcs:
             self.vc_target_outport(vc)
         # Checking South VC
@@ -267,6 +272,14 @@ class Router:
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
                                                 'outport': self.outWest}, time)
+            EVENT_LIST.push(event)
+            return None
+
+        # VC targeting -> PE
+        if len(self.vcs_target_pe) > 0:
+            vc = self.vcs_target_pe.pop()
+            # event push
+            event = Event(EventType.ARR_FLIT, {'router': self, 'vc': vc}, time)
             EVENT_LIST.push(event)
             return None
 

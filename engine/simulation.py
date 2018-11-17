@@ -66,5 +66,14 @@ class Simulation:
                     # VC Election
                     router.arbiter(CLOCK)
 
+                elif current_event.event_type == EventType.ARR_FLIT:
+
+                    # get Event Entity
+                    router = current_event.entity['router']
+                    vc = current_event.entity['vc']
+
+                    # Flit -> PE
+                    router.arrived_flit(vc, CLOCK)
+
             else:
                 CLOCK += 1
