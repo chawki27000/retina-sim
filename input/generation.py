@@ -8,6 +8,7 @@ from communication.structure import Message
 
 class Generation:
     def __init__(self):
+        self.message_tab = []
         self._quantum_tab = []
 
     def config(self, link):
@@ -39,7 +40,6 @@ class Generation:
 
                 # Messages
                 messages = data['scenario']
-                message_tab = []
                 count = 0
                 for m in messages:
                     src = m['src']
@@ -49,17 +49,17 @@ class Generation:
                     deadline = m['deadline']
                     period = m['period']
 
-                    message_tab.append(Message(count,
-                                               period,
-                                               size,
-                                               offset,
-                                               deadline,
-                                               Coordinate(src['i'], src['j']),
-                                               Coordinate(dest['i'], dest['j']),
-                                               ))
+                    self.message_tab.append(Message(count,
+                                                    period,
+                                                    size,
+                                                    offset,
+                                                    deadline,
+                                                    Coordinate(src['i'], src['j']),
+                                                    Coordinate(dest['i'], dest['j']),
+                                                    ))
                     count += 1
 
-                return message_tab
+                return self.message_tab
 
             except yaml.YAMLError as exc:
                 print(exc)
@@ -75,3 +75,24 @@ class Generation:
 
     def vc_quantum(self):
         return self._quantum_tab
+
+    def gcd(self, a, b):
+        while b != 0:
+            remainder = a % b
+            a = b
+            b = remainder
+
+        return a
+
+    def lcm(self, a, b):
+        if a == 0 or b == 0:
+            return 0
+        return (a * b) // self.gcd(a, b)
+
+    def hyperperiod(self):
+        hyperperiod = 1
+
+        for message in self.message_tab:
+            hyperperiod = self.lcm(hyperperiod, message.period)
+
+        return hyperperiod

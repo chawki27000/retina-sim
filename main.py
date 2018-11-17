@@ -45,11 +45,12 @@ def main():
     logging.info('\tVC Quantum setting : %s' % vc_quantum)
     logging.info('-------------------------------')
 
-    # Simulator Settings
-    simulation = Simulation(noc, SIM_DURATION)
-
     # Messages
     messages = generation.scenario('input/scenario.yml')
+
+    # Simulator Settings
+    simulation = Simulation(noc, generation.hyperperiod())
+
     for message in messages:
         simulation.send_message(message)
 

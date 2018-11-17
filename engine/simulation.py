@@ -8,13 +8,13 @@ CLOCK = 0
 
 class Simulation:
 
-    def __init__(self, noc, hyperiod):
-        self.hyperiod = hyperiod  # HyperPeriod
+    def __init__(self, noc, hyperperiod):
+        self.hyperperiod = hyperperiod  # HyperPeriod
         self.noc = noc
 
     def send_message(self, message):
 
-        for i in range(self.hyperiod):
+        for i in range(self.hyperperiod):
             if i % message.period == 0:
                 message_instance = MessageInstance(message, i)
                 event = Event(EventType.SEND_MESSAGE, message_instance, i)  # TODO : replace i by the task offset
@@ -22,7 +22,7 @@ class Simulation:
 
     def simulate(self):
         global CLOCK
-        while not EVENT_LIST.isEmpty() and CLOCK < self.hyperiod:
+        while not EVENT_LIST.isEmpty() and CLOCK < self.hyperperiod:
 
             events = EVENT_LIST.pull(CLOCK)
 
