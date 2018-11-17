@@ -1,11 +1,7 @@
 import logging
-
-# Simulation Setup
 import sys
 
 from architecture.noc import NoC
-from communication.routing import Coordinate
-from communication.structure import Message
 from engine.simulation import Simulation
 from input.generation import Generation
 
@@ -49,22 +45,15 @@ def main():
     logging.info('\tVC Quantum setting : %s' % vc_quantum)
     logging.info('-------------------------------')
 
-
     # Simulator Settings
     simulation = Simulation(noc, SIM_DURATION)
 
-    src = Coordinate(1, 1)
-    dest = Coordinate(2, 2)
-    message = Message(1, 40, 128, 0, 0, src, dest)
+    # Messages
+    messages = generation.scenario('input/scenario.yml')
+    for message in messages:
+        simulation.send_message(message)
 
-    src2 = Coordinate(0, 2)
-    dest2 = Coordinate(2, 2)
-    message2 = Message(2, 60, 128, 0, 0, src2, dest2)
-
-    # Simulation START
-    simulation.send_message(message)
-    simulation.send_message(message2)
-
+    # Starting Simulation
     logging.info('### Simulation --> START ###')
     simulation.simulate()
     logging.info('### Simulation --> END ###')

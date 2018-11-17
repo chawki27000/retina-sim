@@ -2,6 +2,9 @@ import yaml
 import logging
 import sys
 
+from communication.routing import Coordinate
+from communication.structure import Message
+
 
 class Generation:
     def __init__(self):
@@ -36,8 +39,27 @@ class Generation:
 
                 # Messages
                 messages = data['scenario']
+                message_tab = []
+                count = 0
                 for m in messages:
-                    print(m)
+                    src = m['src']
+                    dest = m['dest']
+                    size = m['size']
+                    offset = m['offset']
+                    deadline = m['deadline']
+                    period = m['period']
+
+                    message_tab.append(Message(count,
+                                               period,
+                                               size,
+                                               offset,
+                                               deadline,
+                                               Coordinate(src['i'], src['j']),
+                                               Coordinate(dest['i'], dest['j']),
+                                               ))
+                    count += 1
+
+                return message_tab
 
             except yaml.YAMLError as exc:
                 print(exc)

@@ -1,4 +1,3 @@
-from architecture.noc import NoC
 from communication.structure import MessageInstance
 from engine.event import Event
 from engine.event_list import EventType

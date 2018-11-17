@@ -3,11 +3,11 @@ scenario:
           i: 0
           j: 0
       dest:
-          i: 1
-          j: 1
-      size: 64
+          i: 2
+          j: 2
+      size: 128
       offset: 0
-      deadline: 4
+      deadline: 0
       period: 40
 
     - src:
@@ -16,7 +16,7 @@ scenario:
       dest:
           i: 2
           j: 2
-      size: 64
+      size: 128
       offset: 0
-      deadline: 4
+      deadline: 0
       period: 40
