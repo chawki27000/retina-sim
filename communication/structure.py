@@ -102,6 +102,12 @@ class MessageInstance(Message):
                          message.deadline, message.src, message.dest)
         self.instance = instance
 
+    def set_depart_time(self, depart_time):
+        self._depart_time = depart_time
+
+    def get_depart_time(self):
+        return self._depart_time
+
     def get_arriving_time(self):
         arr = -1
 
@@ -114,6 +120,9 @@ class MessageInstance(Message):
                         arr = flit.arrival_time
 
         return arr
+
+    def get_latency(self):
+        return self.get_arriving_time() - self.get_depart_time()
 
     def __str__(self):
         return 'Message (%d)(instance = %d)' % (self.id, self.instance)

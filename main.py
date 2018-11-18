@@ -64,7 +64,6 @@ def main():
     # printing
     messages_i = simulation.get_message_instance_tab()
     csv = CSVWriter(messages_i)
-    csv.flit_print()
     csv.generate_csv('output/result.csv')
 
 

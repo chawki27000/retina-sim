@@ -24,6 +24,7 @@ class ProcessingEngine:
 
         # Getting Packets from Message
         packets = copy.copy(message_instance.packets)
+        message_instance.set_depart_time(time)
 
         # We assume that we have more place in VCs than packets
         while len(packets) > 0:
