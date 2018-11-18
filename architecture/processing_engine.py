@@ -1,3 +1,4 @@
+import copy
 import logging
 
 from engine.event import Event
@@ -15,15 +16,14 @@ class ProcessingEngine:
 
     def send_packet(self, packet, vc_allotted):
         self.logger.debug('vc allotted number : %d' % vc_allotted.id)
-        while len(packet.flits) > 0:
-            flit = packet.get_flit()
+        for flit in packet.flits:
             vc_allotted.enqueue(flit)
             self.logger.debug('sending Flit (%s)' % flit.type)
 
     def send_to_router(self, message_instance, time):
 
         # Getting Packets from Message
-        packets = message_instance.packets
+        packets = copy.copy(message_instance.packets)
 
         # We assume that we have more place in VCs than packets
         while len(packets) > 0:

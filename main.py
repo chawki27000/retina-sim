@@ -4,6 +4,7 @@ import sys
 from architecture.noc import NoC
 from engine.simulation import Simulation
 from input.generation import Generation
+from output.csv_writer import CSVWriter
 
 SIM_DURATION = 30
 
@@ -49,7 +50,8 @@ def main():
     messages = generation.scenario('input/scenario.yml')
 
     # Simulator Settings
-    simulation = Simulation(noc, generation.hyperperiod())
+    # simulation = Simulation(noc, generation.hyperperiod())
+    simulation = Simulation(noc, 100)
 
     for message in messages:
         simulation.send_message(message)
@@ -58,6 +60,12 @@ def main():
     logging.info('### Simulation --> START ###')
     simulation.simulate()
     logging.info('### Simulation --> END ###')
+
+    # printing
+    messages_i = simulation.get_message_instance_tab()
+    csv = CSVWriter(messages_i)
+    csv.flit_print()
+    csv.generate_csv('output/result.csv')
 
 
 if __name__ == "__main__":

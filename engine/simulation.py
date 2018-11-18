@@ -11,14 +11,20 @@ class Simulation:
     def __init__(self, noc, hyperperiod):
         self.hyperperiod = hyperperiod  # HyperPeriod
         self.noc = noc
+        self._message_instance_tab = []
 
     def send_message(self, message):
 
+        instance_count = 1
         for i in range(self.hyperperiod):
             if i % message.period == 0:
-                message_instance = MessageInstance(message, i)
+                message_instance = MessageInstance(message, instance_count)
                 event = Event(EventType.SEND_MESSAGE, message_instance, i)  # TODO : replace i by the task offset
                 EVENT_LIST.push(event)
+
+                # Instance Saving
+                self._message_instance_tab.append(message_instance)
+                instance_count += 1
 
     def simulate(self):
         global CLOCK
@@ -77,3 +83,6 @@ class Simulation:
 
             else:
                 CLOCK += 1
+
+    def get_message_instance_tab(self):
+        return self._message_instance_tab

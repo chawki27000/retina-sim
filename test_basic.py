@@ -1,13 +1,12 @@
 import unittest
-import simpy
 
-from architecture.virtual_channel import VirtualChannel
-from communication.structure import Packet, Message, FlitType, NodeArray, Node
-from communication.routing import Coordinate, Direction
 from architecture.noc import NoC
-from engine.Simulation import Simulation
+from architecture.virtual_channel import VirtualChannel
+from communication.routing import Coordinate
+from communication.structure import Packet, Message, FlitType, NodeArray, Node
 from engine.event import Event
 from engine.event_list import EventList, EventType
+from engine.simulation import Simulation
 
 
 class TestPacket(unittest.TestCase):

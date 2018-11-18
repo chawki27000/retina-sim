@@ -1,6 +1,7 @@
-import copy
 import enum
 import math
+
+from analysis.end_to_end_latency import EndToEndLatency
 
 FLIT_DEFAULT_SIZE = 32
 PACKET_DEFAULT_SIZE = 128
@@ -28,11 +29,6 @@ class Packet:
     def set_destination(self, dest):
         for flit in self.flits:
             flit.set_destination_info(dest)
-
-    def get_flit(self):
-        flit = copy.deepcopy(self.flits[0])
-        del self.flits[0]
-        return flit
 
     def __str__(self):
         return 'Packet(%d) from Message(%d)' % (self.id, self.message.id)
@@ -82,6 +78,20 @@ class Message:
         for i in range(packetNumber):
             self.packets.append(Packet(i, self.dest, self))
 
+    def get_analysis_latency(self):
+        # Routing Distance Computing
+        nR = EndToEndLatency.routing_distance(self.src, self.dest)
+        # Iteration Number
+        nI = EndToEndLatency.iteration_number(len(self.packets), 4)  # TODO : change to dynamic
+
+        # Network Latency
+        # nI: Number of iteration
+        # oV: Total VC occupied(pessimistic)
+        # nR: Routing Distance
+        nL = EndToEndLatency.network_latency(nI, 1, nR)
+
+        return int((EndToEndLatency.NETWORK_ACCESS_LAT * 2) + nL)
+
 
 #############################################################
 
@@ -92,8 +102,21 @@ class MessageInstance(Message):
                          message.deadline, message.src, message.dest)
         self.instance = instance
 
-    def arrived(self, arr):
-        self.arr = arr
+    def get_arriving_time(self):
+        arr = -1
+
+        packets = self.packets
+        for packet in packets:
+            flits = packet.flits
+            for flit in flits:
+                if flit.type == FlitType.tail:
+                    if arr < flit.arrival_time:
+                        arr = flit.arrival_time
+
+        return arr
+
+    def __str__(self):
+        return 'Message (%d)(instance = %d)' % (self.id, self.instance)
 
 
 #############################################################
