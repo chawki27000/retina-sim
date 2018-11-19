@@ -91,15 +91,14 @@ class Router:
                 EVENT_LIST.push(event)
 
             else:  # No idle VC
-                vc.enqueue(flit)  # restore
+                vc.restore(flit)  # restore
                 # event push
                 event = Event(EventType.SEND_FLIT, {'router': self,
                                                     'vc': vc,
-                                                    'outport': self.outNorth}, time + 1)
+                                                    'outport': outport}, time + 1)
 
                 EVENT_LIST.push(event)
                 self.logger.debug('Time : (%d) - %s was not sent - VC not allotted' % (time, flit))
-                return None
 
         # if is a Body Flit
         elif flit.type == FlitType.body:
@@ -112,14 +111,13 @@ class Router:
             sent = vc_allotted.enqueue(flit)
 
             if not sent:  # No Place
-                vc.enqueue(flit)  # restore
+                vc.restore(flit)  # restore
                 # event push
                 event = Event(EventType.SEND_FLIT, {'router': self,
                                                     'vc': vc,
-                                                    'outport': self.outNorth}, time + 1)
+                                                    'outport': outport}, time + 1)
                 EVENT_LIST.push(event)
                 self.logger.debug('Time : (%d) - %s was not sent - No Place in VC (%s)' % (time, flit, vc_allotted))
-                return None
 
             else:
                 # Next routing
@@ -140,14 +138,13 @@ class Router:
             sent = vc_allotted.enqueue(flit)
 
             if not sent:  # No Place
-                vc.enqueue(flit)  # restore
+                vc.restore(flit)  # restore
                 # event push
                 event = Event(EventType.SEND_FLIT, {'router': self,
                                                     'vc': vc,
-                                                    'outport': self.outNorth}, time + 1)
+                                                    'outport': outport}, time + 1)
                 EVENT_LIST.push(event)
                 self.logger.debug('Time : (%d) - %s was not sent - No Place in VC (%s)' % (time, flit, vc_allotted))
-                return None
 
             else:
                 self.logger.info('Time : (%d) - %s -> sent through %s to %s' % (time, flit,
@@ -159,7 +156,7 @@ class Router:
                 self.vcs_dictionary.remove(vc)
                 vc.lock = False
                 vc.credit_out()
-                self.logger.debug('Time : (%d) - VC (%s) - released' % (time, vc_allotted))
+                self.logger.debug('Time : (%d) - VC (%s) - released' % (time, vc))
 
         # If Quantum is finished
         if vc.quantum <= 0:
@@ -179,7 +176,7 @@ class Router:
             self.logger.debug('Time : (%d) - VC (%s) - quantum NOT finished' % (time, vc))
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
-                                                'outport': self.outNorth}, time + 1)
+                                                'outport': outport}, time + 1)
             EVENT_LIST.push(event)
 
     def arrived_flit(self, vc, time):

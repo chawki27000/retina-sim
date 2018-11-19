@@ -1,7 +1,7 @@
 noc:
   dimension: 4
   numberOfVC: 4
-  VCBufferSize: 4
+  VCBufferSize: 1
 
 quantum:
   1: 1

@@ -16,12 +16,13 @@ class VirtualChannel:
         self.flits.insert(0, flit)
         return True
 
-    def append(self, flit):
+    def restore(self, flit):
         self.flits.append(flit)
 
     def dequeue(self):
         if len(self.flits) <= 0:
             return None
+
         return self.flits.pop()
 
     def isFree(self):
