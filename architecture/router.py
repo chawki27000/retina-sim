@@ -197,23 +197,23 @@ class Router:
         if len(vc.flits) > 0:
             if self.route_computation(vc.flits[0]) == self.outNorth \
                     and vc not in self.vcs_target_north:
-                self.vcs_target_north.insert(0, vc)
+                self.vcs_target_north.append(vc)
                 vc.reset_credit()
             elif self.route_computation(vc.flits[0]) == self.outSouth \
                     and vc not in self.vcs_target_south:
-                self.vcs_target_south.insert(0, vc)
+                self.vcs_target_south.append(vc)
                 vc.reset_credit()
             elif self.route_computation(vc.flits[0]) == self.outEast \
                     and vc not in self.vcs_target_east:
-                self.vcs_target_east.insert(0, vc)
+                self.vcs_target_east.append(vc)
                 vc.reset_credit()
             elif self.route_computation(vc.flits[0]) == self.outWest \
                     and vc not in self.vcs_target_west:
-                self.vcs_target_west.insert(0, vc)
+                self.vcs_target_west.append(vc)
                 vc.reset_credit()
             elif self.route_computation(vc.flits[0]) == self.outPE \
                     and vc not in self.vcs_target_pe:
-                self.vcs_target_pe.insert(0, vc)
+                self.vcs_target_pe.append(vc)
 
     def arbiter(self, time):
 
@@ -235,6 +235,7 @@ class Router:
         # VC targeting -> North
         if len(self.vcs_target_north) > 0:
             vc = self.vcs_target_north.pop()
+            self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
@@ -245,6 +246,7 @@ class Router:
         # VC targeting -> South
         if len(self.vcs_target_south) > 0:
             vc = self.vcs_target_south.pop()
+            self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
@@ -255,6 +257,7 @@ class Router:
         # VC targeting -> East
         if len(self.vcs_target_east) > 0:
             vc = self.vcs_target_east.pop()
+            self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
@@ -265,6 +268,7 @@ class Router:
         # VC targeting -> West
         if len(self.vcs_target_west) > 0:
             vc = self.vcs_target_west.pop()
+            self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
@@ -275,6 +279,7 @@ class Router:
         # VC targeting -> PE
         if len(self.vcs_target_pe) > 0:
             vc = self.vcs_target_pe.pop()
+            self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.ARR_FLIT, {'router': self, 'vc': vc}, time)
             EVENT_LIST.push(event)

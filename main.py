@@ -22,20 +22,20 @@ def main():
     noc = NoC('Network-On-Chip', square_size, nbvc, vc_size, vc_quantum)
 
     # Log Configuration
-    print('Please enter the simulation monitoring mode')
-    print('1 - DEBUG')
-    print('2 - INFO')
-    mode = int(input('--> '))
+    # print('Please enter the simulation monitoring mode')
+    # print('1 - DEBUG')
+    # print('2 - INFO')
+    # mode = int(input('--> '))
+    #
+    # if mode == 1:
+    #     level = logging.DEBUG
+    # elif mode == 2:
+    #     level = logging.INFO
+    # else:
+    #     print('wrong parameters')
+    #     sys.exit()
 
-    if mode == 1:
-        level = logging.DEBUG
-    elif mode == 2:
-        level = logging.INFO
-    else:
-        print('wrong parameters')
-        sys.exit()
-
-    logging.basicConfig(level=level)
+    logging.basicConfig(level=logging.INFO)
 
     logging.info('###################################################################')
     logging.info('### ReTiNAS - Real-Time Network-on-chip Analysis and Simulation ###')

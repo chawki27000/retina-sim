@@ -32,10 +32,10 @@ class Simulation:
 
             events = EVENT_LIST.pull(CLOCK)
 
-            # print('------------------- %d -------------------' % CLOCK)
-            # if events is not None:
-            #     for ev in events:
-            #         print(ev)
+            print('------------------- %d -------------------' % CLOCK)
+            if events is not None:
+                for ev in events:
+                    print(ev)
 
             # for key in EVENT_LIST.register.keys():
             #     for router in EVENT_LIST.register[key]:
