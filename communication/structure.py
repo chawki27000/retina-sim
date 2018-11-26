@@ -92,6 +92,10 @@ class Message:
 
         return int((EndToEndLatency.NETWORK_ACCESS_LAT * 2) + nL)
 
+    def __str__(self):
+        return '[id: %d -- size: %d -- period: %d -- offset: %d -- deadline: %d -- src: %s -- dest: %s]' \
+               % (self.id, self.size, self.period, self.offset, self.deadline, self.src, self.dest)
+
 
 #############################################################
 

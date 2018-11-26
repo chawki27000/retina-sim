@@ -114,12 +114,12 @@ class Generation:
         # Loop
         while len(self._utilization_array) > 0:
             # generate parameters
-            utilization_factor = self.get_random_utiliz_fact()
-            period = self.period_array[random.randint(len(self.period_array))]
-            offset = self.offset_array[random.randint(len(self.offset_array))]
+            utilization_factor = self._utilization_array.pop(random.randrange(len(self._utilization_array)))
+            period = self.period_array[random.randint(0, len(self.period_array) - 1)]
+            offset = self.offset_array[random.randint(0, len(self.offset_array) - 1)]
             size = int(math.ceil(period * utilization_factor))
             lower_bound = int(0.7 * period)
-            deadline = random.randint((period - lower_bound + 1) + lower_bound)
+            deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
 
             # Generate messages
             coord = self.generate_random_coordinate()
@@ -129,23 +129,17 @@ class Generation:
             self.messages.append(message)
 
             # Generate task conflict
-            self.generate_conflict_message(message)
+            # self.generate_conflict_message(message)
             self.counter += 1
+
+        for msg in self.messages:
+            print(msg)
 
     # Utilization Factors
     def get_utilization_factors(self):
-        unifast = Unifast(2, 16, 2)
+        unifast = Unifast(8, 1, 2)
+        return unifast.UUniFastDiscard()
 
-        return unifast.generate_utilization()
-
-    def get_random_utiliz_fact(self):
-        index = random.randint(len(self._utilization_array))
-        utilization_factor = copy.deepcopy(self._utilization_array[index])
-        self._utilization_array.remove(utilization_factor)
-
-        return utilization_factor
-
-    # Conflict Task Generation
     def generate_conflict_message(self, message):
         # Left message
         if message.src.j - 1 > 0:
@@ -166,15 +160,15 @@ class Generation:
     def generate_random_coordinate(self):
 
         # source router coordinate
-        src_i = random.randint(self._square_size)
-        src_j = random.randint(self._square_size)
+        src_i = random.randint(0, self._square_size - 1)
+        src_j = random.randint(0, self._square_size - 1)
 
         # destination router coordinate
         dest_i = src_i
         dest_j = src_j
         while src_i == dest_i:
-            dest_i = random.randint(self._square_size)
+            dest_i = random.randint(0, self._square_size - 1)
         while src_j == dest_j:
-            dest_j = random.randint(self._square_size)
+            dest_j = random.randint(0, self._square_size - 1)
 
         return [Coordinate(src_i, src_j), Coordinate(dest_i, dest_j)]

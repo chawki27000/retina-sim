@@ -1,37 +1,26 @@
-import time
 import random
-import math
 
 
 class Unifast:
-    def __init__(self, nb_task, nb_proc, u):
+    def __init__(self, nb_task, nb_set, u):
         self.nb_task = nb_task
-        self.nb_proc = nb_proc
+        self.nb_set = nb_set
         self.u = u
 
-    def generate_utilization(self):
-        util = []
-        discard = True
-
-        while discard or not self.utilization_is_valid(util):
+    def UUniFastDiscard(self):
+        sets = []
+        while len(sets) < self.nb_set:
+            # Classic UUniFast algorithm:
+            utilizations = []
             sumU = self.u
-            discard = False
-
-            for i in range(self.nb_task - 1):
-                rndm = random.randint(int(round(time.time() * 1000)))
-                nextSumU = sumU * math.pow(rndm, 1 / (self.nb_task - (i + 1)))
-                util.append(sumU - nextSumU)
+            for i in range(1, self.nb_task):
+                nextSumU = sumU * random.random() ** (1.0 / (self.nb_task - i))
+                utilizations.append(sumU - nextSumU)
                 sumU = nextSumU
+            utilizations.append(sumU)
 
-            util[self.nb_task - 1] = sumU
-            if util[self.nb_task - 1] > 1:
-                discard = True
+            # If no task utilization exceeds 1:
+            if all(ut <= 1 for ut in utilizations):
+                sets.append(utilizations)
 
-        return util
-
-    def utilization_is_valid(self, util):
-        sum = 0
-        for u in util:
-            sum += u
-
-        return sum <= self.nb_proc
+        return sets[0]

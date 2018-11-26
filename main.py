@@ -4,6 +4,7 @@ import sys
 from architecture.noc import NoC
 from engine.simulation import Simulation
 from input.generation import Generation
+from input.unifast import Unifast
 from output.csv_writer import CSVWriter
 
 SIM_DURATION = 30
@@ -58,13 +59,14 @@ def main():
 
     # Starting Simulation
     logging.info('### Simulation --> START ###')
-    simulation.simulate()
+    # simulation.simulate()
+    generation.generate_messages()
     logging.info('### Simulation --> END ###')
 
     # printing
-    messages_i = simulation.get_message_instance_tab()
-    csv = CSVWriter(messages_i)
-    csv.generate_csv('output/result.csv')
+    # messages_i = simulation.get_message_instance_tab()
+    # csv = CSVWriter(messages_i)
+    # csv.generate_csv('output/result.csv')
 
 
 if __name__ == "__main__":
