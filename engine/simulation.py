@@ -19,7 +19,8 @@ class Simulation:
         for i in range(self.hyperperiod):
             if i % message.period == 0:
                 message_instance = MessageInstance(message, instance_count)
-                event = Event(EventType.SEND_MESSAGE, message_instance, i)  # TODO : replace i by the task offset
+                event = Event(EventType.SEND_MESSAGE, message_instance,
+                              i + message_instance.offset)  # TODO : replace i by the task offset
                 EVENT_LIST.push(event)
 
                 # Instance Saving
@@ -32,10 +33,10 @@ class Simulation:
 
             events = EVENT_LIST.pull(CLOCK)
 
-            print('------------------- %d -------------------' % CLOCK)
-            if events is not None:
-                for ev in events:
-                    print(ev)
+            # print('------------------- %d -------------------' % CLOCK)
+            # if events is not None:
+            #     for ev in events:
+            #         print(ev)
 
             # for key in EVENT_LIST.register.keys():
             #     for router in EVENT_LIST.register[key]:

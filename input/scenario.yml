@@ -6,9 +6,9 @@ scenario:
           i: 2
           j: 2
       size: 128
-      offset: 0
+      offset: 12
       deadline: 0
-      period: 100
+      period: 40
 
     - src:
           i: 0
@@ -17,6 +17,6 @@ scenario:
           i: 2
           j: 2
       size: 128
-      offset: 0
+      offset: 22
       deadline: 0
-      period: 100
+      period: 60
