@@ -23,18 +23,18 @@ def main():
     noc = NoC('Network-On-Chip', square_size, nbvc, vc_size, vc_quantum)
 
     # Log Configuration
-    # print('Please enter the simulation monitoring mode')
-    # print('1 - DEBUG')
-    # print('2 - INFO')
-    # mode = int(input('--> '))
-    #
-    # if mode == 1:
-    #     level = logging.DEBUG
-    # elif mode == 2:
-    #     level = logging.INFO
-    # else:
-    #     print('wrong parameters')
-    #     sys.exit()
+    print('Please enter the simulation monitoring mode')
+    print('1 - DEBUG')
+    print('2 - INFO')
+    mode = int(input('--> '))
+
+    if mode == 1:
+        level = logging.DEBUG
+    elif mode == 2:
+        level = logging.INFO
+    else:
+        print('wrong parameters')
+        sys.exit()
 
     logging.basicConfig(level=logging.INFO)
 
@@ -47,12 +47,23 @@ def main():
     logging.info('\tVC Quantum setting : %s' % vc_quantum)
     logging.info('-------------------------------')
 
-    # Messages
-    messages = generation.scenario('input/scenario.yml')
+    # Generation mode
+    print('Please enter the messages generation mode')
+    print('1 - UUniFast')
+    print('2 - Manuel')
+    generating = int(input('--> '))
+
+    if generating == 1:
+        messages = generation.uunifast_generate(10)
+    elif generating == 2:
+        messages = generation.scenario('input/scenario.yml')
+    else:
+        print('wrong parameters')
+        sys.exit()
 
     # Simulator Settings
-    # simulation = Simulation(noc, generation.hyperperiod())
-    simulation = Simulation(noc, 100)
+    simulation = Simulation(noc, generation.hyperperiod())
+    # simulation = Simulation(noc, 100)
 
     for message in messages:
         simulation.send_message(message)
@@ -60,7 +71,6 @@ def main():
     # Starting Simulation
     logging.info('### Simulation --> START ###')
     # simulation.simulate()
-    generation.generate_messages()
     logging.info('### Simulation --> END ###')
 
     # printing

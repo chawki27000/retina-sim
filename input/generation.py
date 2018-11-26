@@ -12,9 +12,7 @@ from input.unifast import Unifast
 
 class Generation:
     def __init__(self):
-        self.message_tab = []
         self._quantum_tab = []
-        self._utilization_array = self.get_utilization_factors()
         self.period_array = [50, 100, 150, 200, 300, 600]
         self.offset_array = [0, 10, 15, 30, 60, 80]
         self.messages = []
@@ -58,17 +56,17 @@ class Generation:
                     deadline = m['deadline']
                     period = m['period']
 
-                    self.message_tab.append(Message(count,
-                                                    period,
-                                                    size,
-                                                    offset,
-                                                    deadline,
-                                                    Coordinate(src['i'], src['j']),
-                                                    Coordinate(dest['i'], dest['j']),
-                                                    ))
+                    self.messages.append(Message(count,
+                                                 period,
+                                                 size,
+                                                 offset,
+                                                 deadline,
+                                                 Coordinate(src['i'], src['j']),
+                                                 Coordinate(dest['i'], dest['j']),
+                                                 ))
                     count += 1
 
-                return self.message_tab
+                return self.messages
 
             except yaml.YAMLError as exc:
                 print(exc)
@@ -102,13 +100,14 @@ class Generation:
     def hyperperiod(self):
         hyperperiod = 1
 
-        for message in self.message_tab:
+        for message in self.messages:
             hyperperiod = self.lcm(hyperperiod, message.period)
 
         return hyperperiod
 
     # Generation : Unifast
-    def generate_messages(self):
+    def uunifast_generate(self, nb_task):
+        self._utilization_array = self.get_utilization_factors(nb_task)
 
         self.counter = 0
         # Loop
@@ -132,12 +131,11 @@ class Generation:
             # self.generate_conflict_message(message)
             self.counter += 1
 
-        for msg in self.messages:
-            print(msg)
+        return self.messages
 
     # Utilization Factors
-    def get_utilization_factors(self):
-        unifast = Unifast(8, 1, 2)
+    def get_utilization_factors(self, nb_task):
+        unifast = Unifast(nb_task, 1, 2)
         return unifast.UUniFastDiscard()
 
     def generate_conflict_message(self, message):

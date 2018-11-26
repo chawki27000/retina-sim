@@ -13,3 +13,6 @@ class Coordinate:
     def __init__(self, i, j):
         self.i = i  # Row
         self.j = j  # Column
+
+    def __str__(self):
+        return 'R(%d,%d)' % (self.i, self.j)

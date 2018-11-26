@@ -73,9 +73,9 @@ class Message:
         self.packets = []
 
         # Packet construct
-        packetNumber = int(math.ceil(float(self.size / PACKET_DEFAULT_SIZE)))
+        packet_number = int(math.ceil(float(self.size / PACKET_DEFAULT_SIZE))) + 2  # Payload + 2 (Head/Tail)
 
-        for i in range(packetNumber):
+        for i in range(packet_number):
             self.packets.append(Packet(i, self.dest, self))
 
     def get_analysis_latency(self):
