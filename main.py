@@ -33,7 +33,7 @@ def main():
         print('wrong parameters')
         sys.exit()
 
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=level)
 
     logging.info('###################################################################')
     logging.info('### ReTiNAS - Real-Time Network-on-chip Analysis and Simulation ###')
@@ -60,7 +60,6 @@ def main():
 
     # Simulator Settings
     simulation = Simulation(noc, generation.hyperperiod())
-    # simulation = Simulation(noc, 100)
 
     for message in messages:
         simulation.send_message(message)

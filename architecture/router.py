@@ -191,7 +191,7 @@ class Router:
         # Flit store
         self.proc_engine.flit_receiving(flit)
 
-        self.logger.debug('Time : (%d) - %s arrived to %s' % (time, flit, self))
+        self.logger.info('Time : (%d) - %s arrived to %s' % (time, flit, self.proc_engine))
 
     def vc_target_outport(self, vc):
         if len(vc.flits) > 0:
