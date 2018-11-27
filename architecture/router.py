@@ -241,7 +241,6 @@ class Router:
                                                 'vc': vc,
                                                 'outport': self.outNorth}, time)
             EVENT_LIST.push(event)
-            return None
 
         # VC targeting -> South
         if len(self.vcs_target_south) > 0:
@@ -252,7 +251,6 @@ class Router:
                                                 'vc': vc,
                                                 'outport': self.outSouth}, time)
             EVENT_LIST.push(event)
-            return None
 
         # VC targeting -> East
         if len(self.vcs_target_east) > 0:
@@ -263,7 +261,6 @@ class Router:
                                                 'vc': vc,
                                                 'outport': self.outEast}, time)
             EVENT_LIST.push(event)
-            return None
 
         # VC targeting -> West
         if len(self.vcs_target_west) > 0:
@@ -274,7 +271,6 @@ class Router:
                                                 'vc': vc,
                                                 'outport': self.outWest}, time)
             EVENT_LIST.push(event)
-            return None
 
         # VC targeting -> PE
         if len(self.vcs_target_pe) > 0:
@@ -283,7 +279,6 @@ class Router:
             # event push
             event = Event(EventType.ARR_FLIT, {'router': self, 'vc': vc}, time)
             EVENT_LIST.push(event)
-            return None
 
     def __str__(self):
         return 'Router (%d,%d)' % (self.coordinate.i, self.coordinate.j)

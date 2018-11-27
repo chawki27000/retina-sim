@@ -37,17 +37,27 @@ class EventList:
 
     def double_event(self, event):
         if event.event_type == EventType.SEND_FLIT:
-            entity = event.entity['router']
+            entity1 = event.entity['router']
+            entity2 = event.entity['outport']
+            send_node = SendNode(entity1, entity2)
+
             if event.time in self.register:
-                if entity in self.register[event.time]:
-                    return True
+                for node in self.register[event.time]:
+                    if node.router == entity1 and node.output == entity2:
+                        return True
                 else:
-                    self.register[event.time].append(entity)
+                    self.register[event.time].append(send_node)
                     return False
             else:
                 self.register[event.time] = []
-                self.register[event.time].append(entity)
+                self.register[event.time].append(send_node)
                 return False
 
     def __str__(self):
         return '\n'.join([str(i) for i in self.queue])
+
+
+class SendNode:
+    def __init__(self, router, output):
+        self.router = router
+        self.output = output
