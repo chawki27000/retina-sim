@@ -31,7 +31,7 @@ class Generation:
                 # VC Quatum
                 quantum = data['quantum']
                 if len(quantum) != self._nbvc:
-                    logging.info('Config Error : VC Quantum settings is not identical to the number of VC')
+                    print('Config Error : VC Quantum settings is not identical to VC number')
                     sys.exit()
                 else:
                     for q in quantum.items():

@@ -20,7 +20,7 @@ class Simulation:
             if i % message.period == 0:
                 message_instance = MessageInstance(message, instance_count)
                 event = Event(EventType.SEND_MESSAGE, message_instance,
-                              i + message_instance.offset)  # TODO : replace i by the task offset
+                              i + message_instance.offset)
                 EVENT_LIST.push(event)
 
                 # Instance Saving
