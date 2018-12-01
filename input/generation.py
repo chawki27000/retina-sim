@@ -131,6 +131,8 @@ class Generation:
             # self.generate_conflict_message(message)
             self.counter += 1
 
+        for msg in self.messages:
+            print(msg)
         return self.messages
 
     # Utilization Factors

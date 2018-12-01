@@ -88,7 +88,7 @@ class Message:
         # nI: Number of iteration
         # oV: Total VC occupied(pessimistic)
         # nR: Routing Distance
-        nL = EndToEndLatency.network_latency(nI, 1, nR)
+        nL = EndToEndLatency.network_latency(nI, 4, nR)
 
         return int((EndToEndLatency.NETWORK_ACCESS_LAT * 2) + nL)
 

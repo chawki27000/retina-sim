@@ -3,7 +3,7 @@ import math
 
 class EndToEndLatency:
     PACKET_ROUTER_LAT = 1
-    NETWORK_ACCESS_LAT = 1
+    NETWORK_ACCESS_LAT = 0.5
 
     @staticmethod
     def routing_distance(src, dest):

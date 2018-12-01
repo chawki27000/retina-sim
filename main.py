@@ -51,7 +51,7 @@ def main():
     generating = int(input('--> '))
 
     if generating == 1:
-        messages = generation.uunifast_generate(10)
+        messages = generation.uunifast_generate(30)
     elif generating == 2:
         messages = generation.scenario('input/scenario.yml')
     else:
