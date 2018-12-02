@@ -1,10 +1,10 @@
-import yaml
-import logging
-import sys
-import random
-import copy
 import math
+import random
+import sys
 
+import yaml
+
+from analysis.end_to_end_latency import EndToEndLatency
 from communication.routing import Coordinate
 from communication.structure import Message
 from input.unifast import Unifast
@@ -128,7 +128,7 @@ class Generation:
             self.messages.append(message)
 
             # Generate task conflict
-            # self.generate_conflict_message(message)
+            self.generate_conflict_message(message, 4)
             self.counter += 1
 
         for msg in self.messages:
@@ -140,22 +140,42 @@ class Generation:
         unifast = Unifast(nb_task, 1, 2)
         return unifast.UUniFastDiscard()
 
-    def generate_conflict_message(self, message):
-        # Left message
-        if message.src.j - 1 > 0:
+    def generate_conflict_message(self, message, level):
+        # Level 1
+        if level >= 1:
+            if message.src.j - 1 > 0:  # If router has Left side
+                self.counter += 1
+                coord = Coordinate(message.src.i, message.src.j - 1)
+                msg = Message(self.counter, message.period, message.size,
+                              message.offset, message.deadline, coord, message.dest)
+                self.messages.append(msg)
+
+        # Level 2
+        if level >= 2:
+            if message.src.j + 1 < self._square_size:  # If router has Right side
+                self.counter += 1
+                coord = Coordinate(message.src.i, message.src.j + 1)
+                msg = Message(self.counter, message.period, message.size,
+                              message.offset, message.deadline, coord, message.dest)
+                self.messages.append(msg)
+
+        # Level 3
+        if level >= 3:
             self.counter += 1
-            coord = Coordinate(message.src.i, message.src.i - 1)
+            coord = self.generation_conflict_coordinate(message.src)  # In the same Router but different destination
             msg = Message(self.counter, message.period, message.size,
-                          message.offset, message.deadline, coord, message.dest)
+                          message.offset, message.deadline, message.src, coord)
             self.messages.append(msg)
 
-        # Right message
-        if message.src.j + 1 < self._square_size:
+        # Level 4
+        if level >= 4:
+            # assign a task in the router that's could change axe direction
             self.counter += 1
-            coord = Coordinate(message.src.i, message.src.i + 1)
-            msg = Message(self.counter, message.period, message.size,
-                          message.offset, message.deadline, coord, message.dest)
-            self.messages.append(msg)
+            if message.src.i != message.dest.i:
+                coord = Coordinate(message.src.i, message.dest.J)  # The pivot Router
+                hop = EndToEndLatency.routing_distance(message.src, coord)
+                msg = Message(self.counter, message.period, message.size,
+                              message.offset + hop, message.deadline, coord, message.dest)
 
     def generate_random_coordinate(self):
 
@@ -172,3 +192,13 @@ class Generation:
             dest_j = random.randint(0, self._square_size - 1)
 
         return [Coordinate(src_i, src_j), Coordinate(dest_i, dest_j)]
+
+    def generation_conflict_coordinate(self, src):
+        dest_i = src.i
+        dest_j = src.j
+        while src.i == dest_i:
+            dest_i = random.randint(0, self._square_size - 1)
+        while src.j == dest_j:
+            dest_j = random.randint(0, self._square_size - 1)
+
+        return Coordinate(dest_i, dest_j)
