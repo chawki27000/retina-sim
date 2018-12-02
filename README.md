@@ -72,6 +72,7 @@ quantum: # VCs Quantum configuration (according to numberOfVC)
   4: 4
 ```
 
+There are another parameters that's can be set, the packet and flit default size in **structure.py**. They can be changed by modifying the two constants _FLIT_DEFAULT_SIZE_ and _PACKET_DEFAULT_SIZE_.
 ## Execution
 To run the simulation, go to the project root and execute :
 ```
@@ -82,7 +83,7 @@ After that, a CLI appears and ask 2 parameters : Task assigning mode (Manuel/UUn
 - INFO : Print only router-to-router sending and Flit arriving
 
 ## Example
-The picture bellowed shows Flit sending and buffering into NoC under _wormhole-switching flow control. The simulator can reproduce the same schema.
+The picture bellowed shows Flit sending and buffering into NoC under _wormhole-switching_ flow control. The simulator can reproduce the same schema.
 
 ![Alt Text](https://upload.wikimedia.org/wikipedia/en/a/ae/Wormhole-Three-Flows-Interfering.gif)
 
