@@ -26,7 +26,7 @@ To execute the simulator, it needs a scenario. The latter is a Task Set of sever
 - Task deadline
 - Task period
 
-There is a choice in the way to write a scenario, either in a manuel or automatic way. The first is simply performed through editing **scenario.yml** file (included in the input package).
+There is a choice in the way to write a scenario, either in a manuel or automatic way. The first is simply performed through editing **scenario.yml** file (included in the _input_ package).
 
 Each YAML element describe a communication between two routers. An example of two tasks is given in bellow.
 ```yaml
@@ -58,7 +58,7 @@ scenario:
 The second way is to generate tasks by using [UUniFast-Discard](https://pdfs.semanticscholar.org/24a9/c3297bf08caeceb15777e85f0c3da5c07e26.pdf) Algorithm. The number of tasks must be given by the user in the simulator CLI.
 
 #### Network-on-Chip settings
-To perform a simulator, it required to set the NoC architecture in **config.yml** (also included in input package) as described in the bellow.
+To perform a simulator, it required to set the NoC architecture in **config.yml** (also included in _input_ package) as described in the bellow.
 ```yaml
 noc:
   dimension: 4 # NoC dimension : 4x4
@@ -120,6 +120,12 @@ INFO:Router (2,2):Time : (8) - Flit(2-FlitType.body) from Packet(0) from Message
 INFO:Router (1,2):Time : (8) - Flit(3-FlitType.tail) from Packet(0) from Message(0) -> sent through VC (1)(North)  to Router (2,2)
 INFO:Router (2,2):Time : (9) - Flit(3-FlitType.tail) from Packet(0) from Message(0) arrived to ProcessingEngine (2,2)
 ```
+
+A CSV file named **result.csv** (under _output_ package) contains the task instances latency (computed by the last packet arriving time minus the first packet sending time) and the analysis WCLA. the CSV file in structured as : 
+
+| i | WCLA | L_1 | L_2 | L_3 | L_4 |
+| --- | --- | --- | --- | --- | --- |
+| task index  | analysis  | inst 1 latency | inst 2 latency | inst 3 latency | inst 4 latency |
 
 ## Authors
 
