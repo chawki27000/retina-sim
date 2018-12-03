@@ -128,15 +128,30 @@ class Generation:
             self.messages.append(message)
 
             # Generate task conflict
-            self.generate_conflict_message(message, 4)
+            # self.generate_conflict_message(message, 4)
             self.counter += 1
 
-        for msg in self.messages:
-            print(msg)
         return self.messages
 
     # Utilization Factors
     def get_utilization_factors(self, nb_task):
+        """
+        The UUniFast algorithm was proposed by Bini for generating task
+        utilizations on uniprocessor architectures.
+
+        The UUniFast-Discard algorithm extends it to multiprocessor by
+        discarding task sets containing any utilization that exceeds 1.
+
+        This algorithm is easy and widely used. However, it suffers from very
+        long computation times when n is close to u. Stafford's algorithm is
+        faster.
+
+        Args:
+            - `nb_task`: The number of tasks in a task set.
+            - `nb_set`: Number of sets to generate.
+            - `u`: Total utilization of the task set.
+        Returns `nsets` of `n` task utilizations.
+        """
         unifast = Unifast(nb_task, 1, 2)
         return unifast.UUniFastDiscard()
 
@@ -172,10 +187,11 @@ class Generation:
             # assign a task in the router that's could change axe direction
             self.counter += 1
             if message.src.i != message.dest.i:
-                coord = Coordinate(message.src.i, message.dest.J)  # The pivot Router
+                coord = Coordinate(message.src.i, message.dest.j)  # The pivot Router
                 hop = EndToEndLatency.routing_distance(message.src, coord)
                 msg = Message(self.counter, message.period, message.size,
                               message.offset + hop, message.deadline, coord, message.dest)
+                self.messages.append(msg)
 
     def generate_random_coordinate(self):
 

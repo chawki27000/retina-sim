@@ -51,7 +51,11 @@ def main():
     generating = int(input('--> '))
 
     if generating == 1:
-        messages = generation.uunifast_generate(30)
+        nb_task = int(input('Number of task : '))
+        messages = generation.uunifast_generate(nb_task)
+        # message printing
+        for msg in messages:
+            print(msg)
     elif generating == 2:
         messages = generation.scenario('input/scenario.yml')
     else:
