@@ -43,7 +43,7 @@ class Simulation:
             #         print('%d -> %s' % (key, router))
 
             if events is not None and len(events) > 0:
-                current_event = events.pop(0)
+                current_event = events.pop()
 
                 if current_event.event_type == EventType.SEND_MESSAGE:
                     # get Event Entity
