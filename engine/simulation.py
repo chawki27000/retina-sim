@@ -71,7 +71,7 @@ class Simulation:
                     router = current_event.entity
 
                     # VC Election
-                    router.arbiter(CLOCK)
+                    router.rr_arbiter(CLOCK)
 
                 elif current_event.event_type == EventType.ARR_FLIT:
 

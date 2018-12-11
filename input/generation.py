@@ -1,7 +1,7 @@
 import math
 import random
 import sys
-
+import copy
 import yaml
 
 from analysis.end_to_end_latency import EndToEndLatency
@@ -155,44 +155,6 @@ class Generation:
         unifast = Unifast(nb_task, 1, 2)
         return unifast.UUniFastDiscard()
 
-    def generate_conflict_message(self, message, level):
-        # Level 1
-        if level >= 1:
-            if message.src.j - 1 > 0:  # If router has Left side
-                self.counter += 1
-                coord = Coordinate(message.src.i, message.src.j - 1)
-                msg = Message(self.counter, message.period, message.size,
-                              message.offset, message.deadline, coord, message.dest)
-                self.messages.append(msg)
-
-        # Level 2
-        if level >= 2:
-            if message.src.j + 1 < self._square_size:  # If router has Right side
-                self.counter += 1
-                coord = Coordinate(message.src.i, message.src.j + 1)
-                msg = Message(self.counter, message.period, message.size,
-                              message.offset, message.deadline, coord, message.dest)
-                self.messages.append(msg)
-
-        # Level 3
-        if level >= 3:
-            self.counter += 1
-            coord = self.generation_conflict_coordinate(message.src)  # In the same Router but different destination
-            msg = Message(self.counter, message.period, message.size,
-                          message.offset, message.deadline, message.src, coord)
-            self.messages.append(msg)
-
-        # Level 4
-        if level >= 4:
-            # assign a task in the router that's could change axe direction
-            self.counter += 1
-            if message.src.i != message.dest.i:
-                coord = Coordinate(message.src.i, message.dest.j)  # The pivot Router
-                hop = EndToEndLatency.routing_distance(message.src, coord)
-                msg = Message(self.counter, message.period, message.size,
-                              message.offset + hop, message.deadline, coord, message.dest)
-                self.messages.append(msg)
-
     def generate_random_coordinate(self):
 
         # source router coordinate
@@ -209,6 +171,10 @@ class Generation:
 
         return [Coordinate(src_i, src_j), Coordinate(dest_i, dest_j)]
 
+    """
+    Creation and Generation Conflict Task Part
+    """
+
     def generation_conflict_coordinate(self, src):
         dest_i = src.i
         dest_j = src.j
@@ -218,3 +184,75 @@ class Generation:
             dest_j = random.randint(0, self._square_size - 1)
 
         return Coordinate(dest_i, dest_j)
+
+    def conflict_task_generation(self, message, rate):
+        # extract all XY routing coordinate
+        coordinate_array = self.get_xy_path_coordinate(message)
+
+        # for each coordinate, check its link utilization rate
+        i = 0
+        while i < len(coordinate_array):
+            link_utilization = self.get_link_utilisation(coordinate_array[i])
+
+            # add a conflict task
+            if link_utilization < rate:
+                gap = rate - link_utilization
+                new_size = message.size + (message.period * gap)
+                new_message = Message(message.id,
+                                      message.period,
+                                      new_size,
+                                      message.offset,
+                                      message.deadline,
+                                      coordinate_array[i],
+                                      message.dest)
+
+                self.messages.append(new_message)
+                continue
+
+            else:
+                i += 1
+
+    def get_xy_path_coordinate(self, message):
+        src = copy.copy(message.src)
+        dest = message.dest
+
+        path_array = []
+
+        # put the first router
+        path_array.append(message.src)
+
+        while True:
+            # On X axe (Column)
+            # By the West
+            if src.j > dest.j:
+                src.j -= 1
+                path_array.append(Coordinate(src.i, src.j))
+            # By the East
+            elif src.j < dest.j:
+                src.j += 1
+                path_array.append(Coordinate(src.i, src.j))
+            # On Y axe (Row)
+            else:
+                if src.i > dest.i:
+                    src.i -= 1
+                    path_array.append(Coordinate(src.i, src.j))
+                # By the East
+                elif src.i < dest.i:
+                    src.i += 1
+                    path_array.append(Coordinate(src.i, src.j))
+                else:
+                    break
+
+        del path_array[-1]
+
+        return path_array
+
+    def get_link_utilisation(self, coordinate):
+        link_utilisation = 0
+
+        # Extract messages that has the same source coordinate
+        for msg in self.messages:
+            if msg.src == coordinate:
+                link_utilisation += msg.get_link_utilization()
+
+        return link_utilisation
