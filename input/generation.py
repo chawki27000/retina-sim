@@ -175,44 +175,6 @@ class Generation:
     Creation and Generation Conflict Task Part
     """
 
-    def generate_conflict_message(self, message, level):
-        # Level 1
-        if level >= 1:
-            if message.src.j - 1 > 0:  # If router has Left side
-                self.counter += 1
-                coord = Coordinate(message.src.i, message.src.j - 1)
-                msg = Message(self.counter, message.period, message.size,
-                              message.offset, message.deadline, coord, message.dest)
-                self.messages.append(msg)
-
-        # Level 2
-        if level >= 2:
-            if message.src.j + 1 < self._square_size:  # If router has Right side
-                self.counter += 1
-                coord = Coordinate(message.src.i, message.src.j + 1)
-                msg = Message(self.counter, message.period, message.size,
-                              message.offset, message.deadline, coord, message.dest)
-                self.messages.append(msg)
-
-        # Level 3
-        if level >= 3:
-            self.counter += 1
-            coord = self.generation_conflict_coordinate(message.src)  # In the same Router but different destination
-            msg = Message(self.counter, message.period, message.size,
-                          message.offset, message.deadline, message.src, coord)
-            self.messages.append(msg)
-
-        # Level 4
-        if level >= 4:
-            # assign a task in the router that's could change axe direction
-            self.counter += 1
-            if message.src.i != message.dest.i:
-                coord = Coordinate(message.src.i, message.dest.j)  # The pivot Router
-                hop = EndToEndLatency.routing_distance(message.src, coord)
-                msg = Message(self.counter, message.period, message.size,
-                              message.offset + hop, message.deadline, coord, message.dest)
-                self.messages.append(msg)
-
     def generation_conflict_coordinate(self, src):
         dest_i = src.i
         dest_j = src.j
@@ -256,6 +218,9 @@ class Generation:
 
         path_array = []
 
+        # put the first router
+        path_array.append(message.src)
+
         while True:
             # On X axe (Column)
             # By the West
@@ -277,6 +242,8 @@ class Generation:
                     path_array.append(Coordinate(src.i, src.j))
                 else:
                     break
+
+        del path_array[-1]
 
         return path_array
 
