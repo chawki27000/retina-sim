@@ -215,7 +215,7 @@ class Router:
                     and vc not in self.vcs_target_pe:
                 self.vcs_target_pe.append(vc)
 
-    def arbiter(self, time):
+    def rr_arbiter(self, time):
 
         for vc in self.inPE.vcs:
             self.vc_target_outport(vc)
@@ -279,6 +279,79 @@ class Router:
             # event push
             event = Event(EventType.ARR_FLIT, {'router': self, 'vc': vc}, time)
             EVENT_LIST.push(event)
+
+    def priority_arbiter(self, time):
+        for vc in self.inPE.vcs:
+            self.vc_target_outport(vc)
+        # Checking North VC
+        for vc in self.inNorth.vcs:
+            self.vc_target_outport(vc)
+        # Checking South VC
+        for vc in self.inSouth.vcs:
+            self.vc_target_outport(vc)
+        # Checking East VC
+        for vc in self.inEast.vcs:
+            self.vc_target_outport(vc)
+        # Checking West VC
+        for vc in self.inWest.vcs:
+            self.vc_target_outport(vc)
+
+        # VC targeting -> North
+        if len(self.vcs_target_north) > 0:
+            vc = self.get_most_prioritized_vc(self.vcs_target_north)
+            self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
+            # event push
+            event = Event(EventType.SEND_FLIT, {'router': self,
+                                                'vc': vc,
+                                                'outport': self.outNorth}, time)
+            EVENT_LIST.push(event)
+
+        # VC targeting -> South
+        if len(self.vcs_target_south) > 0:
+            vc = self.get_most_prioritized_vc(self.vcs_target_south)
+            self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
+            # event push
+            event = Event(EventType.SEND_FLIT, {'router': self,
+                                                'vc': vc,
+                                                'outport': self.outSouth}, time)
+            EVENT_LIST.push(event)
+
+        # VC targeting -> East
+        if len(self.vcs_target_east) > 0:
+            vc = self.get_most_prioritized_vc(self.vcs_target_east)
+            self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
+            # event push
+            event = Event(EventType.SEND_FLIT, {'router': self,
+                                                'vc': vc,
+                                                'outport': self.outEast}, time)
+            EVENT_LIST.push(event)
+
+        # VC targeting -> West
+        if len(self.vcs_target_west) > 0:
+            vc = self.get_most_prioritized_vc(self.vcs_target_west)
+            self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
+            # event push
+            event = Event(EventType.SEND_FLIT, {'router': self,
+                                                'vc': vc,
+                                                'outport': self.outWest}, time)
+            EVENT_LIST.push(event)
+
+        # VC targeting -> PE
+        if len(self.vcs_target_pe) > 0:
+            vc = self.get_most_prioritized_vc(self.vcs_target_pe)
+            self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
+            # event push
+            event = Event(EventType.ARR_FLIT, {'router': self, 'vc': vc}, time)
+            EVENT_LIST.push(event)
+
+    def get_most_prioritized_vc(self, vcs_target):
+        priority = self.inNorth.nbvc - 1  # lowest priority
+
+        for i in range(len(vcs_target)):
+            if vcs_target[i].id < priority:
+                priority = i
+
+        return vcs_target[priority]
 
     def __str__(self):
         return 'Router (%d,%d)' % (self.coordinate.i, self.coordinate.j)
