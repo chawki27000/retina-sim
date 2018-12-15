@@ -2,7 +2,11 @@
 Real-Time Network-on-chip Analysis and Simulation
 
 ### Introduction
-The purpose of ReTiNAS is to simulate real-time communicating tasks into On-chip Networks with a specific configuration.It's a discrete event-based simulation with cycle-accurate time handling.
+
+ReTiNAS is a discrete event-based simulator with cycle-accurate time
+handling. The purpose of ReTiNAS is to simulate real-time tasks
+executing on Manycore on-chip Networks, and communicating with each
+other.
 
 ## Installation
 The following packages are required to execute the program :
@@ -18,6 +22,7 @@ $ pip install -r requirement.txt
 
 ## Configuration
 #### Simulator scenario
+
 To execute the simulator, it needs a scenario. The latter is a Task Set of several routers communication that's contain :
 - Router source coordinate
 - Router destination coordinate
@@ -26,9 +31,11 @@ To execute the simulator, it needs a scenario. The latter is a Task Set of sever
 - Task deadline
 - Task period
 
-There is a choice in the way to write a scenario, either in a manuel or automatic way. The first is simply performed through editing **scenario.yml** file (included in the _input_ package).
+There is a choice in the way to write a scenario, either in a manual
+or automatic way. The first is simply performed through editing the
+**scenario.yml** file (included in the _input_ package).
 
-Each YAML element describe a communication between two routers. An example of two tasks is given in bellow.
+Each YAML element describe a communication between two routers. An example of two tasks is given below.
 ```yaml
 scenario:
     # Task 1
@@ -55,10 +62,18 @@ scenario:
       deadline: 60
       period: 100
 ```
-The second way is to generate tasks by using [UUniFast-Discard](https://pdfs.semanticscholar.org/24a9/c3297bf08caeceb15777e85f0c3da5c07e26.pdf) Algorithm. The number of tasks must be given by the user in the simulator CLI.
+	  
+The second way is to generate tasks by using
+[UUniFast-Discard](https://pdfs.semanticscholar.org/24a9/c3297bf08caeceb15777e85f0c3da5c07e26.pdf)
+Algorithm. The number of tasks must be given by the user in the
+simulator CLI.
 
 #### Network-on-Chip settings
-To perform a simulator, it required to set the NoC architecture in **config.yml** (also included in _input_ package) as described in the bellow.
+
+To perform a simulation, you must describe the NoC architecture in
+**config.yml** (also included in _input_ package) as described in the
+below.
+
 ```yaml
 noc:
   dimension: 4 # NoC dimension : 4x4
@@ -72,18 +87,29 @@ quantum: # VCs Quantum configuration (according to numberOfVC)
   4: 4
 ```
 
-There are another parameters that's can be set, the packet and flit default size in **structure.py**. They can be changed by modifying the two constants _FLIT_DEFAULT_SIZE_ and _PACKET_DEFAULT_SIZE_.
+Other parameters are the packet and flit default size in
+**structure.py**. They can be changed by modifying the two constants
+_FLIT_DEFAULT_SIZE_ and _PACKET_DEFAULT_SIZE_.
+
+
 ## Execution
+
 To run the simulation, go to the project root and execute :
+
 ```
 $ python main.py
 ```
-After that, a CLI appears and ask 2 parameters : Task assigning mode (Manuel/UUniFast) and Simulation output mode, that's separated as follow :
+
+After that, a CLI appears and asks 2 parameters : Task assigning mode (Manuel/UUniFast) and Simulation output mode, that can be one between:
 - DEBUG : Print all NoC actions (PE sending, Router sending, VC allocation and releasing) and alternative cases (full buffer, no idle VC)
 - INFO : Print only router-to-router sending and Flit arriving
 
+
 ## Example
-The picture bellowed shows Flit sending and buffering into NoC under _wormhole-switching_ flow control. The simulator can reproduce the same schema.
+
+The picture bellowed shows Flit sending and buffering into NoC under
+_wormhole-switching_ flow control. The simulator can reproduce the
+same schema.
 
 ![Alt Text](https://upload.wikimedia.org/wikipedia/en/a/ae/Wormhole-Three-Flows-Interfering.gif)
 
@@ -91,10 +117,13 @@ The following example is composed of 2 tasks that contain 2 communications :
 - Task 1 : Router (1, 1) -> Router (2, 2)
 - Task 2 : Router (0, 2) -> Router (2, 2)
 
-Into NoC with : 4x4 2D-Mesh topology, 4 VC per InPort, 4 Flit buffer and unified Quantum = 1. We suppose the communication between PE and its router is instantaneous (No time taken into account). 
+Into NoC with : 4x4 2D-Mesh topology, 4 VC per InPort, 4 Flit buffer
+and unified Quantum = 1. We suppose the communication between PE and
+its router is instantaneous (No time taken into account).
 
 
 The following results are the INFO output
+
 ```
 INFO:Router (1,1):Time : (0) - Flit(0-FlitType.head) from Packet(0) from Message(0) -> sent through VC (0)(West)  to Router (1,2)
 INFO:Router (0,2):Time : (0) - Flit(0-FlitType.head) from Packet(0) from Message(1) -> sent through VC (0)(North)  to Router (1,2)
@@ -122,7 +151,10 @@ INFO:Router (1,2):Time : (8) - Flit(3-FlitType.tail) from Packet(0) from Message
 INFO:Router (2,2):Time : (9) - Flit(3-FlitType.tail) from Packet(0) from Message(0) arrived to ProcessingEngine (2,2)
 ```
 
-A CSV file named **result.csv** (under _output_ package) contains the task instances latency (computed by the last packet arriving time minus the first packet sending time) and the analysis WCLA. the CSV file in structured as : 
+A CSV file named **result.csv** (under _output_ package) contains the
+task instances latency (computed by the last packet arriving time
+minus the first packet sending time) and the analysis WCLA. the CSV
+file in structured as :
 
 | i | WCLA | L_1 | L_2 | L_3 | L_4 |
 | --- | --- | --- | --- | --- | --- |
