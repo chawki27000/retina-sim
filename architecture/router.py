@@ -11,7 +11,7 @@ class Router:
         self.id = id
         self.coordinate = coordinate
         self.proc_engine = proc_engine
-        self.logger = logging.getLogger(str(self))
+        self.logger = logging.getLogger(' ')
 
         # Process Attribute
         self.vcs_dictionary = NodeArray()
@@ -81,8 +81,7 @@ class Router:
 
                 # send flit
                 vc_allotted.enqueue(flit)
-                self.logger.info('Time : (%d) - %s -> sent through %s to %s' % (time, flit,
-                                                                                vc_allotted, vc_allotted.router))
+                self.logger.info('(%d) : %s - %s -> %s -> %s' % (time, flit, self, vc_allotted, vc_allotted.router))
                 vc.credit_out()
                 # registering VC allotted in dictionary
                 self.vcs_dictionary.add(Node(vc, vc_allotted))
@@ -123,8 +122,7 @@ class Router:
                 # Next routing
                 event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
                 EVENT_LIST.push(event)
-                self.logger.info('Time : (%d) - %s -> sent through %s to %s' % (time, flit,
-                                                                                vc_allotted, vc_allotted.router))
+                self.logger.info('(%d) : %s - %s -> %s -> %s' % (time, flit, self, vc_allotted, vc_allotted.router))
                 vc.credit_out()
 
         # if is a Tail Flit
@@ -147,8 +145,7 @@ class Router:
                 self.logger.debug('Time : (%d) - %s was not sent - No Place in VC (%s)' % (time, flit, vc_allotted))
 
             else:
-                self.logger.info('Time : (%d) - %s -> sent through %s to %s' % (time, flit,
-                                                                                vc_allotted, vc_allotted.router))
+                self.logger.info('(%d) : %s - %s -> %s -> %s' % (time, flit, self, vc_allotted, vc_allotted.router))
                 # Next routing
                 event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
                 EVENT_LIST.push(event)
@@ -191,7 +188,7 @@ class Router:
         # Flit store
         self.proc_engine.flit_receiving(flit)
 
-        self.logger.info('Time : (%d) - %s arrived to %s' % (time, flit, self.proc_engine))
+        self.logger.info('(%d) : %s - %s -> %s' % (time, flit, self, self.proc_engine))
 
     def vc_target_outport(self, vc):
         if len(vc.flits) > 0:
