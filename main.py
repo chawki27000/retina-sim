@@ -1,5 +1,6 @@
 import logging
 import sys
+import getopt
 
 from architecture.noc import NoC
 from engine.simulation import Simulation
@@ -19,19 +20,30 @@ def main():
 
     noc = NoC('Network-On-Chip', square_size, nbvc, vc_size, vc_quantum)
 
-    # Log Configuration
-    print('Please enter the simulation monitoring mode')
-    print('1 - DEBUG')
-    print('2 - INFO')
-    mode = int(input('--> '))
-
-    if mode == 1:
-        level = logging.DEBUG
-    elif mode == 2:
-        level = logging.INFO
-    else:
-        print('wrong parameters')
+    # CLI Argument parsing
+    level = 0
+    messages = 0
+    try:
+        options, args = getopt.getopt(sys.argv[1:], 'dimu:')
+    except getopt.error as msg:
+        sys.stdout = sys.stderr
+        print(msg)
+        print("""usage: %s [-d|-i] [-u|-m|-]
+            -d, -i: DEBUG / INFO
+            -u, -m : UUniFast val / Manual """ % sys.argv[0])
         sys.exit()
+
+    print('OPTIONS   :', options)
+
+    for opt, value in options:
+        if opt in '-d':
+            level = logging.DEBUG
+        if opt in '-i':
+            level = logging.INFO
+        if opt in '-m':
+            messages = generation.scenario('input/scenario.yml')
+        if opt in '-u':
+            messages = generation.uunifast_generate(int(value))
 
     logging.basicConfig(level=level)
 
@@ -43,24 +55,6 @@ def main():
     logging.info('\tVC Buffer size : %d' % vc_size)
     logging.info('\tVC Quantum setting : %s' % vc_quantum)
     logging.info('-------------------------------')
-
-    # Generation mode
-    print('Please enter the messages generation mode')
-    print('1 - UUniFast')
-    print('2 - Manuel')
-    generating = int(input('--> '))
-
-    if generating == 1:
-        nb_task = int(input('Number of task : '))
-        messages = generation.uunifast_generate(nb_task)
-        # message printing
-        for msg in messages:
-            print(msg)
-    elif generating == 2:
-        messages = generation.scenario('input/scenario.yml')
-    else:
-        print('wrong parameters')
-        sys.exit()
 
     # Simulator Settings
     simulation = Simulation(noc, generation.hyperperiod())
