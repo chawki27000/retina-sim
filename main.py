@@ -4,7 +4,7 @@ import getopt
 
 from architecture.noc import NoC
 from engine.simulation import Simulation
-from input.generation import Generation
+from gen.generation import Generation
 from output.csv_writer import CSVWriter
 
 
@@ -32,8 +32,6 @@ def main():
             -d, -i: DEBUG / INFO
             -u, -m : UUniFast val / Manual """ % sys.argv[0])
         sys.exit()
-
-    print('OPTIONS   :', options)
 
     for opt, value in options:
         if opt in '-d':

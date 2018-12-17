@@ -1,13 +1,9 @@
 import unittest
 
 from architecture.noc import NoC
-from architecture.virtual_channel import VirtualChannel
 from communication.routing import Coordinate
-from communication.structure import Packet, Message, FlitType, NodeArray, Node
-from engine.event import Event
-from engine.event_list import EventList, EventType
-from engine.simulation import Simulation
-from input.generation import Generation
+from communication.structure import Packet, Message, FlitType
+from gen.generation import Generation
 
 
 class TestPacket(unittest.TestCase):

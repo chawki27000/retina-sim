@@ -4,10 +4,9 @@ import sys
 import copy
 import yaml
 
-from analysis.end_to_end_latency import EndToEndLatency
 from communication.routing import Coordinate
 from communication.structure import Message
-from input.unifast import Unifast
+from gen.unifast import Unifast
 
 
 class Generation:
