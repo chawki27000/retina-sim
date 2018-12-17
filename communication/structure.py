@@ -159,3 +159,14 @@ class NodeArray:
             if node.vc_src == vc_src:
                 return node.vc_target
         return None
+
+
+#############################################################
+class Link:
+    def __init__(self, trans, receiv):
+        self.trans = trans
+        self.receiv = receiv
+        self.utilization_rate = 0
+
+    def __str__(self):
+        return '%s -> %s' % (self.trans, self.receiv)

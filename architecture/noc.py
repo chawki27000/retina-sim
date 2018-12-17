@@ -1,4 +1,4 @@
-from communication.structure import Message
+from communication.structure import Message, Link
 from .processing_engine import ProcessingEngine
 from .router import Router
 from .inport import InPort
@@ -14,6 +14,7 @@ class NoC:
         self.nbvc = nbvc
         self.vc_size = vc_size
         self.vc_quantum = vc_quantum
+        self.link_array = []
 
         # Routers Initialisation
         count = 1
@@ -107,14 +108,48 @@ class NoC:
             else:
                 temporary_list[i].outWest.inport_linking(None)
 
-    def process(self):
-        src = Coordinate(0, 0)
-        dest = Coordinate(0, 1)
-        message = Message(200, 256, src, dest)
-        # self.env.process(self.router_matrix[0][0].proc_engine.process(self.env, message))
-        #
-        # self.env.process(self.router_matrix[0][0].process(self.env))
-        # self.env.process(self.router_matrix[0][1].process(self.env))
+    def link_array_filling(self):
+        # Temporary router list
+        temporary_list = []
+
+        # Matrix Exploration
+        for i in range(self.square_size):
+            for j in range(self.square_size):
+                temporary_list.append(self.router_matrix[i][j])
+
+        # Router Linking
+        for i in range(len(temporary_list)):
+            # Near router IDs
+            id = i
+            idUp = id - self.square_size
+            idRight = id + 1
+            idLeft = id - 1
+            idDown = id + self.square_size
+
+            # Up Link
+            if idUp >= 0:
+                temporary_router = temporary_list[idUp]
+                # Link Array filling
+                self.link_array.append(Link(temporary_list[i].coordinate,
+                                            temporary_router.coordinate))
+            # Down Link
+            if idDown < self.square_size * self.square_size:
+                temporary_router = temporary_list[idDown]
+                # Link Array filling
+                self.link_array.append(Link(temporary_list[i].coordinate,
+                                            temporary_router.coordinate))
+            # Right Link
+            if idRight % self.square_size != 0:
+                temporary_router = temporary_list[idRight]
+                # Link Array filling
+                self.link_array.append(Link(temporary_list[i].coordinate,
+                                            temporary_router.coordinate))
+            # Left Link
+            if id % self.square_size != 0:
+                temporary_router = temporary_list[idLeft]
+                # Link Array filling
+                self.link_array.append(Link(temporary_list[i].coordinate,
+                                            temporary_router.coordinate))
 
     def __str__(self):
         string = ''
