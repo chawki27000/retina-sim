@@ -184,3 +184,13 @@ class LinkArray:
 
     def size(self):
         return len(self.array)
+
+    def check_utilization_rate(self, val, rate, error):
+        for link in self.array:
+            if link.utilization_rate + val > rate + error:
+                return False
+        return True
+
+    def add_utilization(self, rate):
+        for link in self.array:
+            link.add_utilization(rate)

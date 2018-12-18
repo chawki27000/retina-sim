@@ -48,25 +48,30 @@ class Generation:
                 data = yaml.load(stream)
 
                 # Messages
-                messages = data['scenario']
-                count = 0
-                for m in messages:
-                    src = m['src']
-                    dest = m['dest']
-                    size = m['size']
-                    offset = m['offset']
-                    deadline = m['deadline']
-                    period = m['period']
+                if 'scenario' in data:
+                    messages = data['scenario']
+                    count = 0
+                    for m in messages:
+                        src = m['src']
+                        dest = m['dest']
+                        size = m['size']
+                        offset = m['offset']
+                        deadline = m['deadline']
+                        period = m['period']
 
-                    self.messages.append(Message(count,
-                                                 period,
-                                                 size,
-                                                 offset,
-                                                 deadline,
-                                                 Coordinate(src['i'], src['j']),
-                                                 Coordinate(dest['i'], dest['j']),
-                                                 ))
-                    count += 1
+                        self.messages.append(Message(count,
+                                                     period,
+                                                     size,
+                                                     offset,
+                                                     deadline,
+                                                     Coordinate(src['i'], src['j']),
+                                                     Coordinate(dest['i'], dest['j']),
+                                                     ))
+                        count += 1
+
+                # UuniFast generation
+                if 'task' in data:
+                    self.messages = self.uunifast_generate(data['task'])
 
                 return self.messages
 
@@ -236,20 +241,15 @@ class Generation:
         path1 = self.get_xy_path_coordinate(message)
 
         # generate random task with random size
-        random_task = self.generate_random_communicating_task(message.size, message.offset)
-        path2 = self.get_xy_path_coordinate(random_task)
+        message_conflict = self.generate_random_communicating_task(message.size, message.offset)
+        path2 = self.get_xy_path_coordinate(message_conflict)
 
         # if the two tasks share at least one physical link (overlap)
         overlap = self.task_overlap(path1, path2)
         if not overlap:
-            pass  # OUT
-
-    def task_overlap(self, p1, p2):
-        for m in p1:
-            for n in p2:
-                if self.is_links_equal(m, n):
-                    return True
-        return False
+            pass  # Discard
+        # else
+        path1.append()
 
     def get_xy_path_coordinate(self, message):
         src = copy.copy(message.src)
@@ -293,6 +293,13 @@ class Generation:
             return True
         else:
             return False
+
+    def task_overlap(self, p1, p2):
+        for m in p1:
+            for n in p2:
+                if self.is_links_equal(m, n):
+                    return True
+        return False
 
     def get_link_utilisation(self, link):
         return link.utilization_rate
