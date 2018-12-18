@@ -20,6 +20,8 @@ def main():
 
     noc = NoC('Network-On-Chip', square_size, nbvc, vc_size, vc_quantum)
 
+    generation.set_noc(noc)
+
     # CLI Argument parsing
     level = 0
     messages = 0

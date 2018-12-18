@@ -5,7 +5,7 @@ import copy
 import yaml
 
 from communication.routing import Coordinate
-from communication.structure import Message
+from communication.structure import Message, Link
 from gen.unifast import Unifast
 
 
@@ -16,6 +16,9 @@ class Generation:
         self.offset_array = [0, 10, 15, 30, 60, 80]
         self.messages = []
         self.counter = 0
+
+    def set_noc(self, noc):
+        self.noc = noc
 
     def config(self, link):
         with open(link, 'r') as stream:
@@ -174,6 +177,23 @@ class Generation:
     Creation and Generation Conflict Task Part
     """
 
+    def generate_random_communicating_task(self, max_size, offset):
+        coord = self.generate_random_coordinate()
+        src = coord[0]
+        dest = coord[1]
+        size = random.randint(1, max_size)
+        period = self.period_array[random.randint(0, len(self.period_array) - 1)]
+        lower_bound = int(0.7 * period)
+        deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
+
+        message = Message(self.counter, period, size, offset, deadline, src, dest)
+        self.counter += 1
+        return message
+
+    def check_path_utilization_rate(self, path, rate, error):
+        for i in range(len(path) - 1):
+            pass
+
     def generation_conflict_coordinate(self, src):
         dest_i = src.i
         dest_j = src.j
@@ -211,14 +231,33 @@ class Generation:
             else:
                 i += 1
 
+    def conflict_task_generation_discard(self, message, rate, error_rate):
+        # extract message XY routing coordinate
+        path1 = self.get_xy_path_coordinate(message)
+
+        # generate random task with random size
+        random_task = self.generate_random_communicating_task(message.size, message.offset)
+        path2 = self.get_xy_path_coordinate(random_task)
+
+        # if the two tasks share at least one physical link (overlap)
+        overlap = self.task_overlap(path1, path2)
+        if not overlap:
+            pass  # OUT
+
+    def task_overlap(self, p1, p2):
+        for m in p1:
+            for n in p2:
+                if self.is_links_equal(m, n):
+                    return True
+        return False
+
     def get_xy_path_coordinate(self, message):
         src = copy.copy(message.src)
         dest = message.dest
 
-        path_array = []
-
         # put the first router
-        path_array.append(message.src)
+        link_array = []
+        path_array = [message.src]
 
         while True:
             # On X axe (Column)
@@ -242,16 +281,18 @@ class Generation:
                 else:
                     break
 
-        del path_array[-1]
+        # fill path
+        for i in range(len(path_array) - 1):
+            link_array.append(Link(path_array[i], path_array[i + 1]))
 
-        return path_array
+        return link_array
 
-    def get_link_utilisation(self, coordinate):
-        link_utilisation = 0
+    def is_links_equal(self, l1, l2):
+        if l1.trans.i == l2.trans.i and l1.receiv.i == l2.receiv.i \
+                and l1.trans.j == l2.trans.j and l1.receiv.j == l2.receiv.j:
+            return True
+        else:
+            return False
 
-        # Extract messages that has the same source coordinate
-        for msg in self.messages:
-            if msg.src == coordinate:
-                link_utilisation += msg.get_link_utilization()
-
-        return link_utilisation
+    def get_link_utilisation(self, link):
+        return link.utilization_rate

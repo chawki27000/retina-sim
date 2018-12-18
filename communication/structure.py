@@ -168,5 +168,19 @@ class Link:
         self.receiv = receiv
         self.utilization_rate = 0
 
+    def add_utilization(self, rate):
+        self.utilization_rate += rate
+
     def __str__(self):
         return '%s -> %s' % (self.trans, self.receiv)
+
+
+class LinkArray:
+    def __init__(self):
+        self.array = []
+
+    def add_link(self, link):
+        self.array.append(link)
+
+    def size(self):
+        return len(self.array)

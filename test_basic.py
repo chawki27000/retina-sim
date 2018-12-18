@@ -3,10 +3,7 @@ import unittest
 from architecture.noc import NoC
 from architecture.virtual_channel import VirtualChannel
 from communication.routing import Coordinate, Direction
-from communication.structure import Packet, Message, FlitType, NodeArray, Node
-from engine.event import Event
-from engine.event_list import EventType, EventList
-from engine.simulation import Simulation
+from communication.structure import Packet, Message, FlitType, NodeArray, Node, Link
 from gen.generation import Generation
 
 
@@ -81,7 +78,7 @@ class TestLink(unittest.TestCase):
 
     def test_links_array(self):
         self.noc.link_array_filling()
-        self.assertEqual(len(self.noc.link_array), 24)
+        self.assertEqual(self.noc.link_array.size(), 24)
 
 
 class TestRouter(unittest.TestCase):
@@ -244,19 +241,31 @@ class TestConflict(unittest.TestCase):
         self.generation = Generation()
 
     def test_xy_path_coordinate(self):
-        coordinate_arr = self.generation.get_xy_path_coordinate(self.message)
+        link_array = self.generation.get_xy_path_coordinate(self.message)
 
-        self.generation.messages.append(self.message)
+        self.assertEqual(len(link_array), 4)
+        self.assertEqual(link_array[3].trans.i, 1)
+        self.assertEqual(link_array[3].trans.j, 2)
+        self.assertEqual(link_array[0].receiv.i, 0)
+        self.assertEqual(link_array[0].receiv.j, 1)
 
-        self.assertEqual(len(coordinate_arr), 4)
+    def test_is_links_equal(self):
+        l1 = Link(Coordinate(0, 0), Coordinate(1, 1))
+        l2 = Link(Coordinate(0, 0), Coordinate(1, 1))
+        l3 = Link(Coordinate(0, 0), Coordinate(0, 1))
 
-        link_utilization = self.generation.get_link_utilisation(self.src)
+        self.assertTrue(self.generation.is_links_equal(l1, l2))
+        self.assertFalse(self.generation.is_links_equal(l1, l3))
 
-        self.assertEqual(link_utilization, self.message.get_link_utilization())
+    def test_task_overlap(self):
+        message2 = Message(1, 12, 256, 0, 0, Coordinate(1, 1), Coordinate(2, 2))
+        message3 = Message(1, 12, 256, 0, 0, Coordinate(2, 0), Coordinate(2, 1))
+        p1 = self.generation.get_xy_path_coordinate(self.message)
+        p2 = self.generation.get_xy_path_coordinate(message2)
+        p3 = self.generation.get_xy_path_coordinate(message3)
 
-        self.generation.conflict_task_generation(self.message, 50)
-
-        self.assertEqual(5, len(self.generation.messages))
+        self.assertTrue(self.generation.task_overlap(p1, p2))
+        self.assertFalse(self.generation.task_overlap(p1, p3))
 
 
 if __name__ == '__main__':
