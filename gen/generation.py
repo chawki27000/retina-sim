@@ -29,6 +29,7 @@ class Generation:
                 self._square_size = data['noc']['dimension']
                 self._nbvc = data['noc']['numberOfVC']
                 self._vc_size = data['noc']['VCBufferSize']
+                self._arbitration = data['noc']['arbitration']
 
                 # VC Quatum
                 quantum = data['quantum']
@@ -94,6 +95,9 @@ class Generation:
 
     def vc_quantum(self):
         return self._quantum_tab
+
+    def arbitration(self):
+        return self._arbitration
 
     # HyperPeriod Computation
     def gcd(self, a, b):

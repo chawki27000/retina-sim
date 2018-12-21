@@ -46,6 +46,7 @@ def main():
         nbvc = generation.nbvc()
         vc_size = generation.vc_size()
         vc_quantum = generation.vc_quantum()
+        arbitration = generation.arbitration()
 
         noc = NoC('Network-On-Chip', square_size, nbvc, vc_size, vc_quantum)
 
@@ -60,6 +61,7 @@ def main():
         logging.info('\tVC Number per Input : %d' % nbvc)
         logging.info('\tVC Buffer size : %d' % vc_size)
         logging.info('\tVC Quantum setting : %s' % vc_quantum)
+        logging.info('\tArbitration Policy : %s' % arbitration)
         logging.info('-------------------------------')
 
         # Simulator Settings
@@ -70,7 +72,7 @@ def main():
 
         # Starting Simulation
         logging.info('### Simulation --> START - hyperperiod : %d ###' % generation.hyperperiod())
-        simulation.simulate()
+        simulation.simulate(arbitration)
         logging.info('### Simulation --> END ###')
 
         # printing

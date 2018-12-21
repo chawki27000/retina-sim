@@ -2,6 +2,7 @@ noc:
   dimension: 4
   numberOfVC: 4
   VCBufferSize: 4
+  arbitration: 'RR' # RR / Priority
 
 quantum:
   1: 1

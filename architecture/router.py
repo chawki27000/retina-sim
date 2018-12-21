@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from communication.structure import FlitType, NodeArray, Node
 from engine.event import Event
@@ -190,6 +191,10 @@ class Router:
 
         self.logger.info('(%d) : %s - %s -> %s' % (time, flit, self, self.proc_engine))
 
+    """
+    Fixed Round-Robin Arbitration
+    """
+
     def vc_target_outport(self, vc):
         if len(vc.flits) > 0:
             if self.route_computation(vc.flits[0]) == self.outNorth \
@@ -277,6 +282,10 @@ class Router:
             event = Event(EventType.ARR_FLIT, {'router': self, 'vc': vc}, time)
             EVENT_LIST.push(event)
 
+    """
+    Priority-based Arbitration
+    """
+
     def priority_arbiter(self, time):
         for vc in self.inPE.vcs:
             self.vc_target_outport(vc)
@@ -342,12 +351,11 @@ class Router:
             EVENT_LIST.push(event)
 
     def get_most_prioritized_vc(self, vcs_target):
-        priority = self.inNorth.nbvc - 1  # lowest priority
+        priority = sys.maxsize  # lowest priority
 
         for i in range(len(vcs_target)):
             if vcs_target[i].id < priority:
                 priority = i
-
         return vcs_target[priority]
 
     def __str__(self):

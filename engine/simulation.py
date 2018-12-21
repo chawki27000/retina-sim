@@ -27,7 +27,7 @@ class Simulation:
                 self._message_instance_tab.append(message_instance)
                 instance_count += 1
 
-    def simulate(self):
+    def simulate(self, arbitration):
         global CLOCK
         while not EVENT_LIST.isEmpty() and CLOCK < self.hyperperiod:
 
@@ -71,7 +71,10 @@ class Simulation:
                     router = current_event.entity
 
                     # VC Election
-                    router.rr_arbiter(CLOCK)
+                    if arbitration == 'RR':
+                        router.rr_arbiter(CLOCK)
+                    elif arbitration == 'Priority':
+                        router.priority_arbiter(CLOCK)
 
                 elif current_event.event_type == EventType.ARR_FLIT:
 
