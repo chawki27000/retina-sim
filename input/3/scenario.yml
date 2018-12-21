@@ -1,2 +1,3 @@
-scenario:
-    task: 10
+task: 10
+method: 'UuniFast'
+load: 0.7

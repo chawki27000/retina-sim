@@ -69,9 +69,14 @@ class Generation:
                                                      ))
                         count += 1
 
-                # UuniFast generation
-                if 'task' in data:
-                    self.messages = self.uunifast_generate(data['task'])
+                # Automatic generation
+                elif 'task' in data:
+                    nb_task = data['task']
+                    method = data['method']
+                    load = data['load']
+
+                    if method == 'UuniFast':
+                        self.messages = self.uunifast_generate(nb_task, load)
 
                 return self.messages
 
@@ -113,7 +118,7 @@ class Generation:
         return hyperperiod
 
     # Generation : Unifast
-    def uunifast_generate(self, nb_task):
+    def uunifast_generate(self, nb_task, load):
         self._utilization_array = self.get_utilization_factors(nb_task)
 
         self.counter = 0
@@ -124,7 +129,7 @@ class Generation:
             period = self.period_array[random.randint(0, len(self.period_array) - 1)]
             offset = self.offset_array[random.randint(0, len(self.offset_array) - 1)]
             size = int(math.ceil(period * utilization_factor))
-            lower_bound = int(0.7 * period)
+            lower_bound = int(load * period)
             deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
 
             # Generate messages

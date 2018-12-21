@@ -4,7 +4,7 @@ import getopt
 import os
 
 from architecture.noc import NoC
-from engine.simulation import Simulation, CLOCK
+from engine.simulation import Simulation
 from gen.generation import Generation
 from gen.csv_writer import CSVWriter
 
@@ -33,6 +33,8 @@ def main():
 
     # file parsing loop
     for file in input_files:
+        Simulation.CLOCK = 0
+
         # NoC Settings
         generation = Generation()
         generation.config('input/' + file + '/config.yml')
@@ -76,11 +78,8 @@ def main():
         csv = CSVWriter(messages_i)
         csv.generate_csv('input/' + file + '/result.csv')
 
-        del simulation
-        del noc
-        del generation
-        del messages
-        CLOCK = 0
+        simulation.reset_clock()
+
 
 if __name__ == "__main__":
     main()

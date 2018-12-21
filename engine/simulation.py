@@ -85,5 +85,9 @@ class Simulation:
             else:
                 CLOCK += 1
 
+    def reset_clock(self):
+        global CLOCK
+        CLOCK = 0
+
     def get_message_instance_tab(self):
         return self._message_instance_tab
