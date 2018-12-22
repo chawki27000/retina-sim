@@ -5,7 +5,7 @@ import copy
 import yaml
 
 from communication.routing import Coordinate
-from communication.structure import Message, Link
+from communication.structure import Message, Link, LinkArray
 from gen.unifast import Unifast
 
 
@@ -204,10 +204,6 @@ class Generation:
         self.counter += 1
         return message
 
-    def check_path_utilization_rate(self, path, rate, error):
-        for i in range(len(path) - 1):
-            pass
-
     def generation_conflict_coordinate(self, src):
         dest_i = src.i
         dest_j = src.j
@@ -218,54 +214,37 @@ class Generation:
 
         return Coordinate(dest_i, dest_j)
 
-    def conflict_task_generation(self, message, rate):
-        # extract all XY routing coordinate
-        coordinate_array = self.get_xy_path_coordinate(message)
-
-        # for each coordinate, check its link utilization rate
-        i = 0
-        while i < len(coordinate_array):
-            link_utilization = self.get_link_utilisation(coordinate_array[i])
-
-            # add a conflict task
-            if link_utilization < rate:
-                gap = rate - link_utilization
-                new_size = message.size + (message.period * gap)
-                new_message = Message(message.id,
-                                      message.period,
-                                      new_size,
-                                      message.offset,
-                                      message.deadline,
-                                      coordinate_array[i],
-                                      message.dest)
-
-                self.messages.append(new_message)
-                continue
-
-            else:
-                i += 1
-
     def conflict_task_generation_discard(self, message, rate, error_rate):
         # extract message XY routing coordinate
         path1 = self.get_xy_path_coordinate(message)
 
-        # generate random task with random size
-        message_conflict = self.generate_random_communicating_task(message.size, message.offset)
-        path2 = self.get_xy_path_coordinate(message_conflict)
+        # while loop to check if the whole path respects rate
+        while self.check_rate_equal_path(path1, rate, error_rate):
 
-        # if the two tasks share at least one physical link (overlap)
-        overlap = self.task_overlap(path1, path2)
-        if not overlap:
-            pass  # Discard
-        # else
-        path1.append()
+            # generate random task with random size
+            message_conflict = self.generate_random_communicating_task(message.size, message.offset)
+            path2 = self.get_xy_path_coordinate(message_conflict)
+
+            # if the two tasks share at least one physical link (overlap)
+            overlap = self.task_overlap(path1, path2)
+            if not overlap:
+                continue  # Discard
+
+            conflict_lu = message_conflict.get_link_utilization()
+
+            # check if generated communication doesn't exceed the rate + error
+            if path2.check_utilization_rate(conflict_lu, rate, error_rate):
+                continue  # Discard
+
+            # add a communication task to message array
+            self.messages.append(message_conflict)
 
     def get_xy_path_coordinate(self, message):
         src = copy.copy(message.src)
         dest = message.dest
 
         # put the first router
-        link_array = []
+        link_array = LinkArray()
         path_array = [message.src]
 
         while True:
@@ -292,7 +271,7 @@ class Generation:
 
         # fill path
         for i in range(len(path_array) - 1):
-            link_array.append(Link(path_array[i], path_array[i + 1]))
+            link_array.add_link(Link(path_array[i], path_array[i + 1]))
 
         return link_array
 
@@ -304,11 +283,18 @@ class Generation:
             return False
 
     def task_overlap(self, p1, p2):
-        for m in p1:
-            for n in p2:
+        for m in p1.array:
+            for n in p2.array:
                 if self.is_links_equal(m, n):
                     return True
         return False
 
     def get_link_utilisation(self, link):
         return link.utilization_rate
+
+    def check_rate_equal_path(self, path, rate, error_rate):
+        for p in path.array:
+            if p.utilization_rate > rate + error_rate or \
+                    p.utilization_rate < rate - error_rate:
+                return False
+        return True
