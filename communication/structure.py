@@ -93,7 +93,7 @@ class Message:
         return int((EndToEndLatency.NETWORK_ACCESS_LAT * 2) + nL)
 
     def get_link_utilization(self):
-        return self.size / self.period
+        return round(self.size / self.period, 2)
 
     def __str__(self):
         return '[id: %d -- size: %d -- period: %d -- offset: %d -- deadline: %d -- src: %s -- dest: %s]' \
@@ -194,3 +194,7 @@ class LinkArray:
     def add_utilization(self, rate):
         for link in self.array:
             link.add_utilization(rate)
+
+    def clear_utilization_rate(self):
+        for link in self.array:
+            link.utilization_rate = 0

@@ -2,6 +2,8 @@ import math
 import random
 import sys
 import copy
+import time
+
 import yaml
 
 from communication.routing import Coordinate
@@ -174,16 +176,16 @@ class Generation:
     def generate_random_coordinate(self):
 
         # source router coordinate
-        src_i = random.randint(0, self._square_size - 1)
-        src_j = random.randint(0, self._square_size - 1)
+        src_i = random.randint(0, self.noc.square_size - 1)
+        src_j = random.randint(0, self.noc.square_size - 1)
 
         # destination router coordinate
         dest_i = src_i
         dest_j = src_j
         while src_i == dest_i:
-            dest_i = random.randint(0, self._square_size - 1)
+            dest_i = random.randint(0, self.noc.square_size - 1)
         while src_j == dest_j:
-            dest_j = random.randint(0, self._square_size - 1)
+            dest_j = random.randint(0, self.noc.square_size - 1)
 
         return [Coordinate(src_i, src_j), Coordinate(dest_i, dest_j)]
 
@@ -216,28 +218,36 @@ class Generation:
 
     def conflict_task_generation_discard(self, message, rate, error_rate):
         # extract message XY routing coordinate
+
         path1 = self.get_xy_path_coordinate(message)
 
         # while loop to check if the whole path respects rate
-        while self.check_rate_equal_path(path1, rate, error_rate):
-
+        while not self.check_rate_equal_path(path1, rate, error_rate):
             # generate random task with random size
             message_conflict = self.generate_random_communicating_task(message.size, message.offset)
             path2 = self.get_xy_path_coordinate(message_conflict)
 
             # if the two tasks share at least one physical link (overlap)
             overlap = self.task_overlap(path1, path2)
+            print('Overlap : %s' % overlap)
             if not overlap:
                 continue  # Discard
 
             conflict_lu = message_conflict.get_link_utilization()
+            print('Message conflict : %f' % conflict_lu)
 
             # check if generated communication doesn't exceed the rate + error
-            if path2.check_utilization_rate(conflict_lu, rate, error_rate):
+            if not path2.check_utilization_rate(conflict_lu, rate, error_rate):
+                print('Discard')
                 continue  # Discard
 
             # add a communication task to message array
+            print('->->->-> ADD IT')
+            self.add_commun_link_utilization(path1, path2, conflict_lu)
             self.messages.append(message_conflict)
+
+        # Clear utilization rate
+        path1.clear_utilization_rate()
 
     def get_xy_path_coordinate(self, message):
         src = copy.copy(message.src)
@@ -282,6 +292,12 @@ class Generation:
         else:
             return False
 
+    def add_commun_link_utilization(self, p1, p2, lu):
+        for m in p1.array:
+            for n in p2.array:
+                if self.is_links_equal(m, n):
+                    m.add_utilization(lu)
+
     def task_overlap(self, p1, p2):
         for m in p1.array:
             for n in p2.array:
@@ -294,7 +310,6 @@ class Generation:
 
     def check_rate_equal_path(self, path, rate, error_rate):
         for p in path.array:
-            if p.utilization_rate > rate + error_rate or \
-                    p.utilization_rate < rate - error_rate:
-                return False
-        return True
+            if rate + error_rate > p.utilization_rate > rate - error_rate:
+                return True
+        return False

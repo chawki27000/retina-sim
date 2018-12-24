@@ -243,11 +243,11 @@ class TestConflict(unittest.TestCase):
     def test_xy_path_coordinate(self):
         link_array = self.generation.get_xy_path_coordinate(self.message)
 
-        self.assertEqual(len(link_array), 4)
-        self.assertEqual(link_array[3].trans.i, 1)
-        self.assertEqual(link_array[3].trans.j, 2)
-        self.assertEqual(link_array[0].receiv.i, 0)
-        self.assertEqual(link_array[0].receiv.j, 1)
+        self.assertEqual(len(link_array.array), 4)
+        self.assertEqual(link_array.array[3].trans.i, 1)
+        self.assertEqual(link_array.array[3].trans.j, 2)
+        self.assertEqual(link_array.array[0].receiv.i, 0)
+        self.assertEqual(link_array.array[0].receiv.j, 1)
 
     def test_is_links_equal(self):
         l1 = Link(Coordinate(0, 0), Coordinate(1, 1))
@@ -266,6 +266,15 @@ class TestConflict(unittest.TestCase):
 
         self.assertTrue(self.generation.task_overlap(p1, p2))
         self.assertFalse(self.generation.task_overlap(p1, p3))
+
+    def test_task_generation_discard(self):
+        generation = Generation()
+        generation.set_noc(self.noc)
+        generation.conflict_task_generation_discard(self.message, 0.5, 0.2)
+
+        self.assertEqual(len(generation.messages), 2)
+
+        print(len(generation.messages))
 
 
 if __name__ == '__main__':
