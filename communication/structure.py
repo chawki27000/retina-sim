@@ -1,7 +1,9 @@
+import copy
 import enum
 import math
 
 from analysis.end_to_end_latency import EndToEndLatency
+from communication.routing import Coordinate
 
 FLIT_DEFAULT_SIZE = 32
 PACKET_DEFAULT_SIZE = 128
@@ -94,6 +96,42 @@ class Message:
 
     def get_link_utilization(self):
         return round(self.size / self.period, 2)
+
+    def get_xy_path_coordinate(self):
+        src = copy.copy(self.src)
+        dest = self.dest
+
+        # put the first router
+        link_array = LinkArray()
+        path_array = [self.src]
+
+        while True:
+            # On X axe (Column)
+            # By the West
+            if src.j > dest.j:
+                src.j -= 1
+                path_array.append(Coordinate(src.i, src.j))
+            # By the East
+            elif src.j < dest.j:
+                src.j += 1
+                path_array.append(Coordinate(src.i, src.j))
+            # On Y axe (Row)
+            else:
+                if src.i > dest.i:
+                    src.i -= 1
+                    path_array.append(Coordinate(src.i, src.j))
+                # By the East
+                elif src.i < dest.i:
+                    src.i += 1
+                    path_array.append(Coordinate(src.i, src.j))
+                else:
+                    break
+
+        # fill path
+        for i in range(len(path_array) - 1):
+            link_array.add_link(Link(path_array[i], path_array[i + 1]))
+
+        return link_array
 
     def __str__(self):
         return '[id: %d -- size: %d -- period: %d -- offset: %d -- deadline: %d -- src: %s -- dest: %s]' \

@@ -219,13 +219,13 @@ class Generation:
     def conflict_task_generation_discard(self, message, rate, error_rate):
         # extract message XY routing coordinate
 
-        path1 = self.get_xy_path_coordinate(message)
+        path1 = message.get_xy_path_coordinate()
 
         # while loop to check if the whole path respects rate
         while not self.check_rate_equal_path(path1, rate, error_rate):
             # generate random task with random size
             message_conflict = self.generate_random_communicating_task(message.size, message.offset)
-            path2 = self.get_xy_path_coordinate(message_conflict)
+            path2 = message_conflict.get_xy_path_coordinate()
 
             # if the two tasks share at least one physical link (overlap)
             overlap = self.task_overlap(path1, path2)
@@ -248,42 +248,6 @@ class Generation:
 
         # Clear utilization rate
         path1.clear_utilization_rate()
-
-    def get_xy_path_coordinate(self, message):
-        src = copy.copy(message.src)
-        dest = message.dest
-
-        # put the first router
-        link_array = LinkArray()
-        path_array = [message.src]
-
-        while True:
-            # On X axe (Column)
-            # By the West
-            if src.j > dest.j:
-                src.j -= 1
-                path_array.append(Coordinate(src.i, src.j))
-            # By the East
-            elif src.j < dest.j:
-                src.j += 1
-                path_array.append(Coordinate(src.i, src.j))
-            # On Y axe (Row)
-            else:
-                if src.i > dest.i:
-                    src.i -= 1
-                    path_array.append(Coordinate(src.i, src.j))
-                # By the East
-                elif src.i < dest.i:
-                    src.i += 1
-                    path_array.append(Coordinate(src.i, src.j))
-                else:
-                    break
-
-        # fill path
-        for i in range(len(path_array) - 1):
-            link_array.add_link(Link(path_array[i], path_array[i + 1]))
-
-        return link_array
 
     def is_links_equal(self, l1, l2):
         if l1.trans.i == l2.trans.i and l1.receiv.i == l2.receiv.i \
@@ -313,3 +277,10 @@ class Generation:
             if rate + error_rate > p.utilization_rate > rate - error_rate:
                 return True
         return False
+
+    """
+    Analysis Tool
+    """
+
+    def direction_intersection(self, message):
+        path = message.get_xy_path_coordinate()
