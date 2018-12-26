@@ -13,7 +13,7 @@ class CSVWriter:
                                                          message.get_depart_time(),
                                                          message.get_arriving_time()))
 
-    def generate_csv(self, link):
+    def generate_csv(self, link, arbitration=None, generation=None):
         with open(link, mode='w') as file:
             writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
@@ -61,6 +61,14 @@ class CSVWriter:
                 # File Header
                 writer.writerow(['i', 'WCLA'])
 
-                for message in self.messages_i:
-                    writer.writerow([message.id,
-                                     message.get_analysis_latency()])
+                if arbitration == 'RR':
+                    for message in self.messages_i:
+                        writer.writerow([message.id,
+                                         message.get_analysis_latency()])
+
+                elif arbitration == 'Priority':
+                    for message in self.messages_i:
+                        # compute direct intersection
+                        intersection = generation.direction_intersection(message)
+                        writer.writerow([message.id,
+                                         message.get_priority_analysis_latency(intersection)])

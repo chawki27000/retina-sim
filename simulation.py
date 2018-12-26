@@ -78,7 +78,9 @@ def main():
         # printing
         messages_i = simulation.get_message_instance_tab()
         csv = CSVWriter(messages_i, 0)
-        csv.generate_csv('input/' + file + '/result_sim.csv')
+        csv.generate_csv('input/' + file + '/result_sim.csv',
+                         arbitration=arbitration,
+                         generation=generation)
 
         simulation.reset_clock()
 

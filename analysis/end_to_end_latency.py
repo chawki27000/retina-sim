@@ -1,4 +1,4 @@
-import math
+from math import ceil, fabs
 
 
 class EndToEndLatency:
@@ -7,12 +7,24 @@ class EndToEndLatency:
 
     @staticmethod
     def routing_distance(src, dest):
-        return math.fabs(src.i - dest.i) + math.fabs(src.j - dest.j)
+        return fabs(src.i - dest.i) + fabs(src.j - dest.j)
+
+    """
+    Giuseppe et al.
+    """
 
     @staticmethod
     def iteration_number(nP, aVflow):
-        return int(math.ceil(nP / float(aVflow)))
+        return int(ceil(nP / float(aVflow)))
 
     @staticmethod
     def network_latency(nI, oV, nR):
         return int((nI * oV) + (nR - 1))
+
+    """
+    Burns et al.
+    """
+
+    @staticmethod
+    def basic_network_latency(li, fsize, h):
+        return (ceil(li / fsize) * fsize) + h

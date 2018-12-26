@@ -143,6 +143,12 @@ class Generation:
             src = coord[0]
             dest = coord[1]
             message = Message(self.counter, period, size, offset, deadline, src, dest)
+            # set random priority (optional)
+            if self._arbitration == 'Priority':
+                priority = random.randint(0, self._nbvc - 1)
+                message.set_priority(priority)
+
+            # add generated message to messages list
             self.messages.append(message)
 
             # Generate task conflict
@@ -283,4 +289,21 @@ class Generation:
     """
 
     def direction_intersection(self, message):
-        path = message.get_xy_path_coordinate()
+        intersection = []
+        # Getting XY route
+        path1 = message.get_xy_path_coordinate()
+
+        # Exploring loop
+        for msg in self.messages:
+            # exclude the message itself from the list
+            if msg == message:
+                continue
+
+            # Getting XY route
+            path2 = msg.get_xy_path_coordinate()
+
+            # Testing the overlap (intersection)
+            if self.task_overlap(path1, path2):
+                intersection.append(msg)
+
+        return intersection

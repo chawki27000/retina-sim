@@ -276,6 +276,19 @@ class TestConflict(unittest.TestCase):
     #
     #     print(len(generation.messages))
 
+    def test_intersection(self):
+        message2 = Message(1, 12, 256, 0, 0, Coordinate(1, 1), Coordinate(2, 2))
+        message3 = Message(1, 12, 256, 0, 0, Coordinate(2, 0), Coordinate(2, 1))
+
+        self.generation.messages.append(self.message)
+        self.generation.messages.append(message2)
+        self.generation.messages.append(message3)
+
+        intersection = self.generation.direction_intersection(self.message)
+
+        self.assertEqual(len(intersection), 1)
+        self.assertEqual(message2, intersection[0])
+
 
 if __name__ == '__main__':
     unittest.main()

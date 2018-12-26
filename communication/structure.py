@@ -80,6 +80,12 @@ class Message:
         for i in range(packetNumber):
             self.packets.append(Packet(i, self.dest, self))
 
+    def get_link_utilization(self):
+        return round(self.size / self.period, 2)
+
+    def set_priority(self, priority):
+        self.priority = priority
+
     def get_analysis_latency(self):
         # Routing Distance Computing
         nR = EndToEndLatency.routing_distance(self.src, self.dest)
@@ -94,8 +100,31 @@ class Message:
 
         return int((EndToEndLatency.NETWORK_ACCESS_LAT * 2) + nL)
 
-    def get_link_utilization(self):
-        return round(self.size / self.period, 2)
+    def get_basic_network_latency(self):
+        # Routing Distance Computing
+        h = EndToEndLatency.routing_distance(self.src, self.dest)
+
+        return EndToEndLatency.basic_network_latency(PACKET_DEFAULT_SIZE,
+                                                     FLIT_DEFAULT_SIZE,
+                                                     h)
+
+    def get_priority_analysis_latency(self, intersection):
+        # Basic Network Latency (without contention)
+        c = self.get_basic_network_latency()
+
+        # network latency
+        last_r = 0
+        r = c
+        while r < self.deadline:
+            tmp_r = c
+            last_r = r
+            for msg in intersection:
+                tmp_r += math.ceil(r / msg.period) * msg.get_basic_network_latency
+
+            # iterate until Ri > Di
+            r = tmp_r
+
+        return last_r
 
     def get_xy_path_coordinate(self):
         src = copy.copy(self.src)
