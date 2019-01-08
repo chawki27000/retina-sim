@@ -39,9 +39,6 @@ def main():
         generation = Generation()
         generation.config('input/' + file + '/config.yml')
 
-        # Messages generation
-        messages = generation.scenario('input/' + file + '/scenario.yml')
-
         square_size = generation.square_size()
         nbvc = generation.nbvc()
         vc_size = generation.vc_size()
@@ -51,6 +48,9 @@ def main():
         noc = NoC('Network-On-Chip', square_size, nbvc, vc_size, vc_quantum)
 
         generation.set_noc(noc)
+
+        # Messages generation
+        messages = generation.scenario('input/' + file + '/scenario.yml')
 
         logging.basicConfig(level=level)
 
@@ -65,7 +65,9 @@ def main():
         logging.info('-------------------------------')
 
         csv = CSVWriter(messages, 1)
-        csv.generate_csv('input/' + file + '/result_analysis.csv')
+        csv.generate_csv('input/' + file + '/result_analysis.csv',
+                         arbitration=arbitration,
+                         generation=generation)
 
 
 if __name__ == "__main__":

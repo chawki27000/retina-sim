@@ -57,9 +57,6 @@ class Router:
                 # Destination Reached
                 return self.outPE
 
-    def reserve_idle_vc(self, inport):
-        return inport.vc_allocator()
-
     def send_flit(self, vc, outport, time):
 
         if len(vc.flits) <= 0:
@@ -348,6 +345,123 @@ class Router:
             self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.ARR_FLIT, {'router': self, 'vc': vc}, time)
+            EVENT_LIST.push(event)
+
+    def send_flit_by_priority(self, vc, outport, time):
+
+        if len(vc.flits) <= 0:
+            return
+
+        # getting the first flit in VC
+        flit = vc.dequeue()
+        if flit is None:
+            return
+
+        # if is a Head Flit
+        if flit.type == FlitType.head:
+            self.logger.debug('Time : (%d) - %s ready to be sent' % (time, flit))
+
+            # Get idle VC from next Input
+            vc_allotted = outport.inPort.priority_vc_allocator(flit.get_priority())
+
+            if vc_allotted is not None:
+                self.logger.debug('Time : (%d) - VC (%s) allotted' % (time, vc_allotted))
+
+                # send flit
+                vc_allotted.enqueue(flit)
+                self.logger.info('(%d) : %s - %s -> %s -> %s' % (time, flit, self, vc_allotted, vc_allotted.router))
+                vc.credit_out()
+                # registering VC allotted in dictionary
+                self.vcs_dictionary.add(Node(vc, vc_allotted))
+                # Next routing
+                event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
+                EVENT_LIST.push(event)
+
+            else:  # No idle VC
+                vc.restore(flit)  # restore
+                # event push
+                event = Event(EventType.SEND_FLIT, {'router': self,
+                                                    'vc': vc,
+                                                    'outport': outport}, time + 1)
+
+                EVENT_LIST.push(event)
+                self.logger.debug('Time : (%d) - %s was not sent - VC not allotted' % (time, flit))
+
+        # if is a Body Flit
+        elif flit.type == FlitType.body:
+            self.logger.debug('Time : (%d) - %s ready to be sent' % (time, flit))
+            # Getting the alloted vc
+            vc_allotted = self.vcs_dictionary.get_target(vc)
+            self.logger.debug('Time : (%d) - Retreiving allotted VC (%s)' % (time, vc_allotted))
+
+            # Sending to the next router
+            sent = vc_allotted.enqueue(flit)
+
+            if not sent:  # No Place
+                vc.restore(flit)  # restore
+                # event push
+                event = Event(EventType.SEND_FLIT, {'router': self,
+                                                    'vc': vc,
+                                                    'outport': outport}, time + 1)
+                EVENT_LIST.push(event)
+                self.logger.debug('Time : (%d) - %s was not sent - No Place in VC (%s)' % (time, flit, vc_allotted))
+
+            else:
+                # Next routing
+                event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
+                EVENT_LIST.push(event)
+                self.logger.info('(%d) : %s - %s -> %s -> %s' % (time, flit, self, vc_allotted, vc_allotted.router))
+                vc.credit_out()
+
+        # if is a Tail Flit
+        elif flit.type == FlitType.tail:
+            self.logger.debug('Time : (%d) - %s ready to be sent' % (time, flit))
+
+            # Getting the alloted vc
+            vc_allotted = self.vcs_dictionary.get_target(vc)
+
+            # Sending to the next router
+            sent = vc_allotted.enqueue(flit)
+
+            if not sent:  # No Place
+                vc.restore(flit)  # restore
+                # event push
+                event = Event(EventType.SEND_FLIT, {'router': self,
+                                                    'vc': vc,
+                                                    'outport': outport}, time + 1)
+                EVENT_LIST.push(event)
+                self.logger.debug('Time : (%d) - %s was not sent - No Place in VC (%s)' % (time, flit, vc_allotted))
+
+            else:
+                self.logger.info('(%d) : %s - %s -> %s -> %s' % (time, flit, self, vc_allotted, vc_allotted.router))
+                # Next routing
+                event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
+                EVENT_LIST.push(event)
+
+                self.vcs_dictionary.remove(vc)
+                vc.lock = False
+                vc.credit_out()
+                self.logger.debug('Time : (%d) - VC (%s) - released' % (time, vc))
+
+        # If Quantum is finished
+        if vc.quantum <= 0:
+            # print('Quantum or VC finished for : %s' % vc)
+            self.logger.debug('Time : (%d) - VC (%s) - quantum finished' % (time, vc))
+            # new VC Election - event push
+            event = Event(EventType.VC_ELECTION, self, time + 1)
+            EVENT_LIST.push(event)
+        elif len(vc.flits) <= 0:
+            self.logger.debug('Time : (%d) - VC (%s) - NO Flits' % (time, vc))
+            # new VC Election - event push
+            event = Event(EventType.VC_ELECTION, self, time + 1)
+            EVENT_LIST.push(event)
+
+        # Another Quantum
+        else:
+            self.logger.debug('Time : (%d) - VC (%s) - quantum NOT finished' % (time, vc))
+            event = Event(EventType.SEND_FLIT, {'router': self,
+                                                'vc': vc,
+                                                'outport': outport}, time + 1)
             EVENT_LIST.push(event)
 
     def get_most_prioritized_vc(self, vcs_target):

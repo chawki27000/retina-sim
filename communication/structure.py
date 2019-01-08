@@ -32,6 +32,9 @@ class Packet:
         for flit in self.flits:
             flit.set_destination_info(dest)
 
+    def get_priority(self):
+        return self.message.get_priority()
+
     def __str__(self):
         return 'Packet(%d) from Message(%d)' % (self.id, self.message.id)
 
@@ -57,6 +60,9 @@ class Flit:
 
     def set_arrival_time(self, arrival_time):
         self.arrival_time = arrival_time
+
+    def get_priority(self):
+        return self.packet.get_priority()
 
     def __str__(self):
         return '%s %d-%d-%d' % (self.type, self.id, self.packet.id, self.packet.message.id)
@@ -86,7 +92,10 @@ class Message:
     def set_priority(self, priority):
         self.priority = priority
 
-    def get_analysis_latency(self):
+    def get_priority(self):
+        return self.priority
+
+    def get_analysis_latency(self, intersection):
         # Routing Distance Computing
         nR = EndToEndLatency.routing_distance(self.src, self.dest)
         # Iteration Number
@@ -96,7 +105,7 @@ class Message:
         # nI: Number of iteration
         # oV: Total VC occupied(pessimistic)
         # nR: Routing Distance
-        nL = EndToEndLatency.network_latency(nI, 4, nR)
+        nL = EndToEndLatency.network_latency(nI, len(intersection), nR)
 
         return int((EndToEndLatency.NETWORK_ACCESS_LAT * 2) + nL)
 
@@ -198,6 +207,10 @@ class MessageInstance(Message):
     def get_latency(self):
         return self.get_arriving_time() - self.get_depart_time()
 
+    def get_priority(self):
+        if hasattr(self, 'priority'):
+            return self.get_priority()
+
     def __str__(self):
         return 'Message (%d)(instance = %d)' % (self.id, self.instance)
 
@@ -265,3 +278,9 @@ class LinkArray:
     def clear_utilization_rate(self):
         for link in self.array:
             link.utilization_rate = 0
+
+    def __str__(self):
+        string = ''
+        for link in self.array:
+            string += link + ' : ' + str(link.utilization_rate)
+            string += '\n'

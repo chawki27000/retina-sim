@@ -63,8 +63,10 @@ class CSVWriter:
 
                 if arbitration == 'RR':
                     for message in self.messages_i:
+                        # compute direct intersection
+                        intersection = generation.direction_intersection(message)
                         writer.writerow([message.id,
-                                         message.get_analysis_latency()])
+                                         message.get_analysis_latency(intersection)])
 
                 elif arbitration == 'Priority':
                     for message in self.messages_i:

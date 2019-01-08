@@ -21,6 +21,13 @@ class InPort:
                 return vc
         return None
 
+    def priority_vc_allocator(self, priority):
+        for vc in self.vcs:
+            if vc.isFree() and vc.id == priority:
+                vc.lock = True
+                return vc
+        return None
+
     def number_idle_vc(self):
         count = 0
         for vc in self.vcs:

@@ -1,13 +1,11 @@
 import math
 import random
 import sys
-import copy
-import time
 
 import yaml
 
 from communication.routing import Coordinate
-from communication.structure import Message, Link, LinkArray
+from communication.structure import Message
 from gen.unifast import Unifast
 
 
@@ -152,7 +150,7 @@ class Generation:
             self.messages.append(message)
 
             # Generate task conflict
-            # self.generate_conflict_message(message, 4)
+            self.conflict_task_generation_discard(message, 50, 20)
             self.counter += 1
 
         return self.messages
@@ -223,8 +221,8 @@ class Generation:
         return Coordinate(dest_i, dest_j)
 
     def conflict_task_generation_discard(self, message, rate, error_rate):
-        # extract message XY routing coordinate
 
+        # extract message XY routing coordinate
         path1 = message.get_xy_path_coordinate()
 
         # while loop to check if the whole path respects rate
@@ -251,6 +249,7 @@ class Generation:
             print('->->->-> ADD IT')
             self.add_commun_link_utilization(path1, path2, conflict_lu)
             self.messages.append(message_conflict)
+            # self.counter += 1
 
         # Clear utilization rate
         path1.clear_utilization_rate()
@@ -280,9 +279,9 @@ class Generation:
 
     def check_rate_equal_path(self, path, rate, error_rate):
         for p in path.array:
-            if rate + error_rate > p.utilization_rate > rate - error_rate:
-                return True
-        return False
+            if p.utilization_rate < rate - error_rate:
+                return False
+        return True
 
     """
     Analysis Tool

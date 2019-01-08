@@ -267,14 +267,13 @@ class TestConflict(unittest.TestCase):
         self.assertTrue(self.generation.task_overlap(p1, p2))
         self.assertFalse(self.generation.task_overlap(p1, p3))
 
-    # def test_task_generation_discard(self):
-    #     generation = Generation()
-    #     generation.set_noc(self.noc)
-    #     generation.conflict_task_generation_discard(self.message, 0.5, 0.2)
-    #
-    #     self.assertEqual(len(generation.messages), 2)
-    #
-    #     print(len(generation.messages))
+    def test_task_generation_discard(self):
+        generation = Generation()
+        generation.set_noc(self.noc)
+        generation.conflict_task_generation_discard(self.message, 0.5, 0.2)
+        path = self.message.get_xy_path_coordinate()
+
+        self.assertTrue(generation.check_rate_equal_path(path, 0.5, 0.2))
 
     def test_intersection(self):
         message2 = Message(1, 12, 256, 0, 0, Coordinate(1, 1), Coordinate(2, 2))
@@ -288,6 +287,10 @@ class TestConflict(unittest.TestCase):
 
         self.assertEqual(len(intersection), 1)
         self.assertEqual(message2, intersection[0])
+
+
+    def test_check_rate_equal_path(self):
+        pass
 
 
 if __name__ == '__main__':

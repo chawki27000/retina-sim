@@ -64,7 +64,11 @@ class Simulation:
                     vc = current_event.entity['vc']
                     outport = current_event.entity['outport']
 
-                    router.send_flit(vc, outport, CLOCK)
+                    # FLIT Sending
+                    if arbitration == 'RR':
+                        router.send_flit(vc, outport, CLOCK)
+                    elif arbitration == 'Priority':
+                        router.send_flit_by_priority(vc, outport, CLOCK)
 
                 elif current_event.event_type == EventType.VC_ELECTION:
                     # Get Event Entity
