@@ -254,6 +254,84 @@ class Generation:
         # Clear utilization rate
         path1.clear_utilization_rate()
 
+    """
+    NEW ALGORITHM : Begin
+    """
+
+    def conflict_task_by_axe(self, message, max_rate, min_rate, error_rate):
+
+        # extract message XY routing coordinate
+        path1 = message.get_xy_path_coordinate()
+
+        # loop : check if all message links are in the interval (between max and min rate)
+        while True:
+            # find outside interval links
+            outside_link = self.find_links_outside_interval(message, max_rate, min_rate, error_rate)
+
+            # if there is no outside link (loop end)
+            if len(outside_link) == 0:
+                break
+
+            # get the first link
+            link = outside_link.pop()
+
+            # get the link axe ( X or Y)
+            if link.trans.j == link.receiv.j:
+                axe = 0  # X axe
+            else:
+                axe = 1  # Y axe
+
+            # get conflict task
+            conflict_message = self.generate_conflict_task_by_axe(link, axe, min_rate, message.offset)
+
+            # add communicating task to taskset
+            self.messages.append(conflict_message)
+            self.counter += 1
+
+            # get conflict message data
+            conflict_lu = conflict_message.get_link_utilization()
+            path2 = conflict_message.get_xy_path_coordinate()
+            # add LU to link
+            self.add_commun_link_utilization(path1, path2, conflict_lu)
+
+    def find_links_outside_interval(self, path, max_rate, min_rate, error_rate):
+        outside_link = []
+
+        for p in path:
+            if p.utilization_rate > max_rate + error_rate \
+                    or p.utilization_rate < min_rate - error_rate:
+                outside_link.append(p)
+
+        return outside_link
+
+    def generate_conflict_task_by_axe(self, link, axe, min_rate, offset):
+        if axe == 0:  # X axe
+            src = Coordinate(link.trans.i, 0)
+            dest = Coordinate(link.trans.i, self._square_size - 1)
+
+        else:  # Y axe
+            src = Coordinate(0, link.trans.j)
+            dest = Coordinate(self._square_size - 1, link.trans.j)
+
+        # generate message
+        message = self.generate_communicating_task_by_axe(min_rate, offset, src, dest)
+
+        return message
+
+    def generate_communicating_task_by_axe(self, min_rate, offset, src, dest):
+        size = random.randint(1, min_rate)
+        period = self.period_array[random.randint(0, len(self.period_array) - 1)]
+        lower_bound = int(0.7 * period)
+        deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
+
+        message = Message(self.counter, period, size, offset, deadline, src, dest)
+        # self.counter += 1
+        return message
+
+    """
+    NEW ALGORITHM : End
+    """
+
     def is_links_equal(self, l1, l2):
         if l1.trans.i == l2.trans.i and l1.receiv.i == l2.receiv.i \
                 and l1.trans.j == l2.trans.j and l1.receiv.j == l2.receiv.j:
