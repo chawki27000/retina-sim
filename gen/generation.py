@@ -4,6 +4,7 @@ import sys
 
 import yaml
 
+from communication import structure
 from communication.routing import Coordinate
 from communication.structure import Message
 from gen.unifast import Unifast
@@ -86,6 +87,9 @@ class Generation:
 
     def square_size(self):
         return self._square_size
+
+    def set_square_size(self, square_size):
+        self._square_size = square_size
 
     def nbvc(self):
         return self._nbvc
@@ -266,7 +270,7 @@ class Generation:
         # loop : check if all message links are in the interval (between max and min rate)
         while True:
             # find outside interval links
-            outside_link = self.find_links_outside_interval(message, max_rate, min_rate, error_rate)
+            outside_link = self.find_links_outside_interval(message, min_rate, max_rate, error_rate)
 
             # if there is no outside link (loop end)
             if len(outside_link) == 0:
@@ -276,13 +280,10 @@ class Generation:
             link = outside_link.pop()
 
             # get the link axe ( X or Y)
-            if link.trans.j == link.receiv.j:
-                axe = 0  # X axe
-            else:
-                axe = 1  # Y axe
+            axe = (0 if link.trans.i == link.receiv.i else 1)
 
             # get conflict task
-            conflict_message = self.generate_conflict_task_by_axe(link, axe, min_rate, message.offset)
+            conflict_message = self.generate_conflict_task_by_axe(link, axe, min_rate, max_rate, message.offset)
 
             # add communicating task to taskset
             self.messages.append(conflict_message)
@@ -294,17 +295,19 @@ class Generation:
             # add LU to link
             self.add_commun_link_utilization(path1, path2, conflict_lu)
 
+    # This function provide us links which are outside [min_rate, max_rate]
     def find_links_outside_interval(self, path, max_rate, min_rate, error_rate):
         outside_link = []
 
-        for p in path:
+        for p in path.array:
             if p.utilization_rate > max_rate + error_rate \
                     or p.utilization_rate < min_rate - error_rate:
                 outside_link.append(p)
 
         return outside_link
 
-    def generate_conflict_task_by_axe(self, link, axe, min_rate, offset):
+    # This function aims to set the communication axe to conflict message
+    def generate_conflict_task_by_axe(self, link, axe, min_rate, max_rate, offset):
         if axe == 0:  # X axe
             src = Coordinate(link.trans.i, 0)
             dest = Coordinate(link.trans.i, self._square_size - 1)
@@ -314,17 +317,28 @@ class Generation:
             dest = Coordinate(self._square_size - 1, link.trans.j)
 
         # generate message
-        message = self.generate_communicating_task_by_axe(min_rate, offset, src, dest)
+        message = self.generate_communicating_task_by_axe(min_rate, max_rate, offset, src, dest)
 
         return message
 
-    def generate_communicating_task_by_axe(self, min_rate, offset, src, dest):
-        size = random.randint(1, min_rate)
-        period = self.period_array[random.randint(0, len(self.period_array) - 1)]
-        lower_bound = int(0.7 * period)
-        deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
+    # Function to generate only a Message with all its parameters
+    # to define deadline interval, we define a lower bound (70% of its period)
+    def generate_communicating_task_by_axe(self, min_rate, max_rate, offset, src, dest):
+        while True:
+            size = random.randint(structure.PACKET_DEFAULT_SIZE, structure.PACKET_DEFAULT_SIZE * 3)
+            period = self.period_array[random.randint(0, len(self.period_array) - 1)]
+            lower_bound = int(0.7 * period)
+            deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
 
-        message = Message(self.counter, period, size, offset, deadline, src, dest)
+            message = Message(self.counter, period, size, offset, deadline, src, dest)
+
+            # calculate message Lu
+            lu = message.get_link_utilization()
+            if lu < (min_rate / 100) or lu > (max_rate / 100):
+                continue
+            else:
+                break
+
         # self.counter += 1
         return message
 
