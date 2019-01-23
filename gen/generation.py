@@ -283,7 +283,7 @@ class Generation:
             axe = (0 if link.trans.i == link.receiv.i else 1)
 
             # get conflict task
-            conflict_message = self.generate_conflict_task_by_axe(link, axe, min_rate, max_rate, message.offset)
+            conflict_message = self.generate_conflict_task_by_axe(link, axe, min_rate, message.offset)
 
             # add communicating task to taskset
             self.messages.append(conflict_message)
@@ -307,7 +307,7 @@ class Generation:
         return outside_link
 
     # This function aims to set the communication axe to conflict message
-    def generate_conflict_task_by_axe(self, link, axe, min_rate, max_rate, offset):
+    def generate_conflict_task_by_axe(self, link, axe, min_rate, offset):
         if axe == 0:  # X axe
             src = Coordinate(link.trans.i, 0)
             dest = Coordinate(link.trans.i, self._square_size - 1)
@@ -317,13 +317,13 @@ class Generation:
             dest = Coordinate(self._square_size - 1, link.trans.j)
 
         # generate message
-        message = self.generate_communicating_task_by_axe(min_rate, max_rate, offset, src, dest)
+        message = self.generate_communicating_task_by_axe(min_rate, offset, src, dest)
 
         return message
 
     # Function to generate only a Message with all its parameters
     # to define deadline interval, we define a lower bound (70% of its period)
-    def generate_communicating_task_by_axe(self, min_rate, max_rate, offset, src, dest):
+    def generate_communicating_task_by_axe(self, min_rate, offset, src, dest):
         while True:
             size = random.randint(structure.PACKET_DEFAULT_SIZE, structure.PACKET_DEFAULT_SIZE * 3)
             period = self.period_array[random.randint(0, len(self.period_array) - 1)]
@@ -334,7 +334,8 @@ class Generation:
 
             # calculate message Lu
             lu = message.get_link_utilization()
-            if lu < (min_rate / 100) or lu > (max_rate / 100):
+            print("LU : %f" % lu)
+            if lu > (min_rate / 100):
                 continue
             else:
                 break
