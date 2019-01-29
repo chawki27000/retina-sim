@@ -1,6 +1,7 @@
 import copy
 import enum
 import math
+from collections import namedtuple
 
 from analysis.end_to_end_latency import EndToEndLatency
 from communication.routing import Coordinate
@@ -135,41 +136,36 @@ class Message:
 
         return last_r
 
-    def get_xy_path_coordinate(self):
+    def get_xy_path_coordinate(self, noc):
         src = copy.copy(self.src)
         dest = self.dest
 
         # put the first router
-        link_array = LinkArray()
-        path_array = [self.src]
+        path_array = [noc.router_matrix[src.i][src.j].id]
 
         while True:
             # On X axe (Column)
             # By the West
             if src.j > dest.j:
                 src.j -= 1
-                path_array.append(Coordinate(src.i, src.j))
+                path_array.append(noc.router_matrix[src.i][src.j].id)
             # By the East
             elif src.j < dest.j:
                 src.j += 1
-                path_array.append(Coordinate(src.i, src.j))
+                path_array.append(noc.router_matrix[src.i][src.j].id)
             # On Y axe (Row)
             else:
                 if src.i > dest.i:
                     src.i -= 1
-                    path_array.append(Coordinate(src.i, src.j))
+                    path_array.append(noc.router_matrix[src.i][src.j].id)
                 # By the East
                 elif src.i < dest.i:
                     src.i += 1
-                    path_array.append(Coordinate(src.i, src.j))
+                    path_array.append(noc.router_matrix[src.i][src.j].id)
                 else:
                     break
 
-        # fill path
-        for i in range(len(path_array) - 1):
-            link_array.add_link(Link(path_array[i], path_array[i + 1]))
-
-        return link_array
+        return path_array
 
     def __str__(self):
         return '[id: %d -- size: %d -- period: %d -- offset: %d -- deadline: %d -- src: %s -- dest: %s]' \
@@ -242,45 +238,49 @@ class NodeArray:
 
 
 #############################################################
-class Link:
-    def __init__(self, trans, receiv):
-        self.trans = trans
-        self.receiv = receiv
-        self.utilization_rate = 0
-
-    def add_utilization(self, rate):
-        self.utilization_rate += rate
-
-    def __str__(self):
-        return '%s -> %s' % (self.trans, self.receiv)
-
-
-class LinkArray:
-    def __init__(self):
-        self.array = []
-
-    def add_link(self, link):
-        self.array.append(link)
-
-    def size(self):
-        return len(self.array)
-
-    def check_utilization_rate(self, val, rate, error):
-        for link in self.array:
-            if link.utilization_rate + val > rate + error:
-                return False
-        return True
-
-    def add_utilization(self, rate):
-        for link in self.array:
-            link.add_utilization(rate)
-
-    def clear_utilization_rate(self):
-        for link in self.array:
-            link.utilization_rate = 0
-
-    def __str__(self):
-        string = ''
-        for link in self.array:
-            string += link + ' : ' + str(link.utilization_rate)
-            string += '\n'
+Link = namedtuple('Link', [
+    'transmitter',
+    'receiver',
+])
+# class Link:
+#     def __init__(self, trans, receiv):
+#         self.trans = trans
+#         self.receiv = receiv
+#         self.utilization_rate = 0
+#
+#     def add_utilization(self, rate):
+#         self.utilization_rate += rate
+#
+#     def __str__(self):
+#         return '%s -> %s' % (self.trans, self.receiv)
+#
+#
+# class LinkArray:
+#     def __init__(self):
+#         self.array = []
+#
+#     def add_link(self, link):
+#         self.array.append(link)
+#
+#     def size(self):
+#         return len(self.array)
+#
+#     def check_utilization_rate(self, val, rate, error):
+#         for link in self.array:
+#             if link.utilization_rate + val > rate + error:
+#                 return False
+#         return True
+#
+#     def add_utilization(self, rate):
+#         for link in self.array:
+#             link.add_utilization(rate)
+#
+#     def clear_utilization_rate(self):
+#         for link in self.array:
+#             link.utilization_rate = 0
+#
+#     def __str__(self):
+#         string = ''
+#         for link in self.array:
+#             string += link + ' : ' + str(link.utilization_rate)
+#             string += '\n'
