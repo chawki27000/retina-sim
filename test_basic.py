@@ -336,13 +336,19 @@ class TestConflictByAxe(unittest.TestCase):
         new_outside_link = self.generation.find_links_outside_interval(link_array, 70, 30, 0)
         self.assertEqual(len(new_outside_link), 3)
 
-    # def test_task_communication_axe(self):
-    #     link_array = self.message.get_xy_path_coordinate()
-    #
-    #     axe = (0 if link_array.array[0].trans.i == link_array.array[0].receiv.i else 1)
-    #     self.assertEqual(axe, 0)
-    #     axe = (0 if link_array.array[3].trans.i == link_array.array[3].receiv.i else 1)
-    #     self.assertEqual(axe, 1)
+    def test_task_communication_axe(self):
+        link_array = self.message.get_xy_path_coordinate(self.noc)
+
+        router_src = self.noc.get_router_coordinate_by_id(link_array[0][0])
+        router_dest = self.noc.get_router_coordinate_by_id(link_array[0][1])
+
+        router_src_1 = self.noc.get_router_coordinate_by_id(link_array[3][0])
+        router_dest_1 = self.noc.get_router_coordinate_by_id(link_array[3][1])
+
+        axe = (0 if router_src.i == router_dest.i else 1)
+        self.assertEqual(axe, 0)
+        axe = (0 if router_src_1.i == router_dest_1.i else 1)
+        self.assertEqual(axe, 1)
 
     # def test_generate_conflict_task_by_axe(self):
     #     link_array = self.message.get_xy_path_coordinate()
