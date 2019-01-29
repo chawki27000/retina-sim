@@ -142,6 +142,7 @@ class Message:
 
         # put the first router
         path_array = [noc.router_matrix[src.i][src.j].id]
+        tuple_array = []
 
         while True:
             # On X axe (Column)
@@ -165,7 +166,11 @@ class Message:
                 else:
                     break
 
-        return path_array
+        # convert a 1D array --> tuple(src, dest)
+        for i in range(len(path_array) - 1):
+            tuple_array.append((path_array[i], path_array[i + 1]))
+
+        return tuple_array
 
     def __str__(self):
         return '[id: %d -- size: %d -- period: %d -- offset: %d -- deadline: %d -- src: %s -- dest: %s]' \

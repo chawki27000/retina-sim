@@ -316,24 +316,25 @@ class TestConflictByAxe(unittest.TestCase):
         self.generation.set_noc(self.noc)
         self.generation.set_square_size(4)
 
+        self.noc.link_array_filling()
+
     def test_xy_path_coordinate(self):
         link_array = self.message.get_xy_path_coordinate(self.noc)
-        self.assertEqual(len(link_array), 5)
-        self.assertEqual(link_array[0], 1)
-        self.assertEqual(link_array[1], 2)
-        self.assertEqual(link_array[2], 3)
-        self.assertEqual(link_array[3], 7)
-        self.assertEqual(link_array[4], 11)
+        self.assertEqual(len(link_array), 4)
+        self.assertEqual(link_array[0][0], 1)
+        self.assertEqual(link_array[0][1], 2)
+        self.assertEqual(link_array[3][0], 7)
+        self.assertEqual(link_array[3][1], 11)
 
-    # def test_find_links_outside_interval(self):
-    #     link_array = self.message.get_xy_path_coordinate()
-    #
-    #     outside_link = self.generation.find_links_outside_interval(link_array, 70, 30, 0)
-    #     self.assertEqual(len(outside_link), 4)
-    #
-    #     outside_link[1].add_utilization(50)
-    #     new_outside_link = self.generation.find_links_outside_interval(link_array, 70, 30, 0)
-    #     self.assertEqual(len(new_outside_link), 3)
+    def test_find_links_outside_interval(self):
+        link_array = self.message.get_xy_path_coordinate(self.noc)
+
+        outside_link = self.generation.find_links_outside_interval(link_array, 70, 30, 0)
+        self.assertEqual(len(outside_link), 4)
+
+        self.generation.add_utilization_rate_to_link(outside_link[0], 50)
+        new_outside_link = self.generation.find_links_outside_interval(link_array, 70, 30, 0)
+        self.assertEqual(len(new_outside_link), 3)
 
     # def test_task_communication_axe(self):
     #     link_array = self.message.get_xy_path_coordinate()

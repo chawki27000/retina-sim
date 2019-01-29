@@ -291,7 +291,7 @@ class Generation:
 
             # get conflict message data
             conflict_lu = conflict_message.get_link_utilization()
-            path2 = conflict_message.get_xy_path_coordinate()
+            path2 = conflict_message.get_xy_path_coordinate(self.noc)
             # add LU to link
             self.add_commun_link_utilization(path1, path2, conflict_lu)
 
@@ -299,9 +299,10 @@ class Generation:
     def find_links_outside_interval(self, path, max_rate, min_rate, error_rate):
         outside_link = []
 
-        for p in path.array:
-            if p.utilization_rate > max_rate + error_rate \
-                    or p.utilization_rate < min_rate - error_rate:
+        for p in path:
+            lu = self.noc.links[str(p[0])][str(p[1])]
+            if lu > max_rate + error_rate \
+                    or lu < min_rate - error_rate:
                 outside_link.append(p)
 
         return outside_link
@@ -343,29 +344,13 @@ class Generation:
         # self.counter += 1
         return message
 
+    # function to add an utilization rate to a specified link
+    def add_utilization_rate_to_link(self, link, utilization):
+        self.noc.links[str(link[0])][str(link[1])] += utilization
+
     """
     NEW ALGORITHM : End
     """
-
-    def is_links_equal(self, l1, l2):
-        if l1.trans.i == l2.trans.i and l1.receiv.i == l2.receiv.i \
-                and l1.trans.j == l2.trans.j and l1.receiv.j == l2.receiv.j:
-            return True
-        else:
-            return False
-
-    def add_commun_link_utilization(self, p1, p2, lu):
-        for m in p1.array:
-            for n in p2.array:
-                if self.is_links_equal(m, n):
-                    m.add_utilization(lu)
-
-    def task_overlap(self, p1, p2):
-        for m in p1.array:
-            for n in p2.array:
-                if self.is_links_equal(m, n):
-                    return True
-        return False
 
     def get_link_utilisation(self, link):
         return link.utilization_rate
@@ -379,23 +364,3 @@ class Generation:
     """
     Analysis Tool
     """
-
-    def direction_intersection(self, message):
-        intersection = []
-        # Getting XY route
-        path1 = message.get_xy_path_coordinate()
-
-        # Exploring loop
-        for msg in self.messages:
-            # exclude the message itself from the list
-            if msg == message:
-                continue
-
-            # Getting XY route
-            path2 = msg.get_xy_path_coordinate()
-
-            # Testing the overlap (intersection)
-            if self.task_overlap(path1, path2):
-                intersection.append(msg)
-
-        return intersection
