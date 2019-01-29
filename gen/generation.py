@@ -270,7 +270,7 @@ class Generation:
         # loop : check if all message links are in the interval (between max and min rate)
         while True:
             # find outside interval links
-            outside_link = self.find_links_outside_interval(message, min_rate, max_rate, error_rate)
+            outside_link = self.find_links_outside_interval(path1, min_rate, max_rate, error_rate)
 
             # if there is no outside link (loop end)
             if len(outside_link) == 0:
@@ -280,10 +280,14 @@ class Generation:
             link = outside_link.pop()
 
             # get the link axe ( X or Y)
-            axe = (0 if link.trans.i == link.receiv.i else 1)
+            router_src = self.noc.get_router_coordinate_by_id(link[0])
+            router_dest = self.noc.get_router_coordinate_by_id(link[1])
+
+            axe = (0 if router_src.i == router_dest.i else 1)
 
             # get conflict task
-            conflict_message = self.generate_conflict_task_by_axe(link, axe, min_rate, message.offset)
+            conflict_message = self.generate_conflict_task_by_axe([router_src, router_dest],
+                                                                  axe, min_rate, message.offset)
 
             # add communicating task to taskset
             self.messages.append(conflict_message)
@@ -292,8 +296,10 @@ class Generation:
             # get conflict message data
             conflict_lu = conflict_message.get_link_utilization()
             path2 = conflict_message.get_xy_path_coordinate(self.noc)
+
             # add LU to link
-            self.add_commun_link_utilization(path1, path2, conflict_lu)
+            for link in path2:
+                self.noc.links[str(link[0])][str(link[1])] += conflict_lu
 
     # This function provide us links which are outside [min_rate, max_rate]
     def find_links_outside_interval(self, path, max_rate, min_rate, error_rate):
@@ -310,12 +316,12 @@ class Generation:
     # This function aims to set the communication axe to conflict message
     def generate_conflict_task_by_axe(self, link, axe, min_rate, offset):
         if axe == 0:  # X axe
-            src = Coordinate(link.trans.i, 0)
-            dest = Coordinate(link.trans.i, self._square_size - 1)
+            src = Coordinate(link[0].i, 0)
+            dest = Coordinate(link[0].i, self._square_size - 1)
 
         else:  # Y axe
-            src = Coordinate(0, link.trans.j)
-            dest = Coordinate(self._square_size - 1, link.trans.j)
+            src = Coordinate(0, link[0].j)
+            dest = Coordinate(self._square_size - 1, link[0].j)
 
         # generate message
         message = self.generate_communicating_task_by_axe(min_rate, offset, src, dest)
