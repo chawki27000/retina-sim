@@ -1,6 +1,7 @@
 import math
 import random
 import sys
+import time
 
 import yaml
 
@@ -13,7 +14,7 @@ from gen.unifast import Unifast
 class Generation:
     def __init__(self):
         self._quantum_tab = []
-        self.period_array = [50, 100, 150, 200, 300, 600]
+        self.period_array = [1200, 1500, 2000, 2200, 2700, 3000, 3500, 4000]
         self.offset_array = [0, 10, 15, 30, 60, 80]
         self.messages = []
         self.counter = 0
@@ -265,12 +266,14 @@ class Generation:
     def conflict_task_by_axe(self, message, max_rate, min_rate, error_rate):
 
         # extract message XY routing coordinate
-        path1 = message.get_xy_path_coordinate()
+        path1 = message.get_xy_path_coordinate(self.noc)
 
         # loop : check if all message links are in the interval (between max and min rate)
         while True:
             # find outside interval links
             outside_link = self.find_links_outside_interval(path1, min_rate, max_rate, error_rate)
+
+            print(outside_link)
 
             # if there is no outside link (loop end)
             if len(outside_link) == 0:
@@ -296,10 +299,10 @@ class Generation:
             # get conflict message data
             conflict_lu = conflict_message.get_link_utilization()
             path2 = conflict_message.get_xy_path_coordinate(self.noc)
-
+            print("PATH 2 : %s" % path2)
             # add LU to link
             for link in path2:
-                self.noc.links[str(link[0])][str(link[1])] += conflict_lu
+                self.add_utilization_rate_to_link(link, conflict_lu)
 
     # This function provide us links which are outside [min_rate, max_rate]
     def find_links_outside_interval(self, path, max_rate, min_rate, error_rate):
@@ -307,8 +310,9 @@ class Generation:
 
         for p in path:
             lu = self.noc.links[str(p[0])][str(p[1])]
-            if lu > max_rate + error_rate \
-                    or lu < min_rate - error_rate:
+            if lu < (max_rate + error_rate) / 100 or \
+                    lu > (min_rate - error_rate) / 100:
+                print('LU ADDED : %f' % lu)
                 outside_link.append(p)
 
         return outside_link
@@ -332,7 +336,8 @@ class Generation:
     # to define deadline interval, we define a lower bound (70% of its period)
     def generate_communicating_task_by_axe(self, min_rate, offset, src, dest):
         while True:
-            size = random.randint(structure.PACKET_DEFAULT_SIZE, structure.PACKET_DEFAULT_SIZE * 3)
+            time.sleep(0.3)
+            size = random.randint(structure.PACKET_DEFAULT_SIZE, structure.PACKET_DEFAULT_SIZE * 10)
             period = self.period_array[random.randint(0, len(self.period_array) - 1)]
             lower_bound = int(0.7 * period)
             deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
@@ -341,13 +346,12 @@ class Generation:
 
             # calculate message Lu
             lu = message.get_link_utilization()
-            print("LU : %f" % lu)
+            print("min rate : %d === LU : %f" % (min_rate, lu))
             if lu > (min_rate / 100):
                 continue
             else:
                 break
 
-        # self.counter += 1
         return message
 
     # function to add an utilization rate to a specified link

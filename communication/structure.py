@@ -4,10 +4,9 @@ import math
 from collections import namedtuple
 
 from analysis.end_to_end_latency import EndToEndLatency
-from communication.routing import Coordinate
 
 FLIT_DEFAULT_SIZE = 32
-PACKET_DEFAULT_SIZE = 128
+PACKET_DEFAULT_SIZE = 1024
 
 
 class Packet:
@@ -83,12 +82,13 @@ class Message:
 
         # Packet construct
         packetNumber = int(math.ceil(float(self.size / PACKET_DEFAULT_SIZE)))
-
+        self.size = PACKET_DEFAULT_SIZE * packetNumber
         for i in range(packetNumber):
             self.packets.append(Packet(i, self.dest, self))
 
     def get_link_utilization(self):
-        return round(self.size / self.period, 2)
+        size_cycle = float(self.size / FLIT_DEFAULT_SIZE)
+        return round(float(size_cycle / self.period), 2)
 
     def set_priority(self, priority):
         self.priority = priority
@@ -247,45 +247,3 @@ Link = namedtuple('Link', [
     'transmitter',
     'receiver',
 ])
-# class Link:
-#     def __init__(self, trans, receiv):
-#         self.trans = trans
-#         self.receiv = receiv
-#         self.utilization_rate = 0
-#
-#     def add_utilization(self, rate):
-#         self.utilization_rate += rate
-#
-#     def __str__(self):
-#         return '%s -> %s' % (self.trans, self.receiv)
-#
-#
-# class LinkArray:
-#     def __init__(self):
-#         self.array = []
-#
-#     def add_link(self, link):
-#         self.array.append(link)
-#
-#     def size(self):
-#         return len(self.array)
-#
-#     def check_utilization_rate(self, val, rate, error):
-#         for link in self.array:
-#             if link.utilization_rate + val > rate + error:
-#                 return False
-#         return True
-#
-#     def add_utilization(self, rate):
-#         for link in self.array:
-#             link.add_utilization(rate)
-#
-#     def clear_utilization_rate(self):
-#         for link in self.array:
-#             link.utilization_rate = 0
-#
-#     def __str__(self):
-#         string = ''
-#         for link in self.array:
-#             string += link + ' : ' + str(link.utilization_rate)
-#             string += '\n'
