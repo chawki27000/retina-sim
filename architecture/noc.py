@@ -153,6 +153,11 @@ class NoC:
                 # Link Array filling
                 self.links[str(router_himself.id)][str(temporary_router.id)] = 0
 
+    def link_array_clean(self):
+        for key in self.links.keys():
+            for key2 in self.links[key]:
+                self.links[key][key2] = 0
+
     def get_router_coordinate_by_id(self, router_id):
         for i in range(self.square_size):
             for j in range(self.square_size):

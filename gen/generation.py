@@ -21,6 +21,7 @@ class Generation:
 
     def set_noc(self, noc):
         self.noc = noc
+        self.noc.link_array_filling()
 
     def config(self, link):
         with open(link, 'r') as stream:
@@ -146,6 +147,7 @@ class Generation:
             src = coord[0]
             dest = coord[1]
             message = Message(self.counter, period, size, offset, deadline, src, dest)
+
             # set random priority (optional)
             if self._arbitration == 'Priority':
                 priority = random.randint(0, self._nbvc - 1)
@@ -155,8 +157,10 @@ class Generation:
             self.messages.append(message)
 
             # Generate task conflict
-            self.conflict_task_generation_discard(message, 50, 20)
-            self.counter += 1
+            self.conflict_task_by_axe(message, 70, 40, 0)
+
+            # Cleaning LU
+            self.noc.link_array_clean()
 
         return self.messages
 
@@ -202,69 +206,68 @@ class Generation:
     Creation and Generation Conflict Task Part
     """
 
-    def generate_random_communicating_task(self, max_size, offset):
-        coord = self.generate_random_coordinate()
-        src = coord[0]
-        dest = coord[1]
-        size = random.randint(1, max_size)
-        period = self.period_array[random.randint(0, len(self.period_array) - 1)]
-        lower_bound = int(0.7 * period)
-        deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
-
-        message = Message(self.counter, period, size, offset, deadline, src, dest)
-        self.counter += 1
-        return message
-
-    def generation_conflict_coordinate(self, src):
-        dest_i = src.i
-        dest_j = src.j
-        while src.i == dest_i:
-            dest_i = random.randint(0, self._square_size - 1)
-        while src.j == dest_j:
-            dest_j = random.randint(0, self._square_size - 1)
-
-        return Coordinate(dest_i, dest_j)
-
-    def conflict_task_generation_discard(self, message, rate, error_rate):
-
-        # extract message XY routing coordinate
-        path1 = message.get_xy_path_coordinate()
-
-        # while loop to check if the whole path respects rate
-        while not self.check_rate_equal_path(path1, rate, error_rate):
-            # generate random task with random size
-            message_conflict = self.generate_random_communicating_task(message.size, message.offset)
-            path2 = message_conflict.get_xy_path_coordinate()
-
-            # if the two tasks share at least one physical link (overlap)
-            overlap = self.task_overlap(path1, path2)
-            print('Overlap : %s' % overlap)
-            if not overlap:
-                continue  # Discard
-
-            conflict_lu = message_conflict.get_link_utilization()
-            print('Message conflict : %f' % conflict_lu)
-
-            # check if generated communication doesn't exceed the rate + error
-            if not path2.check_utilization_rate(conflict_lu, rate, error_rate):
-                print('Discard')
-                continue  # Discard
-
-            # add a communication task to message array
-            print('->->->-> ADD IT')
-            self.add_commun_link_utilization(path1, path2, conflict_lu)
-            self.messages.append(message_conflict)
-            # self.counter += 1
-
-        # Clear utilization rate
-        path1.clear_utilization_rate()
+    # def generate_random_communicating_task(self, max_size, offset):
+    #     coord = self.generate_random_coordinate()
+    #     src = coord[0]
+    #     dest = coord[1]
+    #     size = random.randint(1, max_size)
+    #     period = self.period_array[random.randint(0, len(self.period_array) - 1)]
+    #     lower_bound = int(0.7 * period)
+    #     deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
+    #
+    #     message = Message(self.counter, period, size, offset, deadline, src, dest)
+    #     self.counter += 1
+    #     return message
+    #
+    # def generation_conflict_coordinate(self, src):
+    #     dest_i = src.i
+    #     dest_j = src.j
+    #     while src.i == dest_i:
+    #         dest_i = random.randint(0, self._square_size - 1)
+    #     while src.j == dest_j:
+    #         dest_j = random.randint(0, self._square_size - 1)
+    #
+    #     return Coordinate(dest_i, dest_j)
+    #
+    # def conflict_task_generation_discard(self, message, rate, error_rate):
+    #
+    #     # extract message XY routing coordinate
+    #     path1 = message.get_xy_path_coordinate()
+    #
+    #     # while loop to check if the whole path respects rate
+    #     while not self.check_rate_equal_path(path1, rate, error_rate):
+    #         # generate random task with random size
+    #         message_conflict = self.generate_random_communicating_task(message.size, message.offset)
+    #         path2 = message_conflict.get_xy_path_coordinate()
+    #
+    #         # if the two tasks share at least one physical link (overlap)
+    #         overlap = self.task_overlap(path1, path2)
+    #         print('Overlap : %s' % overlap)
+    #         if not overlap:
+    #             continue  # Discard
+    #
+    #         conflict_lu = message_conflict.get_link_utilization()
+    #         print('Message conflict : %f' % conflict_lu)
+    #
+    #         # check if generated communication doesn't exceed the rate + error
+    #         if not path2.check_utilization_rate(conflict_lu, rate, error_rate):
+    #             print('Discard')
+    #             continue  # Discard
+    #
+    #         # add a communication task to message array
+    #         print('->->->-> ADD IT')
+    #         self.add_commun_link_utilization(path1, path2, conflict_lu)
+    #         self.messages.append(message_conflict)
+    #         # self.counter += 1
+    #
+    #     # Clear utilization rate
+    #     path1.clear_utilization_rate()
 
     """
     NEW ALGORITHM : Begin
     """
 
     def conflict_task_by_axe(self, message, max_rate, min_rate, error_rate):
-
         # extract message XY routing coordinate
         path1 = message.get_xy_path_coordinate(self.noc)
 
@@ -299,7 +302,9 @@ class Generation:
             # get conflict message data
             conflict_lu = conflict_message.get_link_utilization()
             path2 = conflict_message.get_xy_path_coordinate(self.noc)
-            print("PATH 2 : %s" % path2)
+
+            print("PATH 2 : %s" % path2)  #######
+
             # add LU to link
             for link in path2:
                 self.add_utilization_rate_to_link(link, conflict_lu)
@@ -312,7 +317,8 @@ class Generation:
             lu = self.noc.links[str(p[0])][str(p[1])]
             if lu < (max_rate + error_rate) / 100 or \
                     lu > (min_rate - error_rate) / 100:
-                print('LU ADDED : %f' % lu)
+                print('LU ADDED : %f' % lu)  ########
+
                 outside_link.append(p)
 
         return outside_link
@@ -336,7 +342,9 @@ class Generation:
     # to define deadline interval, we define a lower bound (70% of its period)
     def generate_communicating_task_by_axe(self, min_rate, offset, src, dest):
         while True:
-            time.sleep(0.3)
+
+            time.sleep(0.5)  ########
+
             size = random.randint(structure.PACKET_DEFAULT_SIZE, structure.PACKET_DEFAULT_SIZE * 10)
             period = self.period_array[random.randint(0, len(self.period_array) - 1)]
             lower_bound = int(0.7 * period)
@@ -346,7 +354,9 @@ class Generation:
 
             # calculate message Lu
             lu = message.get_link_utilization()
-            print("min rate : %d === LU : %f" % (min_rate, lu))
+
+            print("%s -> %s ||| min rate : %d === LU : %f" % (src, dest, min_rate, lu))  ########
+
             if lu > (min_rate / 100):
                 continue
             else:

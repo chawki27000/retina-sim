@@ -377,6 +377,7 @@ class TestConflictByAxe(unittest.TestCase):
         self.assertLessEqual(conflict_task.get_link_utilization(), 0.3)
 
     def test_conflict_task_by_axe(self):
+
         self.generation.conflict_task_by_axe(self.message, 70, 40, 0)
         print('==========> %d' % len(self.generation.messages))
 
