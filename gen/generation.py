@@ -203,67 +203,6 @@ class Generation:
         return [Coordinate(src_i, src_j), Coordinate(dest_i, dest_j)]
 
     """
-    Creation and Generation Conflict Task Part
-    """
-
-    # def generate_random_communicating_task(self, max_size, offset):
-    #     coord = self.generate_random_coordinate()
-    #     src = coord[0]
-    #     dest = coord[1]
-    #     size = random.randint(1, max_size)
-    #     period = self.period_array[random.randint(0, len(self.period_array) - 1)]
-    #     lower_bound = int(0.7 * period)
-    #     deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
-    #
-    #     message = Message(self.counter, period, size, offset, deadline, src, dest)
-    #     self.counter += 1
-    #     return message
-    #
-    # def generation_conflict_coordinate(self, src):
-    #     dest_i = src.i
-    #     dest_j = src.j
-    #     while src.i == dest_i:
-    #         dest_i = random.randint(0, self._square_size - 1)
-    #     while src.j == dest_j:
-    #         dest_j = random.randint(0, self._square_size - 1)
-    #
-    #     return Coordinate(dest_i, dest_j)
-    #
-    # def conflict_task_generation_discard(self, message, rate, error_rate):
-    #
-    #     # extract message XY routing coordinate
-    #     path1 = message.get_xy_path_coordinate()
-    #
-    #     # while loop to check if the whole path respects rate
-    #     while not self.check_rate_equal_path(path1, rate, error_rate):
-    #         # generate random task with random size
-    #         message_conflict = self.generate_random_communicating_task(message.size, message.offset)
-    #         path2 = message_conflict.get_xy_path_coordinate()
-    #
-    #         # if the two tasks share at least one physical link (overlap)
-    #         overlap = self.task_overlap(path1, path2)
-    #         print('Overlap : %s' % overlap)
-    #         if not overlap:
-    #             continue  # Discard
-    #
-    #         conflict_lu = message_conflict.get_link_utilization()
-    #         print('Message conflict : %f' % conflict_lu)
-    #
-    #         # check if generated communication doesn't exceed the rate + error
-    #         if not path2.check_utilization_rate(conflict_lu, rate, error_rate):
-    #             print('Discard')
-    #             continue  # Discard
-    #
-    #         # add a communication task to message array
-    #         print('->->->-> ADD IT')
-    #         self.add_commun_link_utilization(path1, path2, conflict_lu)
-    #         self.messages.append(message_conflict)
-    #         # self.counter += 1
-    #
-    #     # Clear utilization rate
-    #     path1.clear_utilization_rate()
-
-    """
     NEW ALGORITHM : Begin
     """
 
@@ -293,6 +232,7 @@ class Generation:
 
             # get conflict task
             conflict_message = self.generate_conflict_task_by_axe([router_src, router_dest],
+                                                                  link,
                                                                   axe, min_rate, message.offset)
 
             # add communicating task to taskset
@@ -324,14 +264,26 @@ class Generation:
         return outside_link
 
     # This function aims to set the communication axe to conflict message
-    def generate_conflict_task_by_axe(self, link, axe, min_rate, offset):
+    def generate_conflict_task_by_axe(self, router, ids, axe, min_rate, offset):
+
+        # determining the link direction (left -> right) or (right -> left)
+        direction = self.get_link_direction(ids)
+
         if axe == 0:  # X axe
-            src = Coordinate(link[0].i, 0)
-            dest = Coordinate(link[0].i, self._square_size - 1)
+            if direction == 0:  # left -> right
+                src = Coordinate(router[0].i, 0)
+                dest = Coordinate(router[0].i, self._square_size - 1)
+            else:  # right -> left
+                src = Coordinate(router[0].i, self._square_size - 1)
+                dest = Coordinate(router[0].i, 0)
 
         else:  # Y axe
-            src = Coordinate(0, link[0].j)
-            dest = Coordinate(self._square_size - 1, link[0].j)
+            if direction == 0:  # up -> down
+                src = Coordinate(0, router[0].j)
+                dest = Coordinate(self._square_size - 1, router[0].j)
+            else:  # down -> up
+                src = Coordinate(self._square_size - 1, router[0].j)
+                dest = Coordinate(0, router[0].j)
 
         # generate message
         message = self.generate_communicating_task_by_axe(min_rate, offset, src, dest)
@@ -343,7 +295,7 @@ class Generation:
     def generate_communicating_task_by_axe(self, min_rate, offset, src, dest):
         while True:
 
-            time.sleep(0.5)  ########
+            time.sleep(1)  ########
 
             size = random.randint(structure.PACKET_DEFAULT_SIZE, structure.PACKET_DEFAULT_SIZE * 10)
             period = self.period_array[random.randint(0, len(self.period_array) - 1)]
@@ -381,6 +333,7 @@ class Generation:
                 return False
         return True
 
-    """
-    Analysis Tool
-    """
+    def get_link_direction(self, ids):
+        # 0 :: left -> right || up -> down
+        # 1 :: right -> left || down -> up
+        return 0 if ids[0] < ids[1] else 1
