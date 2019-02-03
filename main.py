@@ -52,9 +52,10 @@ def main():
         # Messages generation
         messages = generation.scenario('input/' + file + '/scenario.yml')
 
+        # set logging level + log file
         logging.basicConfig(level=level,
                             handlers=[
-                                logging.FileHandler("input/output.log"),
+                                logging.FileHandler('input/output.log'),
                                 logging.StreamHandler()
                             ])
 
