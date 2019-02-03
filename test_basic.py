@@ -316,13 +316,44 @@ class TestConflictByAxe(unittest.TestCase):
         self.assertLessEqual(conflict_task.get_link_utilization(), 0.3)
 
     def test_conflict_task_by_axe(self):
-        self.src = Coordinate(2, 3)
-        self.dest = Coordinate(3, 0)
-        self.message = Message(1, 12, 256, 0, 0, self.src, self.dest)
-
         self.generation.conflict_task_by_axe(self.message, 70, 40, 0)
 
-        print('==========> %d' % len(self.generation.messages))
+
+class TestAnalysisTool(unittest.TestCase):
+
+    def setUp(self):
+        self.noc = NoC("Network-On-Chip", 4, 4, 12, [1, 1, 1, 1])
+
+        self.src = Coordinate(0, 0)
+        self.dest = Coordinate(2, 2)
+        self.message = Message(1, 12, 256, 0, 0, self.src, self.dest)
+        self.packet = Packet(1, self.dest, self.message)
+
+        self.flit = self.packet.flits[0]
+
+        self.proc_engine = self.noc.router_matrix[0][0].proc_engine
+        self.router = self.noc.router_matrix[0][0]
+
+        self.generation = Generation()
+        self.generation.set_noc(self.noc)
+        self.generation.set_square_size(4)
+
+        self.noc.link_array_filling()
+
+    def test_is_links_equal(self):
+        message1 = Message(1, 12, 256, 0, 0, Coordinate(0, 2), Coordinate(2, 2))
+        message2 = Message(1, 12, 256, 0, 0, Coordinate(0, 3), Coordinate(3, 3))
+        p1 = self.message.get_xy_path_coordinate(self.noc)
+        p2 = message1.get_xy_path_coordinate(self.noc)
+        p3 = message2.get_xy_path_coordinate(self.noc)
+
+        self.assertEqual(self.generation.task_overlap(p1, p2), True)
+        self.assertEqual(self.generation.task_overlap(p1, p3), False)
+
+    def test_direction_intersection(self):
+        self.assertEqual(len(self.generation.direction_intersection(self.message)), 0)
+        self.generation.conflict_task_by_axe(self.message, 70, 40, 0)
+        self.assertGreater(len(self.generation.direction_intersection(self.message)), 0)
 
 
 if __name__ == '__main__':

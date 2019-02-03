@@ -39,9 +39,6 @@ def main():
         generation = Generation()
         generation.config('input/' + file + '/config.yml')
 
-        # Messages generation
-        messages = generation.scenario('input/' + file + '/scenario.yml')
-
         square_size = generation.square_size()
         nbvc = generation.nbvc()
         vc_size = generation.vc_size()
@@ -52,7 +49,14 @@ def main():
 
         generation.set_noc(noc)
 
-        logging.basicConfig(level=level)
+        # Messages generation
+        messages = generation.scenario('input/' + file + '/scenario.yml')
+
+        logging.basicConfig(level=level,
+                            handlers=[
+                                logging.FileHandler("input/output.log"),
+                                logging.StreamHandler()
+                            ])
 
         logging.info('###################################################################')
         logging.info('### ReTiNAS - Real-Time Network-on-chip Analysis and Simulation ###')
@@ -64,6 +68,20 @@ def main():
         logging.info('\tArbitration Policy : %s' % arbitration)
         logging.info('-------------------------------')
 
+        """
+        Analysis : Begin
+        """
+        csv = CSVWriter(messages, 1)
+        csv.generate_csv('input/' + file + '/result_analysis.csv',
+                         arbitration=arbitration,
+                         generation=generation)
+        """
+        Analysis : End
+        """
+
+        """
+        Simulation : Begin
+        """
         # Simulator Settings
         simulation = Simulation(noc, generation.hyperperiod())
 
@@ -77,10 +95,14 @@ def main():
 
         # printing
         messages_i = simulation.get_message_instance_tab()
-        csv = CSVWriter(messages_i)
-        csv.generate_csv('input/' + file + '/result.csv')
+        csv = CSVWriter(messages_i, 0)
+        csv.generate_csv('input/' + file + '/result_sim.csv')
 
         simulation.reset_clock()
+
+        """
+        Simulation : End
+        """
 
 
 if __name__ == "__main__":

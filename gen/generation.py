@@ -1,7 +1,6 @@
 import math
 import random
 import sys
-import time
 
 import yaml
 
@@ -159,8 +158,8 @@ class Generation:
             # Generate task conflict
             self.conflict_task_by_axe(message, 70, 40, 0)
 
-            # Cleaning LU
-            self.noc.link_array_clean()
+            # TODO : Cleaning LU --> not yet
+            # self.noc.link_array_clean()
 
         return self.messages
 
@@ -215,7 +214,7 @@ class Generation:
             # find outside interval links
             outside_link = self.find_links_outside_interval(path1, min_rate, max_rate, error_rate)
 
-            print(outside_link)
+            ####### print(outside_link)
 
             # if there is no outside link (loop end)
             if len(outside_link) == 0:
@@ -243,7 +242,7 @@ class Generation:
             conflict_lu = conflict_message.get_link_utilization()
             path2 = conflict_message.get_xy_path_coordinate(self.noc)
 
-            print("PATH 2 : %s" % path2)  #######
+            ####### print("PATH 2 : %s" % path2)
 
             # add LU to link
             for link in path2:
@@ -257,7 +256,7 @@ class Generation:
             lu = self.noc.links[str(p[0])][str(p[1])]
             if lu < (max_rate + error_rate) / 100 or \
                     lu > (min_rate - error_rate) / 100:
-                print('LU ADDED : %f' % lu)  ########
+                ######## print('LU ADDED : %f' % lu)
 
                 outside_link.append(p)
 
@@ -295,7 +294,7 @@ class Generation:
     def generate_communicating_task_by_axe(self, min_rate, offset, src, dest):
         while True:
 
-            time.sleep(1)  ########
+            ######## time.sleep(1)
 
             size = random.randint(structure.PACKET_DEFAULT_SIZE, structure.PACKET_DEFAULT_SIZE * 10)
             period = self.period_array[random.randint(0, len(self.period_array) - 1)]
@@ -307,7 +306,7 @@ class Generation:
             # calculate message Lu
             lu = message.get_link_utilization()
 
-            print("%s -> %s ||| min rate : %d === LU : %f" % (src, dest, min_rate, lu))  ########
+            ######## print("%s -> %s ||| min rate : %d === LU : %f" % (src, dest, min_rate, lu))
 
             if lu > (min_rate / 100):
                 continue
@@ -337,3 +336,34 @@ class Generation:
         # 0 :: left -> right || up -> down
         # 1 :: right -> left || down -> up
         return 0 if ids[0] < ids[1] else 1
+
+    """
+    Analysis Tool
+    """
+
+    def task_overlap(self, p1, p2):
+        for m in p1:
+            for n in p2:
+                if m[0] == n[0] and m[1] == n[1]:
+                    return True
+        return False
+
+    def direction_intersection(self, message):
+        intersection = []
+        # Getting XY route
+        path1 = message.get_xy_path_coordinate(self.noc)
+
+        # Exploring loop
+        for msg in self.messages:
+            # exclude the message itself from the list
+            if msg == message:
+                continue
+
+            # Getting XY route
+            path2 = msg.get_xy_path_coordinate(self.noc)
+
+            # Testing the overlap (intersection)
+            if self.task_overlap(path1, path2):
+                intersection.append(msg)
+
+        return intersection
