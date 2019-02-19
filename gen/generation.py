@@ -13,7 +13,7 @@ from gen.unifast import Unifast
 class Generation:
     def __init__(self):
         self._quantum_tab = []
-        self.period_array = [1200, 1500, 2000, 2200, 2700, 3000, 3500, 4000]
+        self.period_array = [1000, 1500, 2000, 3000, 4000, 6000]
         self.offset_array = [0, 10, 15, 30, 60, 80]
         self.messages = []
         self.counter = 0
@@ -53,7 +53,7 @@ class Generation:
                 # Messages
                 if 'scenario' in data:
                     messages = data['scenario']
-                    count = 0
+
                     for m in messages:
                         src = m['src']
                         dest = m['dest']
@@ -61,16 +61,25 @@ class Generation:
                         offset = m['offset']
                         deadline = m['deadline']
                         period = m['period']
+                        priority = -1
+                        # set random priority (optional)
+                        if self._arbitration == 'Priority':
+                            priority = random.randint(0, self._nbvc - 1)
 
-                        self.messages.append(Message(count,
-                                                     period,
-                                                     size,
-                                                     offset,
-                                                     deadline,
-                                                     Coordinate(src['i'], src['j']),
-                                                     Coordinate(dest['i'], dest['j']),
-                                                     ))
-                        count += 1
+                        # Message Creation
+                        message = Message(self.counter,
+                                          period,
+                                          size,
+                                          offset,
+                                          deadline,
+                                          Coordinate(src['i'], src['j']),
+                                          Coordinate(dest['i'], dest['j']),
+                                          priority)
+
+                        self.messages.append(message)
+
+                        # Generate task conflict
+                        # self.conflict_task_by_axe(message, 70, 40, 0)
 
                 # Automatic generation
                 elif 'task' in data:
@@ -150,10 +159,10 @@ class Generation:
             # set random priority (optional)
             if self._arbitration == 'Priority':
                 priority = random.randint(0, self._nbvc - 1)
-                message.set_priority(priority)
 
             # add generated message to messages list
             self.messages.append(message)
+            self.counter += 1
 
             # Generate task conflict
             self.conflict_task_by_axe(message, 70, 40, 0)

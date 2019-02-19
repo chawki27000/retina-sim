@@ -6,13 +6,14 @@ from collections import namedtuple
 from analysis.end_to_end_latency import EndToEndLatency
 
 FLIT_DEFAULT_SIZE = 32
-PACKET_DEFAULT_SIZE = 1024
+PACKET_DEFAULT_SIZE = 128
 
 
 class Packet:
-    def __init__(self, id, dest, message):
+    def __init__(self, id, dest, message, priority=-1):
         self.id = id
         self.message = message
+        self.priority = priority
         self.flits = []
 
         # Flit construct
@@ -20,11 +21,11 @@ class Packet:
 
         for i in range(flitNumber):
             if i == 0:  # Head Flit
-                self.flits.append(Flit(i, FlitType.head, 0, self))
+                self.flits.append(Flit(i, FlitType.head, 0, self, self.priority))
             elif i == flitNumber - 1:  # Tail Flit
-                self.flits.append(Flit(i, FlitType.tail, 0, self))
+                self.flits.append(Flit(i, FlitType.tail, 0, self, self.priority))
             else:  # Body Flit
-                self.flits.append(Flit(i, FlitType.body, 0, self))
+                self.flits.append(Flit(i, FlitType.body, 0, self, self.priority))
 
         self.set_destination(dest)
 
@@ -33,7 +34,7 @@ class Packet:
             flit.set_destination_info(dest)
 
     def get_priority(self):
-        return self.message.get_priority()
+        return self.priority
 
     def __str__(self):
         return 'Packet(%d) from Message(%d)' % (self.id, self.message.id)
@@ -48,11 +49,12 @@ class FlitType(enum.Enum):
 
 #############################################################
 class Flit:
-    def __init__(self, id, type, begin_time, packet):
+    def __init__(self, id, type, begin_time, packet, priority=-1):
         self.id = id
         self.type = type
         self.begin_time = begin_time
         self.destination = None
+        self.priority = priority
         self.packet = packet
 
     def set_destination_info(self, destination):
@@ -62,7 +64,7 @@ class Flit:
         self.arrival_time = arrival_time
 
     def get_priority(self):
-        return self.packet.get_priority()
+        return self.priority
 
     def __str__(self):
         return '%s %d-%d-%d' % (self.type, self.id, self.packet.id, self.packet.message.id)
@@ -70,7 +72,7 @@ class Flit:
 
 #############################################################
 class Message:
-    def __init__(self, id, period, size, offset, deadline, src, dest):
+    def __init__(self, id, period, size, offset, deadline, src, dest, priority=-1):
         self.id = id
         self.period = period
         self.offset = offset
@@ -78,20 +80,18 @@ class Message:
         self.src = src
         self.dest = dest
         self.size = size
+        self.priority = priority
         self.packets = []
 
         # Packet construct
         packetNumber = int(math.ceil(float(self.size / PACKET_DEFAULT_SIZE)))
         self.size = PACKET_DEFAULT_SIZE * packetNumber
         for i in range(packetNumber):
-            self.packets.append(Packet(i, self.dest, self))
+            self.packets.append(Packet(i, self.dest, self, self.priority))
 
     def get_link_utilization(self):
         size_cycle = float(self.size / FLIT_DEFAULT_SIZE)
         return round(float(size_cycle / self.period), 2)
-
-    def set_priority(self, priority):
-        self.priority = priority
 
     def get_priority(self):
         return self.priority
@@ -100,14 +100,16 @@ class Message:
         # Routing Distance Computing
         nR = EndToEndLatency.routing_distance(self.src, self.dest)
         # Iteration Number
-        nI = EndToEndLatency.iteration_number(len(self.packets), 4)  # TODO : change to dynamic
+        # nI = EndToEndLatency.iteration_number(len(self.packets), 4)  # TODO : change to dynamic
+        nI = EndToEndLatency.iteration_number(len(self.packets) * 32, 4)  # TODO : change to dynamic
 
         # Network Latency
         # nI: Number of iteration
         # oV: Total VC occupied(pessimistic)
         # nR: Routing Distance
-        nL = EndToEndLatency.network_latency(nI, len(intersection), nR)
+        nL = EndToEndLatency.network_latency(nI, len(intersection) + 1, nR)
 
+        print('nR: %d -- nI: %d -- oV: %d' % (nR, nI, len(intersection)))
         return int((EndToEndLatency.NETWORK_ACCESS_LAT * 2) + nL)
 
     def get_basic_network_latency(self):
@@ -183,7 +185,7 @@ class Message:
 class MessageInstance(Message):
     def __init__(self, message, instance):
         super().__init__(message.id, message.period, message.size, message.offset,
-                         message.deadline, message.src, message.dest)
+                         message.deadline, message.src, message.dest, message.priority)
         self.instance = instance
 
     def set_depart_time(self, depart_time):

@@ -57,6 +57,10 @@ class Router:
                 # Destination Reached
                 return self.outPE
 
+    """
+    ########## Fixed Round-Robin Arbitration ##########
+    """
+
     def send_flit(self, vc, outport, time):
 
         if len(vc.flits) <= 0:
@@ -188,10 +192,6 @@ class Router:
 
         self.logger.info('(%d) : %s - %s -> %s' % (time, flit, self, self.proc_engine))
 
-    """
-    Fixed Round-Robin Arbitration
-    """
-
     def vc_target_outport(self, vc):
         if len(vc.flits) > 0:
             if self.route_computation(vc.flits[0]) == self.outNorth \
@@ -280,10 +280,26 @@ class Router:
             EVENT_LIST.push(event)
 
     """
-    Priority-based Arbitration
+    ########## Priority-based Arbitration ##########
     """
 
+    def get_vc_candidate(self, candidates):
+
+        if len(candidates) == 1:
+            return candidates[0]
+
+        priority_vc = candidates[0]
+
+        for candidate in candidates[1:]:
+            if priority_vc.id > candidate.id:
+                priority_vc = candidate
+
+        return priority_vc
+
     def priority_arbiter(self, time):
+        """
+        This function gives the elected VC among non empty VCs
+        """
         for vc in self.inPE.vcs:
             self.vc_target_outport(vc)
         # Checking North VC
@@ -301,7 +317,7 @@ class Router:
 
         # VC targeting -> North
         if len(self.vcs_target_north) > 0:
-            vc = self.get_most_prioritized_vc(self.vcs_target_north)
+            vc = self.get_vc_candidate(self.vcs_target_north)
             self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
@@ -311,7 +327,7 @@ class Router:
 
         # VC targeting -> South
         if len(self.vcs_target_south) > 0:
-            vc = self.get_most_prioritized_vc(self.vcs_target_south)
+            vc = self.get_vc_candidate(self.vcs_target_south)
             self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
@@ -321,7 +337,7 @@ class Router:
 
         # VC targeting -> East
         if len(self.vcs_target_east) > 0:
-            vc = self.get_most_prioritized_vc(self.vcs_target_east)
+            vc = self.get_vc_candidate(self.vcs_target_east)
             self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
@@ -331,7 +347,7 @@ class Router:
 
         # VC targeting -> West
         if len(self.vcs_target_west) > 0:
-            vc = self.get_most_prioritized_vc(self.vcs_target_west)
+            vc = self.get_vc_candidate(self.vcs_target_west)
             self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
@@ -341,7 +357,7 @@ class Router:
 
         # VC targeting -> PE
         if len(self.vcs_target_pe) > 0:
-            vc = self.get_most_prioritized_vc(self.vcs_target_pe)
+            vc = self.get_vc_candidate(self.vcs_target_pe)
             self.logger.debug('Time : (%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.ARR_FLIT, {'router': self, 'vc': vc}, time)
@@ -442,35 +458,6 @@ class Router:
                 vc.lock = False
                 vc.credit_out()
                 self.logger.debug('Time : (%d) - VC (%s) - released' % (time, vc))
-
-        # If Quantum is finished
-        if vc.quantum <= 0:
-            # print('Quantum or VC finished for : %s' % vc)
-            self.logger.debug('Time : (%d) - VC (%s) - quantum finished' % (time, vc))
-            # new VC Election - event push
-            event = Event(EventType.VC_ELECTION, self, time + 1)
-            EVENT_LIST.push(event)
-        elif len(vc.flits) <= 0:
-            self.logger.debug('Time : (%d) - VC (%s) - NO Flits' % (time, vc))
-            # new VC Election - event push
-            event = Event(EventType.VC_ELECTION, self, time + 1)
-            EVENT_LIST.push(event)
-
-        # Another Quantum
-        else:
-            self.logger.debug('Time : (%d) - VC (%s) - quantum NOT finished' % (time, vc))
-            event = Event(EventType.SEND_FLIT, {'router': self,
-                                                'vc': vc,
-                                                'outport': outport}, time + 1)
-            EVENT_LIST.push(event)
-
-    def get_most_prioritized_vc(self, vcs_target):
-        priority = sys.maxsize  # lowest priority
-
-        for i in range(len(vcs_target)):
-            if vcs_target[i].id < priority:
-                priority = i
-        return vcs_target[priority]
 
     def __str__(self):
         return 'Router (%d,%d)' % (self.coordinate.i, self.coordinate.j)

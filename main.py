@@ -51,11 +51,12 @@ def main():
 
         # Messages generation
         messages = generation.scenario('input/' + file + '/scenario.yml')
-
+        print("Taskset : %d" % len(messages))
+        print("HP : %d" % generation.hyperperiod())
         # set logging level + log file
         logging.basicConfig(level=level,
                             handlers=[
-                                logging.FileHandler('input/output.log'),
+                                logging.FileHandler('input/' + file + '/output.log'),
                                 logging.StreamHandler()
                             ])
 
