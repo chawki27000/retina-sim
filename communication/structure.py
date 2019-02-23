@@ -188,6 +188,10 @@ class MessageInstance(Message):
                          message.deadline, message.src, message.dest, message.priority)
         self.instance = instance
 
+        # Meta data relative to sending
+        self.packet_wait = 0
+        self.flit_wait = 0
+
     def set_depart_time(self, depart_time):
         self._depart_time = depart_time
 

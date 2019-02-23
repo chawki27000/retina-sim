@@ -45,6 +45,7 @@ class Simulation:
             if events is not None and len(events) > 0:
                 current_event = events.pop()
 
+                #### Processing Engine Events ####
                 if current_event.event_type == EventType.SEND_MESSAGE:
                     # get Event Entity
                     message = current_event.entity
@@ -58,6 +59,21 @@ class Simulation:
                     # Send Message
                     proc_engine.send_to_router(message, CLOCK)
 
+                elif current_event.event_type == EventType.PE_SEND_PACKET:
+                    # Get event Entity
+                    pe = current_event.entity
+
+                    pe.send_packet(CLOCK)
+
+                elif current_event.event_type == EventType.PE_SEND_FLIT:
+                    # Get event Entity
+                    pe = current_event.entity['pe']
+                    packet = current_event.entity['packet']
+                    vc = current_event.entity['vc']
+
+                    pe.send_flit(packet, vc, CLOCK)
+
+                #### Router Events ####
                 elif current_event.event_type == EventType.SEND_FLIT:
                     # get Event Entity
                     router = current_event.entity['router']

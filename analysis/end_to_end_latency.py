@@ -28,3 +28,12 @@ class EndToEndLatency:
     @staticmethod
     def basic_network_latency(li, fsize, h):
         return (ceil(li / fsize) * fsize) + h
+
+    """
+    Qin et al.
+    """
+
+    class QinModel:
+
+        def __init__(self, taskset):
+            self.taskset = taskset

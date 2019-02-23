@@ -6,6 +6,8 @@ class EventType(enum.Enum):
     SEND_FLIT = 2
     VC_ELECTION = 3
     ARR_FLIT = 4
+    PE_SEND_PACKET = 5
+    PE_SEND_FLIT = 6
 
 
 class EventList:

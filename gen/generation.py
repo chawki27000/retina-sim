@@ -77,6 +77,7 @@ class Generation:
                                           priority)
 
                         self.messages.append(message)
+                        self.counter += 1
 
                         # Generate task conflict
                         # self.conflict_task_by_axe(message, 70, 40, 0)

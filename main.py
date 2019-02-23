@@ -56,7 +56,7 @@ def main():
         # set logging level + log file
         logging.basicConfig(level=level,
                             handlers=[
-                                logging.FileHandler('input/' + file + '/output.log'),
+                                # logging.FileHandler('input/' + file + '/output.log'),
                                 logging.StreamHandler()
                             ])
 
