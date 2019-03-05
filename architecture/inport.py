@@ -34,3 +34,7 @@ class InPort:
             if vc.isFree():
                 count += 1
         return count
+
+    def vcs_status(self):
+        for vc in self.vcs:
+            print("%s -- Direction %s -- size : %d" % (vc, vc.direction, len(vc.flits)))

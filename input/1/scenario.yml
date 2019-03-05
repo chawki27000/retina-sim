@@ -5,18 +5,18 @@ scenario:
       dest:
           i: 1
           j: 2
-      size: 128
+      size: 256
       offset: 0
       deadline: 0
       period: 100
 
-    - src:
-          i: 0
-          j: 0
-      dest:
-          i: 1
-          j: 2
-      size: 128
-      offset: 0
-      deadline: 0
-      period: 100
+#    - src:
+#          i: 0
+#          j: 0
+#      dest:
+#          i: 1
+#          j: 2
+#      size: 128
+#      offset: 0
+#      deadline: 0
+#      period: 100

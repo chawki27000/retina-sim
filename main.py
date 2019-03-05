@@ -4,7 +4,7 @@ import getopt
 import os
 
 from architecture.noc import NoC
-from engine.simulation import Simulation
+from engine.simulation import Simulation, TRACESET
 from gen.generation import Generation
 from gen.csv_writer import CSVWriter
 
@@ -96,15 +96,16 @@ def main():
         logging.info('### Simulation --> END ###')
 
         # printing
-        messages_i = simulation.get_message_instance_tab()
-        csv = CSVWriter(messages_i, 0)
-        csv.generate_csv('input/' + file + '/result_sim.csv')
+        # messages_i = simulation.get_message_instance_tab()
+        # csv = CSVWriter(messages_i, 0)
+        # csv.generate_csv('input/' + file + '/result_sim.csv')
 
         simulation.reset_clock()
 
         """
         Simulation : End
         """
+        print(TRACESET)
 
 
 if __name__ == "__main__":

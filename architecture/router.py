@@ -1,10 +1,11 @@
 import logging
-import sys
 
+from communication.routing import Direction
 from communication.structure import FlitType, NodeArray, Node
 from engine.event import Event
 from engine.event_list import EventType
 from engine.global_obj import EVENT_LIST
+from engine.simulation import TRACESET
 
 
 class Router:
@@ -189,6 +190,7 @@ class Router:
 
         # Flit store
         self.proc_engine.flit_receiving(flit)
+        TRACESET.set_flit_arrival(flit, time)
 
         self.logger.info('(%d) : %s - %s -> %s' % (time, flit, self, self.proc_engine))
 
@@ -367,9 +369,6 @@ class Router:
 
     def send_flit_by_priority(self, vc, outport, time):
 
-        if len(vc.flits) <= 0:
-            return
-
         # getting the first flit in VC
         flit = vc.dequeue()
         if flit is None:
@@ -462,6 +461,11 @@ class Router:
                 vc.credit_out()
                 self.logger.debug('(%d) - %s : released' % (time, vc))
 
+                # Check if there is another VC PE wants ready to send
+                if vc.direction == Direction.pe:
+                    event = Event(EventType.VC_ELECTION, self, time)
+                    EVENT_LIST.push(event)
+
         # If VC empty
         if len(vc.flits) <= 0:
             self.logger.debug('(%d) - %s : NO Flits' % (time, vc))
@@ -476,6 +480,13 @@ class Router:
                                                 'vc': vc,
                                                 'outport': outport}, time + 1)
             EVENT_LIST.push(event)
+
+    def inport_status(self):
+        print("North : %s" % (self.inNorth.vcs_status()))
+        print("South : %s" % (self.inSouth.vcs_status()))
+        print("West : %s" % (self.inWest.vcs_status()))
+        print("East : %s" % (self.inEast.vcs_status()))
+        print("PE : %s" % (self.inPE.vcs_status()))
 
     def __str__(self):
         return 'Router (%d,%d)' % (self.coordinate.i, self.coordinate.j)

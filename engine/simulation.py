@@ -2,8 +2,10 @@ from communication.structure import MessageInstance
 from engine.event import Event
 from engine.event_list import EventType
 from engine.global_obj import EVENT_LIST
+from gen.trace import TraceSet
 
 CLOCK = 0
+TRACESET = TraceSet()
 
 
 class Simulation:
@@ -29,6 +31,7 @@ class Simulation:
 
     def simulate(self, arbitration):
         global CLOCK
+        global TRACESET
         while not EVENT_LIST.isEmpty() and CLOCK < self.hyperperiod:
 
             events = EVENT_LIST.pull(CLOCK)
@@ -65,13 +68,6 @@ class Simulation:
 
                     pe.send_packet(CLOCK)
 
-                elif current_event.event_type == EventType.PE_SEND_FLIT:
-                    # Get event Entity
-                    pe = current_event.entity['pe']
-                    packet = current_event.entity['packet']
-                    vc = current_event.entity['vc']
-
-                    pe.send_flit(packet, vc, CLOCK)
 
                 #### Router Events ####
                 elif current_event.event_type == EventType.SEND_FLIT:
