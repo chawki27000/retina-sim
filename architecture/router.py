@@ -461,10 +461,10 @@ class Router:
                 vc.credit_out()
                 self.logger.debug('(%d) - %s : released' % (time, vc))
 
-                # Check if there is another VC PE wants ready to send
-                if vc.direction == Direction.pe:
-                    event = Event(EventType.VC_ELECTION, self, time)
-                    EVENT_LIST.push(event)
+            # Check if there is another VC PE wants ready to send
+            if vc.direction == Direction.pe:
+                event = Event(EventType.VC_ELECTION, self, time)
+                EVENT_LIST.push(event)
 
         # If VC empty
         if len(vc.flits) <= 0:
@@ -480,6 +480,27 @@ class Router:
                                                 'vc': vc,
                                                 'outport': outport}, time + 1)
             EVENT_LIST.push(event)
+
+    def router_check(self, time):
+        print("%s CHECK at : %d" % (self, time))
+        for msg in self.proc_engine.sending_queue:
+
+            if len(msg.packets) <= 0:
+                continue
+
+            # get remain packet
+            packet = msg.packets.pop(0)
+
+            # check if there is available VC
+            vc_allotted = self.inPE.priority_vc_allocator(packet)
+            if vc_allotted is not None:
+                print('available')
+            else:
+                print('NOT available')
+
+        # event push
+        event = Event(EventType.ROUTER_CHECK, self, time + 1)
+        EVENT_LIST.push(event)
 
     def inport_status(self):
         print("North : %s" % (self.inNorth.vcs_status()))

@@ -8,6 +8,7 @@ class EventType(enum.Enum):
     ARR_FLIT = 4
     PE_SEND_PACKET = 5
     PE_SEND_FLIT = 6
+    ROUTER_CHECK = 7
 
 
 class EventList:

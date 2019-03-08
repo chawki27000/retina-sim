@@ -1,4 +1,3 @@
-import copy
 import logging
 
 from engine.event import Event
@@ -12,6 +11,7 @@ class ProcessingEngine:
     def __init__(self):
         self.flit_arr_queue = []
         self.packets = None
+        self.sending_queue = []
 
     def router_bind(self, router):
         self.router = router
@@ -55,11 +55,14 @@ class ProcessingEngine:
 
     def send_to_router(self, message_instance, time):
         # Getting Packets from Message
-        self.packets = copy.deepcopy(message_instance.packets)
-        message_instance.set_depart_time(time)
+        # self.packets = copy.deepcopy(message_instance.packets)
+        # message_instance.set_depart_time(time)
 
-        # event push
-        event = Event(EventType.PE_SEND_PACKET, self, time)
+        # insert message in sending queue
+        self.sending_queue.append(message_instance)
+
+        # # event push
+        event = Event(EventType.ROUTER_CHECK, self.router, time)
         EVENT_LIST.push(event)
 
     def flit_receiving(self, flit):

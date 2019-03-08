@@ -93,13 +93,18 @@ class Simulation:
                         router.priority_arbiter(CLOCK)
 
                 elif current_event.event_type == EventType.ARR_FLIT:
-
                     # get Event Entity
                     router = current_event.entity['router']
                     vc = current_event.entity['vc']
 
                     # Flit -> PE
                     router.arrived_flit(vc, CLOCK)
+
+                elif current_event.event_type == EventType.ROUTER_CHECK:
+                    # get Event Entity
+                    router = current_event.entity
+
+                    router.router_check(CLOCK)
 
             else:
                 CLOCK += 1
