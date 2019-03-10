@@ -6,6 +6,7 @@ from engine.event import Event
 from engine.event_list import EventType
 from engine.global_obj import EVENT_LIST
 from engine.simulation import TRACESET
+from gen.trace import Trace
 
 
 class Router:
@@ -217,7 +218,7 @@ class Router:
                 self.vcs_target_pe.append(vc)
 
     def rr_arbiter(self, time):
-
+        print("### VC ELECTION ON : %s" % self)
         for vc in self.inPE.vcs:
             self.vc_target_outport(vc)
         # Checking North VC
@@ -285,7 +286,7 @@ class Router:
     ########## Priority-based Arbitration ##########
     """
 
-    def get_vc_candidate(self, candidates):
+    def get_highest_priority_vc(self, candidates):
 
         # No Arbitration
         if len(candidates) == 1:
@@ -321,7 +322,8 @@ class Router:
 
         # VC targeting -> North
         if len(self.vcs_target_north) > 0:
-            vc = self.get_vc_candidate(self.vcs_target_north)
+            vc = self.get_highest_priority_vc(self.vcs_target_north)
+            self.vcs_target_north.clear()
             self.logger.debug('(%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
@@ -331,7 +333,8 @@ class Router:
 
         # VC targeting -> South
         if len(self.vcs_target_south) > 0:
-            vc = self.get_vc_candidate(self.vcs_target_south)
+            vc = self.get_highest_priority_vc(self.vcs_target_south)
+            self.vcs_target_south.clear()
             self.logger.debug('(%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
@@ -341,7 +344,8 @@ class Router:
 
         # VC targeting -> East
         if len(self.vcs_target_east) > 0:
-            vc = self.get_vc_candidate(self.vcs_target_east)
+            vc = self.get_highest_priority_vc(self.vcs_target_east)
+            self.vcs_target_east.clear()
             self.logger.debug('(%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
@@ -351,7 +355,8 @@ class Router:
 
         # VC targeting -> West
         if len(self.vcs_target_west) > 0:
-            vc = self.get_vc_candidate(self.vcs_target_west)
+            vc = self.get_highest_priority_vc(self.vcs_target_west)
+            self.vcs_target_west.clear()
             self.logger.debug('(%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
@@ -361,7 +366,8 @@ class Router:
 
         # VC targeting -> PE
         if len(self.vcs_target_pe) > 0:
-            vc = self.get_vc_candidate(self.vcs_target_pe)
+            vc = self.get_highest_priority_vc(self.vcs_target_pe)
+            self.vcs_target_pe.clear()
             self.logger.debug('(%d) - %s -> Elected' % (time, vc))
             # event push
             event = Event(EventType.ARR_FLIT, {'router': self, 'vc': vc}, time)
@@ -461,11 +467,6 @@ class Router:
                 vc.credit_out()
                 self.logger.debug('(%d) - %s : released' % (time, vc))
 
-            # Check if there is another VC PE wants ready to send
-            if vc.direction == Direction.pe:
-                event = Event(EventType.VC_ELECTION, self, time)
-                EVENT_LIST.push(event)
-
         # If VC empty
         if len(vc.flits) <= 0:
             self.logger.debug('(%d) - %s : NO Flits' % (time, vc))
@@ -482,25 +483,42 @@ class Router:
             EVENT_LIST.push(event)
 
     def router_check(self, time):
-        print("%s CHECK at : %d" % (self, time))
+
         for msg in self.proc_engine.sending_queue:
 
-            if len(msg.packets) <= 0:
-                continue
-
-            # get remain packet
+            # get the first packet of a message
             packet = msg.packets.pop(0)
 
-            # check if there is available VC
-            vc_allotted = self.inPE.priority_vc_allocator(packet)
-            if vc_allotted is not None:
-                print('available')
-            else:
-                print('NOT available')
+            # reserving InPE VC to the packet
+            vc_allotted = self.inPE.priority_vc_allocator(packet.priority)
 
-        # event push
-        event = Event(EventType.ROUTER_CHECK, self, time + 1)
-        EVENT_LIST.push(event)
+            if vc_allotted is not None:
+                # put all flits on the InPE at the same time
+                i = 0
+                while len(packet.flits) > 0:
+                    flit = packet.flits.pop(0)
+                    vc_allotted.enqueue(flit)
+                    self.logger.info('(%d) : %s - %s -> %s -> %s' % (time, flit, self.proc_engine, vc_allotted, self))
+                    # trace create
+                    TRACESET.add_trace(Trace(flit, time + i))
+                    i += 1
+
+                # event push
+                event = Event(EventType.VC_ELECTION, self, time + 1)
+                EVENT_LIST.push(event)
+
+            else:
+                msg.packets.insert(0, packet)
+
+            # if all packets are sent
+            if len(msg.packets) <= 0:
+                self.proc_engine.sending_queue.remove(msg)
+
+            # otherwise, create another event
+            else:
+                # event push
+                event = Event(EventType.ROUTER_CHECK, self, time + 1)
+                EVENT_LIST.push(event)
 
     def inport_status(self):
         print("North : %s" % (self.inNorth.vcs_status()))
