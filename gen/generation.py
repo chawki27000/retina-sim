@@ -87,9 +87,14 @@ class Generation:
                     nb_task = data['task']
                     method = data['method']
                     load = data['load']
+                    self._arbitration = data['arbitration']
 
                     if method == 'UuniFast':
                         self.messages = self.uunifast_generate(nb_task, load)
+
+                    # Generate task conflict
+                    # for message in self.messages:
+                    #     self.conflict_task_by_axe(message, 70, 40, 0)
 
                 return self.messages
 
@@ -151,22 +156,24 @@ class Generation:
             lower_bound = int(load * period)
             deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
 
+            # set random priority (optional)
+            if self._arbitration == 'Priority':
+                priority = random.randint(0, self._nbvc - 1)
+            else:
+                priority = -1
+
             # Generate messages
             coord = self.generate_random_coordinate()
             src = coord[0]
             dest = coord[1]
-            message = Message(self.counter, period, size, offset, deadline, src, dest)
-
-            # set random priority (optional)
-            if self._arbitration == 'Priority':
-                priority = random.randint(0, self._nbvc - 1)
+            message = Message(self.counter, period, size, offset, deadline, src, dest, priority)
 
             # add generated message to messages list
             self.messages.append(message)
             self.counter += 1
 
             # Generate task conflict
-            self.conflict_task_by_axe(message, 70, 40, 0)
+            # self.conflict_task_by_axe(message, 70, 40, 0)
 
             # TODO : Cleaning LU --> not yet
             # self.noc.link_array_clean()

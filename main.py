@@ -73,10 +73,10 @@ def main():
         """
         Analysis : Begin
         """
-        csv = CSVWriter(messages, 1)
-        csv.generate_csv('input/' + file + '/result_analysis.csv',
-                         arbitration=arbitration,
-                         generation=generation)
+        # csv = CSVWriter(messages, 1)
+        # csv.generate_csv('input/' + file + '/result_analysis.csv',
+        #                  arbitration=arbitration,
+        #                  generation=generation)
         """
         Analysis : End
         """
