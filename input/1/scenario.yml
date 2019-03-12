@@ -1,4 +1,22 @@
-task: 10
-method: 'UuniFast'
-load: 0.7
-arbitration: 'Priority'
+scenario:
+    - src:
+          i: 0
+          j: 0
+      dest:
+          i: 1
+          j: 2
+      size: 256
+      offset: 0
+      deadline: 0
+      period: 100
+
+    - src:
+          i: 0
+          j: 0
+      dest:
+          i: 1
+          j: 2
+      size: 128
+      offset: 0
+      deadline: 0
+      period: 100

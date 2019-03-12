@@ -80,7 +80,7 @@ class Generation:
                         self.counter += 1
 
                         # Generate task conflict
-                        # self.conflict_task_by_axe(message, 70, 40, 0)
+                        self.conflict_task_by_axe(message, 70, 40, 0)
 
                 # Automatic generation
                 elif 'task' in data:
@@ -318,7 +318,8 @@ class Generation:
             lower_bound = int(0.7 * period)
             deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
 
-            message = Message(self.counter, period, size, offset, deadline, src, dest)
+            priority = random.randint(0, self._nbvc - 1)
+            message = Message(self.counter, period, size, offset, deadline, src, dest, priority)
 
             # calculate message Lu
             lu = message.get_link_utilization()

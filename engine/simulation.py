@@ -1,3 +1,5 @@
+import time
+
 from communication.structure import MessageInstance
 from engine.event import Event
 from engine.event_list import EventType
@@ -33,6 +35,8 @@ class Simulation:
         global CLOCK
         global TRACESET
         while not EVENT_LIST.isEmpty() and CLOCK < self.hyperperiod:
+
+            # time.sleep(1)
 
             events = EVENT_LIST.pull(CLOCK)
 

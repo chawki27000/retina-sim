@@ -67,7 +67,8 @@ class Flit:
         return self.priority
 
     def __str__(self):
-        return '%s %d-%d-%d' % (self.type, self.id, self.packet.id, self.packet.message.id)
+        return '%s %d-%d-%d(%d)' % (
+            self.type, self.id, self.packet.id, self.packet.message.id, self.packet.message.instance)
 
 
 #############################################################
@@ -175,8 +176,9 @@ class Message:
         return tuple_array
 
     def __str__(self):
-        return '[id: %d -- size: %d -- period: %d -- offset: %d -- deadline: %d -- src: %s -- dest: %s]' \
-               % (self.id, self.size, self.period, self.offset, self.deadline, self.src, self.dest)
+        return '[id: %d -- size: %d -- period: %d -- offset: %d -- deadline: %d ' \
+               '-- src: %s -- dest: %s -- priority : %d]' \
+               % (self.id, self.size, self.period, self.offset, self.deadline, self.src, self.dest, self.priority)
 
 
 #############################################################
@@ -219,7 +221,8 @@ class MessageInstance(Message):
             return self.get_priority()
 
     def __str__(self):
-        return 'Message (%d)(instance = %d)' % (self.id, self.instance)
+        return 'Message (%d)(instance = %d)(P = %d)(S = %s)(D = %s)' % \
+               (self.id, self.instance, self.priority, self.src, self.dest)
 
 
 #############################################################

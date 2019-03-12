@@ -484,6 +484,7 @@ class Router:
 
     def router_check(self, time):
 
+        once = False
         for msg in self.proc_engine.sending_queue:
 
             # get the first packet of a message
@@ -517,8 +518,10 @@ class Router:
             # otherwise, create another event
             else:
                 # event push
-                event = Event(EventType.ROUTER_CHECK, self, time + 1)
-                EVENT_LIST.push(event)
+                if not once:
+                    event = Event(EventType.ROUTER_CHECK, self, time + 1)
+                    EVENT_LIST.push(event)
+                    once = True
 
     def inport_status(self):
         print("North : %s" % (self.inNorth.vcs_status()))

@@ -96,8 +96,8 @@ def main():
         logging.info('### Simulation --> END ###')
 
         # printing
-        # messages_i = simulation.get_message_instance_tab()
-        # csv = CSVWriter(messages_i, 0)
+        messages_i = simulation.get_message_instance_tab()
+        csv = CSVWriter(messages_i, 0)
         # csv.generate_csv('input/' + file + '/result_sim.csv')
 
         simulation.reset_clock()
@@ -106,6 +106,7 @@ def main():
         Simulation : End
         """
         print(TRACESET)
+        csv.trace_csv(TRACESET)
 
 
 if __name__ == "__main__":

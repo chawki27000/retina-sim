@@ -2,6 +2,10 @@ import csv
 
 
 class CSVWriter:
+
+    def trace_csv(self, trace):
+        pass
+
     def __init__(self, messages_i, type):
         self.messages_i = messages_i
         self.type = type
