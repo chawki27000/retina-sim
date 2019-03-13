@@ -3,23 +3,32 @@ import csv
 
 class CSVWriter:
 
-    def trace_csv(self, traceset, nb_task):
-        task_counter = 0
+    def get_max_instance(self):
+        max = 0
+        for instance in self.messages_i:
+            if instance.instance > max:
+                max = instance.instance
+
+        return max
 
     def __init__(self, messages_i, type):
         self.messages_i = messages_i
         self.type = type
 
-    def flit_print(self):
-        for message in self.messages_i:
-            pass
-            print('%s depart at : %d arrived at : %d' % (message,
-                                                         message.get_depart_time(),
-                                                         message.get_arriving_time()))
+    def simulation_trace_csv(self, link):
 
-    def generate_csv(self, link, arbitration=None, generation=None):
+        # build header row
+        header = ['i']
+        max_instance = self.get_max_instance()
+        for i in range(1, max_instance + 1):
+            stri = 'L_' + str(i)
+            header.append(stri)
+
         with open(link, mode='w') as file:
             writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+            # File Header
+            writer.writerow(header)
 
             # Array to dictionary
             dico = dict()
@@ -31,50 +40,12 @@ class CSVWriter:
                     dico[message.id] = []
                     dico[message.id].append(message)
 
-            # generation
-            if self.type == 0:  # Simulation
-                # File Header
-                writer.writerow(['i', 'L_1', 'L_2', 'L_3', 'L_4'])
+            # Write instance latency value
+            for item in dico.items():
+                instance = item[1]
 
-                for item in dico.items():
-                    instance = item[1]
+                write_array = [item[0]]
+                for i in range(len(instance)):
+                    write_array.append(instance[i].get_latency())
 
-                    if len(instance) == 1:
-                        writer.writerow([instance[0].id,
-                                         instance[0].get_latency()])
-
-                    if len(instance) == 2:
-                        writer.writerow([instance[0].id,
-                                         instance[0].get_latency(),
-                                         instance[1].get_latency()])
-
-                    if len(instance) == 3:
-                        writer.writerow([instance[0].id,
-                                         instance[0].get_latency(),
-                                         instance[1].get_latency(),
-                                         instance[2].get_latency()])
-
-                    if len(instance) == 4:
-                        writer.writerow([instance[0].id,
-                                         instance[0].get_latency(),
-                                         instance[1].get_latency(),
-                                         instance[2].get_latency(),
-                                         instance[3].get_latency()])
-
-            elif self.type == 1:  # Analysis
-                # File Header
-                writer.writerow(['i', 'WCLA'])
-
-                if arbitration == 'RR':
-                    for message in self.messages_i:
-                        # compute direct intersection
-                        intersection = generation.direction_intersection(message)
-                        writer.writerow([message.id,
-                                         message.get_analysis_latency(intersection)])
-
-                elif arbitration == 'Priority':
-                    for message in self.messages_i:
-                        # compute direct intersection
-                        intersection = generation.direction_intersection(message)
-                        writer.writerow([message.id,
-                                         message.get_priority_analysis_latency(intersection)])
+                writer.writerow(write_array)

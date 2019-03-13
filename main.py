@@ -98,17 +98,20 @@ def main():
         # printing
         messages_i = simulation.get_message_instance_tab()
         csv = CSVWriter(messages_i, 0)
-        # csv.generate_csv('input/' + file + '/result_sim.csv')
 
         simulation.reset_clock()
 
         """
         Simulation : End
         """
+
         # print(TRACESET)
         # csv.trace_csv(TRACESET, len(messages))
+
         for message in simulation.get_message_instance_tab():
             print("%s --> latency : %d" % (message, message.get_latency()))
+
+        csv.simulation_trace_csv('input/' + file + '/result_sim.csv')
 
 
 if __name__ == "__main__":
