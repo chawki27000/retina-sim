@@ -1,7 +1,7 @@
 import logging
+import math
 
-from communication.routing import Direction
-from communication.structure import FlitType, NodeArray, Node
+from communication.structure import FlitType, NodeArray, Node, PACKET_DEFAULT_SIZE, FLIT_DEFAULT_SIZE
 from engine.event import Event
 from engine.event_list import EventType
 from engine.global_obj import EVENT_LIST
@@ -187,11 +187,16 @@ class Router:
             self.vcs_dictionary.remove(vc)
             vc.lock = False
 
-        flit.set_arrival_time(time)
-
         # Flit store
         self.proc_engine.flit_receiving(flit)
         TRACESET.set_flit_arrival(flit, time)
+
+        # set arrival time to the last flit into the message
+        nb_flit = PACKET_DEFAULT_SIZE / FLIT_DEFAULT_SIZE
+        nb_packet = math.ceil(flit.packet.message.size / PACKET_DEFAULT_SIZE)
+
+        if flit.id == nb_flit - 1 and flit.packet.id == nb_packet - 1:
+            flit.packet.message.set_arrival_time(time)
 
         self.logger.info('(%d) : %s - %s -> %s' % (time, flit, self, self.proc_engine))
 
@@ -500,6 +505,11 @@ class Router:
                     flit = packet.flits.pop(0)
                     vc_allotted.enqueue(flit)
                     self.logger.info('(%d) : %s - %s -> %s -> %s' % (time, flit, self.proc_engine, vc_allotted, self))
+
+                    # set depart time for the first first in the first packet
+                    if flit.id == 0 and flit.packet.id == 0:
+                        flit.packet.message.set_depart_time(time)
+
                     # trace create
                     TRACESET.add_trace(Trace(flit, time + i))
                     i += 1

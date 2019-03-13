@@ -8,7 +8,7 @@ scenario:
       size: 256
       offset: 0
       deadline: 0
-      period: 100
+      period: 1000
 
     - src:
           i: 0
@@ -19,4 +19,9 @@ scenario:
       size: 128
       offset: 0
       deadline: 0
-      period: 100
+      period: 1000
+
+#'task': 10
+#'method': 'UuniFast'
+#'load': 0.7
+#'arbitration': 'Priority'

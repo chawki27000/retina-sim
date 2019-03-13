@@ -93,8 +93,8 @@ class Generation:
                         self.messages = self.uunifast_generate(nb_task, load)
 
                     # Generate task conflict
-                    # for message in self.messages:
-                    #     self.conflict_task_by_axe(message, 70, 40, 0)
+                    for message in self.messages:
+                        self.conflict_task_by_axe(message, 70, 40, 0)
 
                 return self.messages
 

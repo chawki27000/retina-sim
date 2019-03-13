@@ -105,8 +105,10 @@ def main():
         """
         Simulation : End
         """
-        print(TRACESET)
-        csv.trace_csv(TRACESET)
+        # print(TRACESET)
+        # csv.trace_csv(TRACESET, len(messages))
+        for message in simulation.get_message_instance_tab():
+            print("%s --> latency : %d" % (message, message.get_latency()))
 
 
 if __name__ == "__main__":

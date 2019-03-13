@@ -197,24 +197,11 @@ class MessageInstance(Message):
     def set_depart_time(self, depart_time):
         self._depart_time = depart_time
 
-    def get_depart_time(self):
-        return self._depart_time
-
-    def get_arriving_time(self):
-        arr = -1
-
-        packets = self.packets
-        for packet in packets:
-            flits = packet.flits
-            for flit in flits:
-                if flit.type == FlitType.tail:
-                    if arr < flit.arrival_time:
-                        arr = flit.arrival_time
-
-        return arr
+    def set_arrival_time(self, arrival_time):
+        self._arrival_time = arrival_time
 
     def get_latency(self):
-        return self.get_arriving_time() - self.get_depart_time()
+        return self._arrival_time - self._depart_time
 
     def get_priority(self):
         if hasattr(self, 'priority'):

@@ -3,8 +3,8 @@ import csv
 
 class CSVWriter:
 
-    def trace_csv(self, trace):
-        pass
+    def trace_csv(self, traceset, nb_task):
+        task_counter = 0
 
     def __init__(self, messages_i, type):
         self.messages_i = messages_i
