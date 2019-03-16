@@ -196,7 +196,7 @@ class Router:
         nb_packet = math.ceil(flit.packet.message.size / PACKET_DEFAULT_SIZE)
 
         if flit.id == nb_flit - 1 and flit.packet.id == nb_packet - 1:
-            flit.packet.message.set_arrival_time(time)
+            flit.packet.message.set_arrival_time(time-nb_packet)
 
         self.logger.info('(%d) : %s - %s -> %s' % (time, flit, self, self.proc_engine))
 
@@ -288,7 +288,7 @@ class Router:
             EVENT_LIST.push(event)
 
     """
-    ########## Priority-based Arbitration ##########
+    ########## Preemptive Priority-based Arbitration ##########
     """
 
     def get_highest_priority_vc(self, candidates):

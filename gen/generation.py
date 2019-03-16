@@ -14,7 +14,8 @@ class Generation:
     def __init__(self):
         self._quantum_tab = []
         self.period_array = [1000, 1500, 2000, 3000, 4000, 6000]
-        self.offset_array = [0, 10, 15, 30, 60, 80]
+        # self.offset_array = [0, 10, 15, 30, 60, 80]
+        self.offset_array = [0]
         self.messages = []
         self.counter = 0
 
@@ -63,7 +64,7 @@ class Generation:
                         period = m['period']
                         priority = -1
                         # set random priority (optional)
-                        if self._arbitration == 'Priority':
+                        if self._arbitration == 'PRIORITY_PREEMPT':
                             priority = random.randint(0, self._nbvc - 1)
 
                         # Message Creation
@@ -74,27 +75,26 @@ class Generation:
                                           deadline,
                                           Coordinate(src['i'], src['j']),
                                           Coordinate(dest['i'], dest['j']),
-                                          priority)
+                                          19)
 
                         self.messages.append(message)
                         self.counter += 1
 
                         # Generate task conflict
-                        self.conflict_task_by_axe(message, 70, 40, 0)
+                        self.conflict_task_by_axe(message, 100, 90, 0)
 
                 # Automatic generation
                 elif 'task' in data:
                     nb_task = data['task']
                     method = data['method']
                     load = data['load']
-                    self._arbitration = data['arbitration']
 
                     if method == 'UuniFast':
                         self.messages = self.uunifast_generate(nb_task, load)
 
                     # Generate task conflict
-                    for message in self.messages:
-                        self.conflict_task_by_axe(message, 70, 40, 0)
+                    # for message in self.messages:
+                    #     self.conflict_task_by_axe(message, 70, 40, 0)
 
                 return self.messages
 

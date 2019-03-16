@@ -1,5 +1,3 @@
-import time
-
 from communication.structure import MessageInstance
 from engine.event import Event
 from engine.event_list import EventType
@@ -83,7 +81,7 @@ class Simulation:
                     # FLIT Sending
                     if arbitration == 'RR':
                         router.send_flit(vc, outport, CLOCK)
-                    elif arbitration == 'Priority':
+                    elif arbitration == 'PRIORITY_PREEMPT':
                         router.send_flit_by_priority(vc, outport, CLOCK)
 
                 elif current_event.event_type == EventType.VC_ELECTION:
@@ -93,7 +91,7 @@ class Simulation:
                     # VC Election
                     if arbitration == 'RR':
                         router.rr_arbiter(CLOCK)
-                    elif arbitration == 'Priority':
+                    elif arbitration == 'PRIORITY_PREEMPT':
                         router.priority_arbiter(CLOCK)
 
                 elif current_event.event_type == EventType.ARR_FLIT:

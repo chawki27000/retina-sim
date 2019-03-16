@@ -6,7 +6,7 @@ from collections import namedtuple
 from analysis.end_to_end_latency import EndToEndLatency
 
 FLIT_DEFAULT_SIZE = 32
-PACKET_DEFAULT_SIZE = 128
+PACKET_DEFAULT_SIZE = 1024
 
 
 class Packet:
@@ -208,7 +208,7 @@ class MessageInstance(Message):
             return self.get_priority()
 
     def __str__(self):
-        return 'Message (%d)(instance = %d)(P = %d)(S = %s)(D = %s)' % \
+        return 'Message (%d)(instance = %d)(Priority = %d)(S = %s)(D = %s)' % \
                (self.id, self.instance, self.priority, self.src, self.dest)
 
 
