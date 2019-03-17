@@ -63,8 +63,9 @@ class Generation:
                         deadline = m['deadline']
                         period = m['period']
                         priority = -1
+
                         # set random priority (optional)
-                        if self._arbitration == 'PRIORITY_PREEMPT':
+                        if self._arbitration == 'PRIORITY_PREEMPT' or self._arbitration == 'PRIORITY_FIX':
                             priority = random.randint(0, self._nbvc - 1)
 
                         # Message Creation
@@ -75,13 +76,13 @@ class Generation:
                                           deadline,
                                           Coordinate(src['i'], src['j']),
                                           Coordinate(dest['i'], dest['j']),
-                                          19)
+                                          priority)
 
                         self.messages.append(message)
                         self.counter += 1
 
                         # Generate task conflict
-                        self.conflict_task_by_axe(message, 100, 90, 0)
+                        # self.conflict_task_by_axe(message, 20, 10, 0)
 
                 # Automatic generation
                 elif 'task' in data:

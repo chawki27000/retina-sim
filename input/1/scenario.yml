@@ -1,14 +1,14 @@
 scenario:
-    - src:
-          i: 0
-          j: 0
-      dest:
-          i: 3
-          j: 2
-      size: 4096
-      offset: 0
-      deadline: 0
-      period: 1000
+  - src:
+      i: 0
+      j: 0
+    dest:
+      i: 3
+      j: 2
+    size: 128
+    offset: 0
+    deadline: 0
+    period: 1000
 #
 #    - src:
 #          i: 0

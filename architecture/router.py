@@ -59,11 +59,53 @@ class Router:
                 # Destination Reached
                 return self.outPE
 
+    def arrived_flit(self, vc, time):
+        flit = vc.dequeue()
+
+        if flit.type == FlitType.tail:
+            self.vcs_dictionary.remove(vc)
+            vc.lock = False
+
+        # Flit store
+        self.proc_engine.flit_receiving(flit)
+        TRACESET.set_flit_arrival(flit, time)
+
+        # set arrival time to the last flit into the message
+        nb_flit = PACKET_DEFAULT_SIZE / FLIT_DEFAULT_SIZE
+        nb_packet = math.ceil(flit.packet.message.size / PACKET_DEFAULT_SIZE)
+
+        if flit.id == nb_flit - 1 and flit.packet.id == nb_packet - 1:
+            flit.packet.message.set_arrival_time(time - nb_packet)
+
+        self.logger.info('(%d) : %s - %s -> %s' % (time, flit, self, self.proc_engine))
+
+    def vc_target_outport(self, vc):
+        if len(vc.flits) > 0:
+            if self.route_computation(vc.flits[0]) == self.outNorth \
+                    and vc not in self.vcs_target_north:
+                self.vcs_target_north.append(vc)
+                vc.reset_credit()
+            elif self.route_computation(vc.flits[0]) == self.outSouth \
+                    and vc not in self.vcs_target_south:
+                self.vcs_target_south.append(vc)
+                vc.reset_credit()
+            elif self.route_computation(vc.flits[0]) == self.outEast \
+                    and vc not in self.vcs_target_east:
+                self.vcs_target_east.append(vc)
+                vc.reset_credit()
+            elif self.route_computation(vc.flits[0]) == self.outWest \
+                    and vc not in self.vcs_target_west:
+                self.vcs_target_west.append(vc)
+                vc.reset_credit()
+            elif self.route_computation(vc.flits[0]) == self.outPE \
+                    and vc not in self.vcs_target_pe:
+                self.vcs_target_pe.append(vc)
+
     """
-    ########## Fixed Round-Robin Arbitration ##########
+    ########## Fixed Round-Robin Arbitration ######################################################################
     """
 
-    def send_flit(self, vc, outport, time):
+    def send_flit_by_credit(self, vc, outport, time):
 
         if len(vc.flits) <= 0:
             return
@@ -180,50 +222,7 @@ class Router:
                                                 'outport': outport}, time + 1)
             EVENT_LIST.push(event)
 
-    def arrived_flit(self, vc, time):
-        flit = vc.dequeue()
-
-        if flit.type == FlitType.tail:
-            self.vcs_dictionary.remove(vc)
-            vc.lock = False
-
-        # Flit store
-        self.proc_engine.flit_receiving(flit)
-        TRACESET.set_flit_arrival(flit, time)
-
-        # set arrival time to the last flit into the message
-        nb_flit = PACKET_DEFAULT_SIZE / FLIT_DEFAULT_SIZE
-        nb_packet = math.ceil(flit.packet.message.size / PACKET_DEFAULT_SIZE)
-
-        if flit.id == nb_flit - 1 and flit.packet.id == nb_packet - 1:
-            flit.packet.message.set_arrival_time(time-nb_packet)
-
-        self.logger.info('(%d) : %s - %s -> %s' % (time, flit, self, self.proc_engine))
-
-    def vc_target_outport(self, vc):
-        if len(vc.flits) > 0:
-            if self.route_computation(vc.flits[0]) == self.outNorth \
-                    and vc not in self.vcs_target_north:
-                self.vcs_target_north.append(vc)
-                vc.reset_credit()
-            elif self.route_computation(vc.flits[0]) == self.outSouth \
-                    and vc not in self.vcs_target_south:
-                self.vcs_target_south.append(vc)
-                vc.reset_credit()
-            elif self.route_computation(vc.flits[0]) == self.outEast \
-                    and vc not in self.vcs_target_east:
-                self.vcs_target_east.append(vc)
-                vc.reset_credit()
-            elif self.route_computation(vc.flits[0]) == self.outWest \
-                    and vc not in self.vcs_target_west:
-                self.vcs_target_west.append(vc)
-                vc.reset_credit()
-            elif self.route_computation(vc.flits[0]) == self.outPE \
-                    and vc not in self.vcs_target_pe:
-                self.vcs_target_pe.append(vc)
-
     def rr_arbiter(self, time):
-        print("### VC ELECTION ON : %s" % self)
         for vc in self.inPE.vcs:
             self.vc_target_outport(vc)
         # Checking North VC
@@ -288,7 +287,7 @@ class Router:
             EVENT_LIST.push(event)
 
     """
-    ########## Preemptive Priority-based Arbitration ##########
+    ########## Preemptive Priority-based Arbitration ##############################################################
     """
 
     def get_highest_priority_vc(self, candidates):
@@ -487,16 +486,20 @@ class Router:
                                                 'outport': outport}, time + 1)
             EVENT_LIST.push(event)
 
-    def router_check(self, time):
+    def router_check(self, time, arbitration):
 
         once = False
         for msg in self.proc_engine.sending_queue:
-
             # get the first packet of a message
             packet = msg.packets.pop(0)
 
             # reserving InPE VC to the packet
-            vc_allotted = self.inPE.priority_vc_allocator(packet.priority)
+            if arbitration == "PRIORITY_PREEMPT" or arbitration == "PRIORITY_FIX":
+                vc_allotted = self.inPE.priority_vc_allocator(packet.priority)
+            elif arbitration == "RR":
+                vc_allotted = self.inPE.vc_allocator()
+            else:
+                vc_allotted = None
 
             if vc_allotted is not None:
                 # put all flits on the InPE at the same time

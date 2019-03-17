@@ -6,7 +6,7 @@ from collections import namedtuple
 from analysis.end_to_end_latency import EndToEndLatency
 
 FLIT_DEFAULT_SIZE = 32
-PACKET_DEFAULT_SIZE = 1024
+PACKET_DEFAULT_SIZE = 128
 
 
 class Packet:

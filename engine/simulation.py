@@ -80,7 +80,7 @@ class Simulation:
 
                     # FLIT Sending
                     if arbitration == 'RR':
-                        router.send_flit(vc, outport, CLOCK)
+                        router.send_flit_by_credit(vc, outport, CLOCK)
                     elif arbitration == 'PRIORITY_PREEMPT':
                         router.send_flit_by_priority(vc, outport, CLOCK)
 
@@ -106,7 +106,7 @@ class Simulation:
                     # get Event Entity
                     router = current_event.entity
 
-                    router.router_check(CLOCK)
+                    router.router_check(CLOCK, arbitration)
 
             else:
                 CLOCK += 1
