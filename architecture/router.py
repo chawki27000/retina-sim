@@ -110,6 +110,10 @@ class Router:
         if len(vc.flits) <= 0:
             return
 
+        # print("--- %s ---" % self)
+        # self.inport_status()
+        # print("----------")
+
         # getting the first flit in VC
         flit = vc.dequeue()
         if flit is None:
@@ -127,7 +131,8 @@ class Router:
 
                 # send flit
                 vc_allotted.enqueue(flit)
-                self.logger.info('(%d) : %s - %s -> %s -> %s' % (time, flit, self, vc_allotted, vc_allotted.router))
+                self.logger.info(
+                    '(%d) : %s ON %s- %s -> %s -> %s' % (time, flit, vc, self, vc_allotted, vc_allotted.router))
                 vc.credit_out()
                 # registering VC allotted in dictionary
                 self.vcs_dictionary.add(Node(vc, vc_allotted))
@@ -168,7 +173,8 @@ class Router:
                 # Next routing
                 event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
                 EVENT_LIST.push(event)
-                self.logger.info('(%d) : %s - %s -> %s -> %s' % (time, flit, self, vc_allotted, vc_allotted.router))
+                self.logger.info(
+                    '(%d) : %s ON %s- %s -> %s -> %s' % (time, flit, vc, self, vc_allotted, vc_allotted.router))
                 vc.credit_out()
 
         # if is a Tail Flit
@@ -191,7 +197,8 @@ class Router:
                 self.logger.debug('(%d) - %s was not sent - No Place in VC (%s)' % (time, flit, vc_allotted))
 
             else:
-                self.logger.info('(%d) : %s - %s -> %s -> %s' % (time, flit, self, vc_allotted, vc_allotted.router))
+                self.logger.info(
+                    '(%d) : %s ON %s- %s -> %s -> %s' % (time, flit, vc, self, vc_allotted, vc_allotted.router))
                 # Next routing
                 event = Event(EventType.VC_ELECTION, vc_allotted.router, time + 1)
                 EVENT_LIST.push(event)
@@ -520,6 +527,7 @@ class Router:
                 # event push
                 event = Event(EventType.VC_ELECTION, self, time + 1)
                 EVENT_LIST.push(event)
+                print("## VC_ELECTION CREATION for %s at : %d" % (self, time + 1))
 
             else:
                 msg.packets.insert(0, packet)

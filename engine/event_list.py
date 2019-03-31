@@ -20,6 +20,14 @@ class EventList:
         return len(self.queue) == 0
 
     def push(self, event):
+
+        # Avoiding duplcation election in the same router
+        if event.event_type == EventType.VC_ELECTION:
+            if event.time in self.queue:
+                for node in self.queue[event.time]:
+                    if node.time == event.time and node.entity == event.entity:
+                        return
+
         # Avoiding duplicate event
         if self.double_event(event):
             event.time += 1
