@@ -1,10 +1,10 @@
 scenario:
   - src:
       i: 0
-      j: 1
+      j: 0
     dest:
       i: 1
-      j: 2
+      j: 1
     size: 128
     offset: 0
     deadline: 0
@@ -12,10 +12,10 @@ scenario:
 
   - src:
       i: 0
-      j: 3
+      j: 0
     dest:
       i: 1
-      j: 2
+      j: 1
     size: 128
     offset: 0
     deadline: 0

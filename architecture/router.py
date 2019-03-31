@@ -248,7 +248,7 @@ class Router:
         # VC targeting -> North
         if len(self.vcs_target_north) > 0:
             vc = self.vcs_target_north.pop(0)
-            self.logger.debug('(%d) - %s -> Elected' % (time, vc))
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
@@ -258,7 +258,7 @@ class Router:
         # VC targeting -> South
         if len(self.vcs_target_south) > 0:
             vc = self.vcs_target_south.pop(0)
-            self.logger.debug('(%d) - %s -> Elected' % (time, vc))
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
@@ -268,7 +268,7 @@ class Router:
         # VC targeting -> East
         if len(self.vcs_target_east) > 0:
             vc = self.vcs_target_east.pop(0)
-            self.logger.debug('(%d) - %s -> Elected' % (time, vc))
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
@@ -278,7 +278,7 @@ class Router:
         # VC targeting -> West
         if len(self.vcs_target_west) > 0:
             vc = self.vcs_target_west.pop(0)
-            self.logger.debug('(%d) - %s -> Elected' % (time, vc))
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
@@ -288,7 +288,7 @@ class Router:
         # VC targeting -> PE
         if len(self.vcs_target_pe) > 0:
             vc = self.vcs_target_pe.pop(0)
-            self.logger.debug('(%d) - %s -> Elected' % (time, vc))
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
             event = Event(EventType.ARR_FLIT, {'router': self, 'vc': vc}, time)
             EVENT_LIST.push(event)
@@ -335,7 +335,7 @@ class Router:
         if len(self.vcs_target_north) > 0:
             vc = self.get_highest_priority_vc(self.vcs_target_north)
             self.vcs_target_north.clear()
-            self.logger.debug('(%d) - %s -> Elected' % (time, vc))
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
@@ -346,7 +346,7 @@ class Router:
         if len(self.vcs_target_south) > 0:
             vc = self.get_highest_priority_vc(self.vcs_target_south)
             self.vcs_target_south.clear()
-            self.logger.debug('(%d) - %s -> Elected' % (time, vc))
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
@@ -357,7 +357,7 @@ class Router:
         if len(self.vcs_target_east) > 0:
             vc = self.get_highest_priority_vc(self.vcs_target_east)
             self.vcs_target_east.clear()
-            self.logger.debug('(%d) - %s -> Elected' % (time, vc))
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
@@ -368,7 +368,7 @@ class Router:
         if len(self.vcs_target_west) > 0:
             vc = self.get_highest_priority_vc(self.vcs_target_west)
             self.vcs_target_west.clear()
-            self.logger.debug('(%d) - %s -> Elected' % (time, vc))
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
             event = Event(EventType.SEND_FLIT, {'router': self,
                                                 'vc': vc,
@@ -379,7 +379,7 @@ class Router:
         if len(self.vcs_target_pe) > 0:
             vc = self.get_highest_priority_vc(self.vcs_target_pe)
             self.vcs_target_pe.clear()
-            self.logger.debug('(%d) - %s -> Elected' % (time, vc))
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
             event = Event(EventType.ARR_FLIT, {'router': self, 'vc': vc}, time)
             EVENT_LIST.push(event)
