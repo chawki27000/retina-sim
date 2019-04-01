@@ -501,7 +501,7 @@ class Router:
             packet = msg.packets.pop(0)
 
             # reserving InPE VC to the packet
-            if arbitration == "PRIORITY_PREEMPT" or arbitration == "PRIORITY_FIX":
+            if arbitration == "PRIORITY_PREEMPT" or arbitration == "PRIORITY_NON_PREEMPT":
                 vc_allotted = self.inPE.priority_vc_allocator(packet.priority)
             elif arbitration == "RR":
                 vc_allotted = self.inPE.vc_allocator()

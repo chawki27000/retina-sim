@@ -65,7 +65,7 @@ class Generation:
                         priority = -1
 
                         # set random priority (optional)
-                        if self._arbitration == 'PRIORITY_PREEMPT' or self._arbitration == 'PRIORITY_FIX':
+                        if self._arbitration == 'PRIORITY_PREEMPT' or self._arbitration == 'PRIORITY_NON_PREEMPT':
                             priority = random.randint(0, self._nbvc - 1)
 
                         # Message Creation

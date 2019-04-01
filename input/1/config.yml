@@ -2,7 +2,7 @@ noc:
   dimension: 4
   numberOfVC: 3
   VCBufferSize: 4
-  arbitration: 'RR' # RR / PRIORITY_PREEMPT / PRIORITY_FIX
+  arbitration: 'PRIORITY_PREEMPT' # RR / PRIORITY_PREEMPT / PRIORITY_FIX PRIORITY_NON_PREEMPT
 
 quantum:
   1: 3
