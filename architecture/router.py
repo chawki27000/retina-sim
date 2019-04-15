@@ -23,6 +23,7 @@ class Router:
         self.vcs_target_east = []
         self.vcs_target_west = []
         self.vcs_target_pe = []
+        self.pipelined_sending = []
 
     def inport_setting(self, inNorth, inSouth, inEast, inWest):
         self.inNorth = inNorth
@@ -76,6 +77,7 @@ class Router:
 
         if flit.id == nb_flit - 1 and flit.packet.id == nb_packet - 1:
             flit.packet.message.set_arrival_time(time - nb_packet)
+            print("############### ARRIVAL TIME : %d" % time)
 
         self.logger.info('(%d) : %s - %s -> %s' % (time, flit, self, self.proc_engine))
 
@@ -519,6 +521,7 @@ class Router:
                     # set depart time for the first first in the first packet
                     if flit.id == 0 and flit.packet.id == 0:
                         flit.packet.message.set_depart_time(time)
+                        print("############### DEPARTURE TIME : %d" % time)
 
                     # trace create
                     TRACESET.add_trace(Trace(flit, time + i))
