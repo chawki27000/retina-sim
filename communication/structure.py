@@ -56,6 +56,7 @@ class Flit:
         self.destination = None
         self.priority = priority
         self.packet = packet
+        self.timestamp = -1
 
     def set_destination_info(self, destination):
         self.destination = destination

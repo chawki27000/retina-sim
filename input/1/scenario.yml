@@ -10,16 +10,16 @@ scenario:
     deadline: 0
     period: 100
 
-#  - src:
-#      i: 0
-#      j: 1
-#    dest:
-#      i: 0
-#      j: 2
-#    size: 128
-#    offset: 0
-#    deadline: 0
-#    period: 100
+  - src:
+      i: 0
+      j: 1
+    dest:
+      i: 0
+      j: 2
+    size: 256
+    offset: 0
+    deadline: 0
+    period: 100
 
 #'task': 1
 #'method': 'UuniFast'

@@ -77,7 +77,6 @@ class Router:
 
         if flit.id == nb_flit - 1 and flit.packet.id == nb_packet - 1:
             flit.packet.message.set_arrival_time(time - nb_packet)
-            print("############### ARRIVAL TIME : %d" % time)
 
         self.logger.info('(%d) : %s - %s -> %s' % (time, flit, self, self.proc_engine))
 
@@ -299,9 +298,19 @@ class Router:
     ########## Preemptive Priority-based Arbitration ##############################################################
     """
 
-    def get_highest_priority_vc(self, candidates):
+    def get_highest_priority_vc(self, candidates, time):
 
         # No Arbitration
+        if len(candidates) == 1:
+            return candidates[0]
+
+        # filtering
+        for candidate in candidates:
+            if candidate.flits[0].timestamp == time:
+                print("############### REMOVE ---> %s FROM ---> %s" % (candidate.flits[0], candidate))
+                candidates.remove(candidate)
+
+        # After filtering
         if len(candidates) == 1:
             return candidates[0]
 
@@ -335,7 +344,7 @@ class Router:
 
         # VC targeting -> North
         if len(self.vcs_target_north) > 0:
-            vc = self.get_highest_priority_vc(self.vcs_target_north)
+            vc = self.get_highest_priority_vc(self.vcs_target_north, time)
             self.vcs_target_north.clear()
             self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
@@ -346,7 +355,7 @@ class Router:
 
         # VC targeting -> South
         if len(self.vcs_target_south) > 0:
-            vc = self.get_highest_priority_vc(self.vcs_target_south)
+            vc = self.get_highest_priority_vc(self.vcs_target_south, time)
             self.vcs_target_south.clear()
             self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
@@ -357,7 +366,7 @@ class Router:
 
         # VC targeting -> East
         if len(self.vcs_target_east) > 0:
-            vc = self.get_highest_priority_vc(self.vcs_target_east)
+            vc = self.get_highest_priority_vc(self.vcs_target_east, time)
             self.vcs_target_east.clear()
             self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
@@ -368,7 +377,7 @@ class Router:
 
         # VC targeting -> West
         if len(self.vcs_target_west) > 0:
-            vc = self.get_highest_priority_vc(self.vcs_target_west)
+            vc = self.get_highest_priority_vc(self.vcs_target_west, time)
             self.vcs_target_west.clear()
             self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
@@ -379,7 +388,7 @@ class Router:
 
         # VC targeting -> PE
         if len(self.vcs_target_pe) > 0:
-            vc = self.get_highest_priority_vc(self.vcs_target_pe)
+            vc = self.get_highest_priority_vc(self.vcs_target_pe, time)
             self.vcs_target_pe.clear()
             self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
             # event push
@@ -405,6 +414,7 @@ class Router:
 
                 # send flit
                 vc_allotted.enqueue(flit)
+                flit.timestamp = time
                 self.logger.info('(%d) : %s - %s -> %s -> %s' % (time, flit, self, vc_allotted, vc_allotted.router))
                 vc.credit_out()
                 # registering VC allotted in dictionary
@@ -433,6 +443,7 @@ class Router:
 
             # Sending to the next router
             sent = vc_allotted.enqueue(flit)
+            flit.timestamp = time
 
             if not sent:  # No Place
                 vc.restore(flit)  # restore
@@ -459,6 +470,7 @@ class Router:
 
             # Sending to the next router
             sent = vc_allotted.enqueue(flit)
+            flit.timestamp = time
 
             if not sent:  # No Place
                 vc.restore(flit)  # restore
@@ -521,7 +533,6 @@ class Router:
                     # set depart time for the first first in the first packet
                     if flit.id == 0 and flit.packet.id == 0:
                         flit.packet.message.set_depart_time(time)
-                        print("############### DEPARTURE TIME : %d" % time)
 
                     # trace create
                     TRACESET.add_trace(Trace(flit, time + i))
