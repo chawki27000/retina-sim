@@ -341,6 +341,78 @@ class Router:
 
         return priority_vc
 
+    def preemptive_priority_arbiter(self, time):
+        """
+        This function gives the elected VC among non empty VCs
+        """
+        for vc in self.inPE.vcs:
+            self.vc_target_outport(vc)
+        # Checking North VC
+        for vc in self.inNorth.vcs:
+            self.vc_target_outport(vc)
+        # Checking South VC
+        for vc in self.inSouth.vcs:
+            self.vc_target_outport(vc)
+        # Checking East VC
+        for vc in self.inEast.vcs:
+            self.vc_target_outport(vc)
+        # Checking West VC
+        for vc in self.inWest.vcs:
+            self.vc_target_outport(vc)
+
+        # VC targeting -> North
+        if len(self.vcs_target_north) > 0:
+            vc = self.get_highest_preemptive_priority_vc(self.vcs_target_north, time)
+            self.vcs_target_north.clear()
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
+            # event push
+            event = Event(EventType.SEND_FLIT, {'router': self,
+                                                'vc': vc,
+                                                'outport': self.outNorth}, time)
+            EVENT_LIST.push(event)
+
+        # VC targeting -> South
+        if len(self.vcs_target_south) > 0:
+            vc = self.get_highest_preemptive_priority_vc(self.vcs_target_south, time)
+            self.vcs_target_south.clear()
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
+            # event push
+            event = Event(EventType.SEND_FLIT, {'router': self,
+                                                'vc': vc,
+                                                'outport': self.outSouth}, time)
+            EVENT_LIST.push(event)
+
+        # VC targeting -> East
+        if len(self.vcs_target_east) > 0:
+            vc = self.get_highest_preemptive_priority_vc(self.vcs_target_east, time)
+            self.vcs_target_east.clear()
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
+            # event push
+            event = Event(EventType.SEND_FLIT, {'router': self,
+                                                'vc': vc,
+                                                'outport': self.outEast}, time)
+            EVENT_LIST.push(event)
+
+        # VC targeting -> West
+        if len(self.vcs_target_west) > 0:
+            vc = self.get_highest_preemptive_priority_vc(self.vcs_target_west, time)
+            self.vcs_target_west.clear()
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
+            # event push
+            event = Event(EventType.SEND_FLIT, {'router': self,
+                                                'vc': vc,
+                                                'outport': self.outWest}, time)
+            EVENT_LIST.push(event)
+
+        # VC targeting -> PE
+        if len(self.vcs_target_pe) > 0:
+            vc = self.get_highest_preemptive_priority_vc(self.vcs_target_pe, time)
+            self.vcs_target_pe.clear()
+            self.logger.debug('(%d) - %s From %s -> Elected' % (time, vc, self))
+            # event push
+            event = Event(EventType.ARR_FLIT, {'router': self, 'vc': vc}, time)
+            EVENT_LIST.push(event)
+
     def priority_arbiter(self, time):
         """
         This function gives the elected VC among non empty VCs

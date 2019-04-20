@@ -93,6 +93,8 @@ class Simulation:
                         router.rr_arbiter(CLOCK)
                     elif arbitration == 'PRIORITY_PREEMPT':
                         router.priority_arbiter(CLOCK)
+                    elif arbitration == 'PRIORITY_NON_PREEMPT':
+                        router.preemptive_priority_arbiter(CLOCK)
 
                 elif current_event.event_type == EventType.ARR_FLIT:
                     # get Event Entity
