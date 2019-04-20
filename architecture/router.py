@@ -307,12 +307,30 @@ class Router:
         # filtering
         for candidate in candidates:
             if candidate.flits[0].timestamp == time:
-                print("############### REMOVE ---> %s FROM ---> %s" % (candidate.flits[0], candidate))
                 candidates.remove(candidate)
 
         # After filtering
         if len(candidates) == 1:
             return candidates[0]
+
+        priority_vc = candidates[0]
+
+        # Arbitration according to Priority
+        for candidate in candidates[1:]:
+            if priority_vc.id > candidate.id:
+                priority_vc = candidate
+
+        return priority_vc
+
+    def get_highest_preemptive_priority_vc(self, candidates, time):
+        # No Arbitration
+        if len(candidates) == 1:
+            return candidates[0]
+
+        # Filter
+        for candidate in candidates:
+            if candidate.flits[-1].timestamp == time:
+                candidates.remove(candidate)
 
         priority_vc = candidates[0]
 
