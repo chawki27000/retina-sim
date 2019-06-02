@@ -91,7 +91,7 @@ class Message:
         for i in range(packetNumber):
             self.packets.append(Packet(i, self.dest, self, self.priority))
 
-    def size(self):
+    def size_by_flit(self):
         nbpacket = len(self.packets)
         nbflit = nbpacket * len(self.packets[0].flits)
 

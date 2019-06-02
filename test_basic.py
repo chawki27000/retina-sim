@@ -372,8 +372,7 @@ class TestAnalysisTool(unittest.TestCase):
 
         self.qinModel = QinModel(self.noc, self.messages)
 
-        self.slot_table = self.noc.vc_quantum
-        self.tmda = TDMA(self.noc, self.slot_table)
+        self.tdma = TDMA(self.noc, self.noc.vc_quantum)
 
     def test_direct_interference_set(self):
         taskset = self.qinModel.direct_interference_set(self.message3)
@@ -386,6 +385,13 @@ class TestAnalysisTool(unittest.TestCase):
 
         self.assertEqual(taskset[0].id, 1)
         self.assertEqual(taskset[1].id, 2)
+
+    def test_total_slot(self):
+        self.assertEqual(self.tdma.total_slot(), 4)
+
+    def test_tdma_latency(self):
+        latency = self.tdma.latency(self.message3, self.tdma.slot_table[1])
+        print(latency)
 
 
 if __name__ == '__main__':

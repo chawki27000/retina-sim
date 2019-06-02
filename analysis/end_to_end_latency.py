@@ -48,7 +48,7 @@ class TDMA:
         return count
 
     def latency(self, message, reserved_slot):
-        nbflit = message.size()
+        nbflit = message.size_by_flit()
         nbhope = len(message.get_xy_path_coordinate(self.noc))
 
         return (nbflit * self.total_slot() / reserved_slot) + nbhope
