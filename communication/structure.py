@@ -91,11 +91,11 @@ class Message:
         for i in range(packetNumber):
             self.packets.append(Packet(i, self.dest, self, self.priority))
 
-    def size_by_flit(self):
+    def basic_network_latency(self, noc):
         nbpacket = len(self.packets)
         nbflit = nbpacket * len(self.packets[0].flits)
 
-        return nbflit
+        return nbflit + len(self.get_xy_path_coordinate(noc))
 
     def get_link_utilization(self):
         size_cycle = float(self.size / FLIT_DEFAULT_SIZE)
@@ -103,48 +103,6 @@ class Message:
 
     def get_priority(self):
         return self.priority
-
-    # def get_analysis_latency(self, intersection):
-    #     # Routing Distance Computing
-    #     nR = EndToEndLatency.routing_distance(self.src, self.dest)
-    #     # Iteration Number
-    #     # nI = EndToEndLatency.iteration_number(len(self.packets), 4)  # TODO : change to dynamic
-    #     nI = EndToEndLatency.iteration_number(len(self.packets) * 32, 4)  # TODO : change to dynamic
-    #
-    #     # Network Latency
-    #     # nI: Number of iteration
-    #     # oV: Total VC occupied(pessimistic)
-    #     # nR: Routing Distance
-    #     nL = EndToEndLatency.network_latency(nI, len(intersection) + 1, nR)
-    #
-    #     print('nR: %d -- nI: %d -- oV: %d' % (nR, nI, len(intersection)))
-    #     return int((EndToEndLatency.NETWORK_ACCESS_LAT * 2) + nL)
-
-    # def get_basic_network_latency(self):
-    #     # Routing Distance Computing
-    #     h = EndToEndLatency.routing_distance(self.src, self.dest)
-    #
-    #     return EndToEndLatency.basic_network_latency(PACKET_DEFAULT_SIZE,
-    #                                                  FLIT_DEFAULT_SIZE,
-    #                                                  h)
-
-    # def get_priority_analysis_latency(self, intersection):
-    #     # Basic Network Latency (without contention)
-    #     c = self.get_basic_network_latency()
-    #
-    #     # network latency
-    #     last_r = 0
-    #     r = c
-    #     while r < self.deadline:
-    #         tmp_r = c
-    #         last_r = r
-    #         for msg in intersection:
-    #             tmp_r += math.ceil(r / msg.period) * msg.get_basic_network_latency
-    #
-    #         # iterate until Ri > Di
-    #         r = tmp_r
-    #
-    #     return last_r
 
     def get_xy_path_coordinate(self, noc):
         src = copy.copy(self.src)

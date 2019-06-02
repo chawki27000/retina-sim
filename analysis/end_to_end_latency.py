@@ -48,7 +48,7 @@ class TDMA:
         return count
 
     def latency(self, message, reserved_slot):
-        nbflit = message.size_by_flit()
+        nbflit = len(message.packets) * len(message.packets[0].flits)
         nbhope = len(message.get_xy_path_coordinate(self.noc))
 
         return (nbflit * self.total_slot() / reserved_slot) + nbhope
@@ -111,31 +111,9 @@ class QinModel:
 
     def upstream_indirect_interference_set(self, message):
         upstream_set = []
-
         indirect_inter_set = self.indirect_interference_set(message)
 
-        # get the first link axe
-        p1 = message.get_xy_path_coordinate(self.noc)
-
-        print(self.get_link_direction(p1[0]))
-
-        for indirect_task in indirect_inter_set:
-            print(indirect_task)
-            p2 = indirect_task.get_xy_path_coordinate(self.noc)
-
-            # right -> left || down -> up
-            if self.get_link_direction(p1[0]) == 1:
-                print("compare (right -> left || down -> up) -> between %s and %s" % (p1, p2))
-                if p1[0][0] < p2[0][0]:
-                    upstream_set.append(indirect_task)
-
-            # left -> right || up -> down
-            elif self.get_link_direction(p1[0]) == 0:
-                print("compare (left -> right || up -> down) -> between %d and %d" % (p1[0][0], p2[0][0]))
-                if p1[0][0] > p2[0][0]:
-                    upstream_set.append(indirect_task)
-
-        return upstream_set
+        # print(self.noc.get_router_coordinate_by_id(6))
 
     def downstream_indirect_interference_set(self, message):
         downstream_set = []
@@ -145,12 +123,12 @@ class QinModel:
     def latency_0th(self, message):
         direct_taskset = self.direct_interference_set(message)
 
-        latency = message.size()
+        latency = message.basic_network_latency(self.noc)
         for task in direct_taskset:
             indirect_taskset = self.indirect_interference_set(task)
-            latency += task.size()
+            latency += task.basic_network_latency(self.noc)
             for indirect_task in indirect_taskset:
-                latency += indirect_task.size()
+                latency += indirect_task.basic_network_latency(self.noc)
 
         return latency
 
@@ -161,15 +139,15 @@ class QinModel:
 
         while ri < message.deadline():
 
-            tmp_ri = message.size()
+            tmp_ri = message.basic_network_latency(self.noc)
             for task in direct_taskset:
                 indirect_taskset = self.indirect_interference_set(message)
 
                 count = 0
                 for indirect_task in indirect_taskset:
-                    count += indirect_task.size()
+                    count += indirect_task.basic_network_latency(self.noc)
 
-                tmp_ri += math.ceil((ri + count) / task.period) * task.size()
+                tmp_ri += math.ceil((ri + count) / task.period) * task.basic_network_latency(self.noc)
 
                 if tmp_ri == ri:
                     break

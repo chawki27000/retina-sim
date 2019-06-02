@@ -362,7 +362,7 @@ class TestAnalysisTool(unittest.TestCase):
         self.noc = NoC("Network-On-Chip", 4, 4, 12, [1, 1, 1, 1])
         self.noc.link_array_filling()
 
-        self.message1 = Message(1, 150, 256, 0, 100, Coordinate(0, 3), Coordinate(0, 1))
+        self.message1 = Message(1, 150, 896, 0, 100, Coordinate(0, 3), Coordinate(0, 1))
         self.message2 = Message(2, 150, 256, 0, 100, Coordinate(2, 0), Coordinate(3, 0))
         self.message3 = Message(3, 400, 256, 0, 300, Coordinate(0, 2), Coordinate(3, 0))
         self.message4 = Message(4, 600, 256, 0, 550, Coordinate(2, 0), Coordinate(3, 0))
@@ -386,12 +386,18 @@ class TestAnalysisTool(unittest.TestCase):
         self.assertEqual(taskset[0].id, 1)
         self.assertEqual(taskset[1].id, 2)
 
+    def test_latency_0th(self):
+        print(self.qinModel.latency_0th(self.message1))
+
+    def test_latency_nth(self):
+        pass
+
     def test_total_slot(self):
         self.assertEqual(self.tdma.total_slot(), 4)
 
     def test_tdma_latency(self):
         latency = self.tdma.latency(self.message3, self.tdma.slot_table[1])
-        print(latency)
+        self.assertEqual(latency, 37)
 
 
 if __name__ == '__main__':
