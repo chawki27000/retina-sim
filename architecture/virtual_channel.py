@@ -28,10 +28,11 @@ class VirtualChannel:
     def isFree(self):
         return not self.lock
 
-    def lock(self):
+    def locked(self):
         self.lock = True
 
     def release(self):
+        print("############ %s released" % self)
         self.lock = False
 
     def credit_out(self):

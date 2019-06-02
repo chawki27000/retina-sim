@@ -17,7 +17,7 @@ class InPort:
     def vc_allocator(self):
         for vc in self.vcs:
             if vc.isFree():
-                vc.lock = True
+                vc.locked()
                 return vc
         return None
 

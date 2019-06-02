@@ -65,7 +65,7 @@ class Router:
 
         if flit.type == FlitType.tail:
             self.vcs_dictionary.remove(vc)
-            vc.lock = False
+            vc.release()
 
         # Flit store
         self.proc_engine.flit_receiving(flit)
@@ -111,10 +111,6 @@ class Router:
         if len(vc.flits) <= 0:
             return
 
-        # print("--- %s ---" % self)
-        # self.inport_status()
-        # print("----------")
-
         # getting the first flit in VC
         flit = vc.dequeue()
         if flit is None:
@@ -149,7 +145,8 @@ class Router:
                                                     'outport': outport}, time + 1)
 
                 EVENT_LIST.push(event)
-                self.logger.debug('(%d) - %s was not sent - VC not allotted' % (time, flit))
+                self.logger.debug('(%d) - %s was not sent - VC not allotted ON %s' %
+                                  (time, flit, outport.inPort.router))
 
         # if is a Body Flit
         elif flit.type == FlitType.body:
@@ -205,7 +202,7 @@ class Router:
                 EVENT_LIST.push(event)
 
                 self.vcs_dictionary.remove(vc)
-                vc.lock = False
+                vc.release()
                 vc.credit_out()
                 self.logger.debug('(%d) - VC (%s) - released' % (time, vc))
 
@@ -631,7 +628,6 @@ class Router:
                 # event push
                 event = Event(EventType.VC_ELECTION, self, time + 1)
                 EVENT_LIST.push(event)
-                print("## VC_ELECTION CREATION for %s at : %d" % (self, time + 1))
 
             else:
                 msg.packets.insert(0, packet)
