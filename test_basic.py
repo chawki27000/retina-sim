@@ -366,7 +366,7 @@ class TestAnalysisTool(unittest.TestCase):
         self.message2 = Message(2, 150, 256, 0, 100, Coordinate(2, 0), Coordinate(3, 0))
         self.message3 = Message(3, 400, 256, 0, 300, Coordinate(0, 2), Coordinate(3, 0))
         self.message4 = Message(4, 600, 256, 0, 550, Coordinate(2, 0), Coordinate(3, 0))
-        self.message5 = Message(5, 300, 256, 0, 250, Coordinate(0, 1), Coordinate(2, 0))
+        self.message5 = Message(5, 300, 3072, 0, 250, Coordinate(0, 1), Coordinate(2, 0))
 
         self.messages = [self.message1, self.message2, self.message3, self.message4, self.message5]
 
@@ -387,10 +387,10 @@ class TestAnalysisTool(unittest.TestCase):
         self.assertEqual(taskset[1].id, 2)
 
     def test_latency_0th(self):
-        print(self.qinModel.latency_0th(self.message1))
+        self.assertEqual(self.qinModel.latency_0th(self.message1), 30)
 
     def test_latency_nth(self):
-        pass
+        self.qinModel.latency_nth(self.message5)
 
     def test_total_slot(self):
         self.assertEqual(self.tdma.total_slot(), 4)
