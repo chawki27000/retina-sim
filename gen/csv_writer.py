@@ -1,5 +1,7 @@
 import csv
 
+from analysis.end_to_end_latency import QinModel, TDMA
+
 
 class CSVWriter:
 
@@ -11,9 +13,10 @@ class CSVWriter:
 
         return max
 
-    def __init__(self, messages_i, type):
+    def __init__(self, messages_i, type, noc):
         self.messages_i = messages_i
         self.type = type
+        self.noc = noc
 
     def simulation_trace_csv(self, link):
 
@@ -49,3 +52,28 @@ class CSVWriter:
                     write_array.append(instance[i].get_latency())
 
                 writer.writerow(write_array)
+
+    def analysis_trace_csv(self, link, messages):
+        # build header row
+        header = ['i', 'WCLA']
+
+        with open(link, mode='w') as file:
+            writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+            # File Header
+            writer.writerow(header)
+
+            # compute wcla according to arbitration mode
+            if self.type == 'RR':
+                tdma = TDMA(self.noc, self.noc.vc_quantum)
+
+                for msg in messages:
+                    latency = tdma.latency(msg, tdma.slot_table[0])
+                    writer.writerow([msg.id, latency])
+
+            elif self.type == 'PRIORITY_PREEMPT':
+                qinModel = QinModel(self.noc, messages)
+
+                for msg in messages:
+                    latency = qinModel.latency_nth(msg)
+                    writer.writerow([msg.id, latency])

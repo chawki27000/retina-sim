@@ -82,7 +82,7 @@ class Generation:
                         self.counter += 1
 
                         # Generate task conflict
-                        # self.conflict_task_by_axe(message, 20, 10, 0)
+                        self.conflict_task_by_axe(message, 20, 10, 0)
 
                 # Automatic generation
                 elif 'task' in data:

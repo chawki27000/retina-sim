@@ -73,10 +73,8 @@ def main():
         """
         Analysis : Begin
         """
-        # csv = CSVWriter(messages, 1)
-        # csv.generate_csv('input/' + file + '/result_analysis.csv',
-        #                  arbitration=arbitration,
-        #                  generation=generation)
+        csv = CSVWriter(messages, arbitration, noc)
+        csv.analysis_trace_csv('input/' + file + '/result_analysis.csv', messages)
         """
         Analysis : End
         """
@@ -85,31 +83,31 @@ def main():
         Simulation : Begin
         """
         # Simulator Settings
-        simulation = Simulation(noc, generation.hyperperiod())
-
-        for message in messages:
-            simulation.send_message(message)
-
-        # Starting Simulation
-        logging.info('### Simulation --> START - hyperperiod : %d ###' % generation.hyperperiod())
-        simulation.simulate(arbitration)
-        logging.info('### Simulation --> END ###')
-
-        # printing
-        messages_i = simulation.get_message_instance_tab()
-        csv = CSVWriter(messages_i, 0)
-
-        simulation.reset_clock()
-
-        """
-        Simulation : End
-        """
-
-        # Trace generation : Latency
-        for message in simulation.get_message_instance_tab():
-            print("%s --> latency : %d" % (message, message.get_latency()))
-
-        csv.simulation_trace_csv('input/' + file + '/result_sim.csv')
+        # simulation = Simulation(noc, generation.hyperperiod())
+        #
+        # for message in messages:
+        #     simulation.send_message(message)
+        #
+        # # Starting Simulation
+        # logging.info('### Simulation --> START - hyperperiod : %d ###' % generation.hyperperiod())
+        # simulation.simulate(arbitration)
+        # logging.info('### Simulation --> END ###')
+        #
+        # # printing
+        # messages_i = simulation.get_message_instance_tab()
+        # csv = CSVWriter(messages_i, 0)
+        #
+        # simulation.reset_clock()
+        #
+        # """
+        # Simulation : End
+        # """
+        #
+        # # Trace generation : Latency
+        # for message in simulation.get_message_instance_tab():
+        #     print("%s --> latency : %d" % (message, message.get_latency()))
+        #
+        # csv.simulation_trace_csv('input/' + file + '/result_sim.csv')
 
 
 if __name__ == "__main__":

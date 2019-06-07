@@ -139,24 +139,17 @@ class QinModel:
         direct_taskset = self.direct_interference_set(message)
 
         ri = self.latency_0th(message)
-        print("RI ---------------> %d" % ri)
 
         while ri < message.deadline:
-            time.sleep(0.3)
-            print("Ri --> %d" % ri)
             tmp_ri = message.basic_network_latency(self.noc)
             for task in direct_taskset:
                 indirect_taskset = self.indirect_interference_set(task)
-                print("indirect_taskset --> %d" % len(indirect_taskset))
 
                 count = 0
                 for indirect_task in indirect_taskset:
                     count += indirect_task.basic_network_latency(self.noc)
 
-                print("counter after --> %d" % count)
-
                 tmp_ri += math.ceil((ri + count) / task.period) * task.basic_network_latency(self.noc)
-                print("tmp_ri --> %d" % tmp_ri)
 
             ri = tmp_ri
 
