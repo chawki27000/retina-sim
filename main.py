@@ -1,15 +1,18 @@
-import logging
-import sys
 import getopt
+import logging
 import os
+import sys
+
+import simpy
 
 from architecture.noc import NoC
-from engine.simulation import Simulation, TRACESET
 from gen.generation import Generation
-from gen.csv_writer import CSVWriter
 
 
 def main():
+    # Create the SimPy environment. This is the thing that runs the simulation.
+    env = simpy.Environment()
+
     # parse input files
     input_files = os.popen("ls input").read().split('\n')
     del input_files[-1]
@@ -33,8 +36,6 @@ def main():
 
     # file parsing loop
     for file in input_files:
-        Simulation.CLOCK = 0
-
         # NoC Settings
         generation = Generation()
         generation.config('input/' + file + '/config.yml')
@@ -45,7 +46,7 @@ def main():
         vc_quantum = generation.vc_quantum()
         arbitration = generation.arbitration()
 
-        noc = NoC('Network-On-Chip', square_size, nbvc, vc_size, vc_quantum)
+        noc = NoC(env, 'Network-On-Chip', square_size, nbvc, vc_size, vc_quantum)
 
         generation.set_noc(noc)
 
@@ -73,8 +74,8 @@ def main():
         """
         Analysis : Begin
         """
-        csv = CSVWriter(messages, arbitration, noc)
-        csv.analysis_trace_csv('input/' + file + '/result_analysis.csv', messages)
+        # csv = CSVWriter(messages, arbitration, noc)
+        # csv.analysis_trace_csv('input/' + file + '/result_analysis.csv', messages)
         """
         Analysis : End
         """
@@ -83,21 +84,17 @@ def main():
         Simulation : Begin
         """
         # Simulator Settings
-        # simulation = Simulation(noc, generation.hyperperiod())
-        #
-        # for message in messages:
-        #     simulation.send_message(message)
-        #
-        # # Starting Simulation
-        # logging.info('### Simulation --> START - hyperperiod : %d ###' % generation.hyperperiod())
-        # simulation.simulate(arbitration)
-        # logging.info('### Simulation --> END ###')
-        #
-        # # printing
+        noc.messages = messages
+
+        # Starting Simulation
+        logging.info('### Simulation --> START - hyperperiod : %d ###' % generation.hyperperiod())
+        env.run(until=100)
+        logging.info('### Simulation --> END ###')
+
+        # printing
         # messages_i = simulation.get_message_instance_tab()
         # csv = CSVWriter(messages_i, 0)
-        #
-        # simulation.reset_clock()
+
         #
         # """
         # Simulation : End

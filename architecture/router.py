@@ -121,6 +121,12 @@ class Router:
         # getting the first flit in VC
         flit = vc.dequeue()
 
+        # Flit Timestamp to avoid premature sending
+        if flit.timestamp == self.env.now:
+            vc.flits.insert(0, flit)
+            return
+        flit.timestamp = self.env.now
+
         # if is a Head Flit
         if flit.type == FlitType.head:
             # Get idle VC from next Input

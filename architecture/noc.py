@@ -1,4 +1,5 @@
 from communication.routing import Coordinate, Direction
+from communication.structure import MessageInstance
 from .inport import InPort
 from .outport import OutPort
 from .processing_engine import ProcessingEngine
@@ -7,6 +8,7 @@ from .router import Router
 
 class NoC:
     def __init__(self, env, name, square_size, nbvc, vc_size, vc_quantum):
+        self.action = env.process(self.run())
         self.env = env
         self.name = name
         self.router_matrix = []
@@ -15,6 +17,8 @@ class NoC:
         self.vc_size = vc_size
         self.vc_quantum = vc_quantum
         self.links = dict()
+        self.messages = None
+        self.messages_instance = []
 
         # Routers Initialisation
         count = 1
@@ -166,6 +170,20 @@ class NoC:
                 if self.router_matrix[i][j].id == router_id:
                     return self.router_matrix[i][j].coordinate
         return None
+
+    def run(self):
+
+        while True:
+            for message in self.messages:
+                coord = message.src
+                router = self.router_matrix[coord.i][coord.j]
+
+                if self.env.now % message.period == 0:
+                    mi = MessageInstance(message, 0)
+                    self.messages_instance.append(mi)
+                    router.proc_engine.send_to_router(mi)
+
+            yield self.env.timeout(1)
 
     def __str__(self):
         string = ''
