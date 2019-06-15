@@ -26,7 +26,7 @@ class Generation:
     def config(self, link):
         with open(link, 'r') as stream:
             try:
-                data = yaml.load(stream)
+                data = yaml.safe_load(stream)
 
                 # parsing
                 self._square_size = data['noc']['dimension']
@@ -49,7 +49,7 @@ class Generation:
     def scenario(self, link):
         with open(link, 'r') as stream:
             try:
-                data = yaml.load(stream)
+                data = yaml.safe_load(stream)
 
                 # Messages
                 if 'scenario' in data:
