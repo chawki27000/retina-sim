@@ -6,7 +6,8 @@ from .router import Router
 
 
 class NoC:
-    def __init__(self, name, square_size, nbvc, vc_size, vc_quantum):
+    def __init__(self, env, name, square_size, nbvc, vc_size, vc_quantum):
+        self.env = env
         self.name = name
         self.router_matrix = []
         self.square_size = square_size
@@ -20,21 +21,21 @@ class NoC:
         for i in range(square_size):
             line = []
             for j in range(square_size):
-                line.append(self.router_initialisation(count, i, j))
+                line.append(self.router_initialisation(env, count, i, j))
                 count += 1
             self.router_matrix.append(line)
 
         # Routers linking
         self.router_linking()
 
-    def router_initialisation(self, id, x, y):
+    def router_initialisation(self, env, id, x, y):
 
         # ProcessingEngine
-        proc_engine = ProcessingEngine()
+        proc_engine = ProcessingEngine(env)
 
         # Routers construct
         coordinate = Coordinate(x, y)
-        router = Router(id, coordinate, proc_engine)
+        router = Router(env, id, coordinate, proc_engine)
 
         # InPort
         inNorth = InPort(router, Direction.north, self.nbvc, self.vc_size, self.vc_quantum)

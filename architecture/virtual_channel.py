@@ -32,7 +32,6 @@ class VirtualChannel:
         self.lock = True
 
     def release(self):
-        print("############ %s released" % self)
         self.lock = False
 
     def credit_out(self):
@@ -42,8 +41,7 @@ class VirtualChannel:
         self.quantum -= 1
 
     def reset_credit(self):
-        if self.quantum <= 0:
-            self.quantum = self.default_quantum
+        self.quantum = self.default_quantum
 
     def __str__(self):
         return 'VC (%d)(%s) ' % (self.id, self.direction.value)
