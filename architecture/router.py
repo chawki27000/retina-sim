@@ -11,6 +11,7 @@ class Router:
         self.coordinate = coordinate
         self.proc_engine = proc_engine
         self.logger = logging.getLogger(' ')
+        self.noc = None
 
         # Process Attribute
         self.vcs_dictionary = NodeArray()
@@ -36,6 +37,9 @@ class Router:
     def proc_engine_setting(self, inPE, outPE):
         self.inPE = inPE
         self.outPE = outPE
+
+    def noc_settings(self, noc):
+        self.noc = noc
 
     def route_computation(self, flit):
         # On X axe (Column)
@@ -70,7 +74,12 @@ class Router:
         if self.is_packet_still_in_vc(packet):
             return False
 
-        requested_vc = self.inPE.vc_allocator()
+        if self.noc.arbitration == "RR":
+            requested_vc = self.inPE.vc_allocator()
+        elif self.noc.arbitration == "PRIORITY_PREEMPT":
+            requested_vc = self.inPE.priority_vc_allocator(packet.priority)
+        else:
+            requested_vc = None
 
         if requested_vc is not None:
             for flit in packet.flits:
@@ -129,8 +138,14 @@ class Router:
 
         # if is a Head Flit
         if flit.type == FlitType.head:
+
             # Get idle VC from next Input
-            vc_allotted = outport.inPort.vc_allocator()
+            if self.noc.arbitration == "RR":
+                vc_allotted = self.inPE.vc_allocator()
+            elif self.noc.arbitration == "PRIORITY_PREEMPT":
+                vc_allotted = self.inPE.priority_vc_allocator(flit.priority)
+            else:
+                vc_allotted = None
 
             if vc_allotted is not None:
                 self.logger.debug('(%d) - VC (%s) allotted' % (self.env.now, vc_allotted))
@@ -191,51 +206,125 @@ class Router:
             self.inNorth.reset_slot_table()
             self.inSouth.reset_slot_table()
 
-            # ---------- VC election ----------
-            for vc in self.inPE.vcs:
-                self.vc_target_outport(vc)
-            # Checking North VC
-            for vc in self.inNorth.vcs:
-                self.vc_target_outport(vc)
-            # Checking South VC
-            for vc in self.inSouth.vcs:
-                self.vc_target_outport(vc)
-            # Checking East VC
-            for vc in self.inEast.vcs:
-                self.vc_target_outport(vc)
-            # Checking West VC
-            for vc in self.inWest.vcs:
-                self.vc_target_outport(vc)
+            if self.noc.arbitration == "RR":
+                self.rr_arbitration()
 
-            # VC targeting -> North
-            if len(self.vcs_target_north) > 0:
-                vc = self.vcs_target_north.pop(0)
-                self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
-                self.send_flit(vc, self.outNorth)
+            elif self.noc.arbitration == "PRIORITY_PREEMPT":
+                self.priority_preemptive_arbitration()
 
-            # VC targeting -> South
-            if len(self.vcs_target_south) > 0:
-                vc = self.vcs_target_south.pop(0)
-                self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
-                self.send_flit(vc, self.outSouth)
+    def rr_arbitration(self):
+        # ---------- VC election ----------
+        for vc in self.inPE.vcs:
+            self.vc_target_outport(vc)
+        # Checking North VC
+        for vc in self.inNorth.vcs:
+            self.vc_target_outport(vc)
+        # Checking South VC
+        for vc in self.inSouth.vcs:
+            self.vc_target_outport(vc)
+        # Checking East VC
+        for vc in self.inEast.vcs:
+            self.vc_target_outport(vc)
+        # Checking West VC
+        for vc in self.inWest.vcs:
+            self.vc_target_outport(vc)
 
-            # VC targeting -> East
-            if len(self.vcs_target_east) > 0:
-                vc = self.vcs_target_east.pop(0)
-                self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
-                self.send_flit(vc, self.outEast)
+        # VC targeting -> North
+        if len(self.vcs_target_north) > 0:
+            vc = self.vcs_target_north.pop(0)
+            self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
+            self.send_flit(vc, self.outNorth)
 
-            # VC targeting -> West
-            if len(self.vcs_target_west) > 0:
-                vc = self.vcs_target_west.pop(0)
-                self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
-                self.send_flit(vc, self.outWest)
+        # VC targeting -> South
+        if len(self.vcs_target_south) > 0:
+            vc = self.vcs_target_south.pop(0)
+            self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
+            self.send_flit(vc, self.outSouth)
 
-            # VC targeting -> PE
-            if len(self.vcs_target_pe) > 0:
-                vc = self.vcs_target_pe.pop(0)
-                self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
-                self.arrived_flit(vc)
+        # VC targeting -> East
+        if len(self.vcs_target_east) > 0:
+            vc = self.vcs_target_east.pop(0)
+            self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
+            self.send_flit(vc, self.outEast)
+
+        # VC targeting -> West
+        if len(self.vcs_target_west) > 0:
+            vc = self.vcs_target_west.pop(0)
+            self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
+            self.send_flit(vc, self.outWest)
+
+        # VC targeting -> PE
+        if len(self.vcs_target_pe) > 0:
+            vc = self.vcs_target_pe.pop(0)
+            self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
+            self.arrived_flit(vc)
+
+    def get_highest_preemptive_priority_vc(self, candidates):
+
+        # No Arbitration
+        if len(candidates) == 1:
+            return candidates[0]
+
+        priority_vc = candidates[0]
+
+        # Arbitration according to Priority
+        for candidate in candidates[1:]:
+            if priority_vc.id > candidate.id:
+                priority_vc = candidate
+
+        return priority_vc
+
+    def priority_preemptive_arbitration(self):
+        # ---------- VC election ----------
+        for vc in self.inPE.vcs:
+            self.vc_target_outport(vc)
+        # Checking North VC
+        for vc in self.inNorth.vcs:
+            self.vc_target_outport(vc)
+        # Checking South VC
+        for vc in self.inSouth.vcs:
+            self.vc_target_outport(vc)
+        # Checking East VC
+        for vc in self.inEast.vcs:
+            self.vc_target_outport(vc)
+        # Checking West VC
+        for vc in self.inWest.vcs:
+            self.vc_target_outport(vc)
+
+        # VC targeting -> North
+        if len(self.vcs_target_north) > 0:
+            vc = self.get_highest_preemptive_priority_vc(self.vcs_target_north)
+            self.vcs_target_north.clear()
+            self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
+            self.send_flit(vc, self.outNorth)
+
+        # VC targeting -> South
+        if len(self.vcs_target_south) > 0:
+            vc = self.get_highest_preemptive_priority_vc(self.vcs_target_south)
+            self.vcs_target_south.clear()
+            self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
+            self.send_flit(vc, self.outSouth)
+
+        # VC targeting -> East
+        if len(self.vcs_target_east) > 0:
+            vc = self.get_highest_preemptive_priority_vc(self.vcs_target_east)
+            self.vcs_target_east.clear()
+            self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
+            self.send_flit(vc, self.outEast)
+
+        # VC targeting -> West
+        if len(self.vcs_target_west) > 0:
+            vc = self.get_highest_preemptive_priority_vc(self.vcs_target_west)
+            self.vcs_target_west.clear()
+            self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
+            self.send_flit(vc, self.outWest)
+
+        # VC targeting -> PE
+        if len(self.vcs_target_pe) > 0:
+            vc = self.get_highest_preemptive_priority_vc(self.vcs_target_pe)
+            self.vcs_target_pe.clear()
+            self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
+            self.arrived_flit(vc)
 
     def __str__(self):
         return 'Router (%d,%d)' % (self.coordinate.i, self.coordinate.j)

@@ -19,6 +19,7 @@ class NoC:
         self.links = dict()
         self.messages = None
         self.messages_instance = []
+        self.arbitration = None
 
         # Routers Initialisation
         count = 1
@@ -63,6 +64,8 @@ class NoC:
         # Processing Engine
         proc_engine.router_bind(router)
         router.proc_engine_setting(inPE, outPE)
+
+        router.noc_settings(self)
 
         return router
 

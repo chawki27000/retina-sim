@@ -85,7 +85,7 @@ def main():
         """
         # Simulator Settings
         noc.messages = messages
-
+        noc.arbitration = arbitration
         # Starting Simulation
         logging.info('### Simulation --> START - hyperperiod : %d ###' % generation.hyperperiod())
         env.run(until=100)
