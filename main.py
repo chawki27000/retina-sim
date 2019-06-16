@@ -85,26 +85,26 @@ def main():
         Simulation : Begin
         """
         # Simulator Settings
-        noc.messages = messages
-        noc.arbitration = arbitration
-        # Starting Simulation
-        logging.info('### Simulation --> START - hyperperiod : %d ###' % generation.hyperperiod())
-        env.run(until=generation.hyperperiod())
-        logging.info('### Simulation --> END ###')
-
-        # printing
-        messages_i = noc.messages_instance
-        csv = CSVWriter(messages_i, 0, noc)
+        # noc.messages = messages
+        # noc.arbitration = arbitration
+        # # Starting Simulation
+        # logging.info('### Simulation --> START - hyperperiod : %d ###' % generation.hyperperiod())
+        # env.run(until=generation.hyperperiod())
+        # logging.info('### Simulation --> END ###')
+        #
+        # # printing
+        # messages_i = noc.messages_instance
+        # csv = CSVWriter(messages_i, 0, noc)
 
         """
         Simulation : End
         """
 
         # Trace generation : Latency
-        for message in messages_i:
-            print("%s --> latency : %d" % (message, message.get_latency()))
-
-        csv.simulation_trace_csv('input/' + file + '/result_sim.csv')
+        # for message in messages_i:
+        #     print("%s --> latency : %d" % (message, message.get_latency()))
+        #
+        # csv.simulation_trace_csv('input/' + file + '/result_sim.csv')
 
 
 if __name__ == "__main__":

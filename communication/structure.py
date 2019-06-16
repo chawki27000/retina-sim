@@ -1,9 +1,8 @@
 import copy
 import enum
-import math
 from collections import namedtuple
 
-from analysis.end_to_end_latency import EndToEndLatency
+import math
 
 FLIT_DEFAULT_SIZE = 32
 PACKET_DEFAULT_SIZE = 128
@@ -159,6 +158,9 @@ class MessageInstance(Message):
         self.packet_wait = 0
         self.flit_wait = 0
 
+        self._arrival_time = None
+        self._depart_time = None
+
     def set_depart_time(self, depart_time):
         self._depart_time = depart_time
 
@@ -166,6 +168,8 @@ class MessageInstance(Message):
         self._arrival_time = arrival_time
 
     def get_latency(self):
+        if self._arrival_time is None:
+            return -1
         return self._arrival_time - self._depart_time
 
     def get_priority(self):

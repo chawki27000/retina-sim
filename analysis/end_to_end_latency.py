@@ -90,7 +90,7 @@ class QinModel:
         direct_interference_task = []
 
         for msg in self.taskset:
-            if msg == message or msg.id > message.id:
+            if msg == message or msg.id < message.id:
                 continue
 
             if self.path_intersection(message, msg):

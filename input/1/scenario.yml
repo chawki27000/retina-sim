@@ -5,10 +5,10 @@ scenario:
     dest:
       i: 2
       j: 2
-    size: 256
+    size: 128
     offset: 0
     deadline: 0
-    period: 100
+    period: 3000
 
 #  - src:
 #      i: 0

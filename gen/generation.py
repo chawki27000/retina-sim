@@ -76,13 +76,13 @@ class Generation:
                                           deadline,
                                           Coordinate(src['i'], src['j']),
                                           Coordinate(dest['i'], dest['j']),
-                                          priority=priority)
+                                          priority=0)
 
                         self.messages.append(message)
                         self.counter += 1
 
                         # Generate task conflict
-                        # self.conflict_task_by_axe(message, 20, 10, 0)
+                        # self.conflict_task_by_axe(message, 100, 90, 0)
 
                 # Automatic generation
                 elif 'task' in data:

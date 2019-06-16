@@ -68,7 +68,7 @@ class CSVWriter:
                 tdma = TDMA(self.noc, self.noc.vc_quantum)
 
                 for msg in messages:
-                    latency = tdma.latency(msg, tdma.slot_table[0])
+                    latency = tdma.latency(msg, tdma.slot_table[3])
                     writer.writerow([msg.id, latency])
 
             elif self.type == 'PRIORITY_PREEMPT':
