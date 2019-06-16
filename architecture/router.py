@@ -1,6 +1,9 @@
 import logging
 
-from communication.structure import NodeArray, FlitType, Node
+import math
+
+from communication.structure import NodeArray, FlitType, Node, PACKET_DEFAULT_SIZE, FLIT_DEFAULT_SIZE
+from engine.simulation import TRACESET
 
 
 class Router:
@@ -86,6 +89,11 @@ class Router:
                 requested_vc.enqueue(flit)
                 self.logger.info(
                     '(%d) : %s - %s -> %s -> %s' % (self.env.now, flit, self.proc_engine, requested_vc, self))
+
+                # set depart time for the first first in the first packet
+                if flit.id == 0 and flit.packet.id == 0:
+                    flit.packet.message.set_depart_time(self.env.now)
+
             return True
         else:
             return False
@@ -122,6 +130,15 @@ class Router:
 
         # Flit store
         self.proc_engine.flit_receiving(flit)
+
+        TRACESET.set_flit_arrival(flit.packet.message, self.env.now)
+
+        # set arrival time to the last flit into the message
+        nb_flit = PACKET_DEFAULT_SIZE / FLIT_DEFAULT_SIZE
+        nb_packet = math.ceil(flit.packet.message.size / PACKET_DEFAULT_SIZE)
+
+        if flit.id == nb_flit - 1 and flit.packet.id == nb_packet - 1:
+            flit.packet.message.set_arrival_time(self.env.now + 1)
 
         self.logger.info('(%d) : %s - %s -> %s' % (self.env.now, flit, self, self.proc_engine))
 

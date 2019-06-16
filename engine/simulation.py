@@ -1,4 +1,11 @@
 from communication.structure import MessageInstance
+from engine.event import Event
+from engine.event_list import EventType
+from engine.global_obj import EVENT_LIST
+from gen.trace import TraceSet
+
+CLOCK = 0
+TRACESET = TraceSet()
 
 
 class Simulation:
