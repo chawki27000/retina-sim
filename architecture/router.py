@@ -141,9 +141,9 @@ class Router:
 
             # Get idle VC from next Input
             if self.noc.arbitration == "RR":
-                vc_allotted = self.inPE.vc_allocator()
+                vc_allotted = outport.inPort.vc_allocator()
             elif self.noc.arbitration == "PRIORITY_PREEMPT":
-                vc_allotted = self.inPE.priority_vc_allocator(flit.priority)
+                vc_allotted = outport.inPort.priority_vc_allocator(flit.priority)
             else:
                 vc_allotted = None
 
