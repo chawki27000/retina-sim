@@ -1,3 +1,6 @@
+import copy
+
+
 class VirtualChannel:
     def __init__(self, id, direction, router, max_size, quantum):
         self.id = id

@@ -75,8 +75,8 @@ def main():
         """
         Analysis : Begin
         """
-        csv = CSVWriter(messages, arbitration, noc)
-        csv.analysis_trace_csv('input/' + file + '/result_analysis.csv', messages)
+        # csv = CSVWriter(messages, arbitration, noc)
+        # csv.analysis_trace_csv('input/' + file + '/result_analysis.csv', messages)
         """
         Analysis : End
         """
@@ -85,16 +85,17 @@ def main():
         Simulation : Begin
         """
         # Simulator Settings
-        # noc.messages = messages
-        # noc.arbitration = arbitration
-        # # Starting Simulation
-        # logging.info('### Simulation --> START - hyperperiod : %d ###' % generation.hyperperiod())
+        noc.messages = messages
+        noc.arbitration = arbitration
+        # Starting Simulation
+        logging.info('### Simulation --> START - hyperperiod : %d ###' % generation.hyperperiod())
         # env.run(until=generation.hyperperiod())
-        # logging.info('### Simulation --> END ###')
-        #
-        # # printing
-        # messages_i = noc.messages_instance
-        # csv = CSVWriter(messages_i, 0, noc)
+        env.run(until=20)
+        logging.info('### Simulation --> END ###')
+
+        # printing
+        messages_i = noc.messages_instance
+        csv = CSVWriter(messages_i, 0, noc)
 
         """
         Simulation : End

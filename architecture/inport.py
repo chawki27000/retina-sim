@@ -15,15 +15,9 @@ class InPort:
             self.vcs.append(VirtualChannel(i, self.direction, self.router, self.vc_size, self.slot_table[i]))
 
     def reset_slot_table(self):
-        if self.is_all_empty():
-            for vc in self.vcs:
-                vc.reset_credit()
-
-    def is_all_empty(self):
         for vc in self.vcs:
-            if len(vc.flits) > 0:
-                return False
-        return True
+            if vc.quantum < 0:
+                vc.reset_credit()
 
     def vc_allocator(self):
         for vc in self.vcs:

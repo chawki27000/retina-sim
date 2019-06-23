@@ -3,23 +3,23 @@ scenario:
       i: 0
       j: 0
     dest:
-      i: 2
+      i: 0
       j: 2
     size: 128
     offset: 0
     deadline: 0
-    period: 3000
+    period: 100
 
-#  - src:
-#      i: 0
-#      j: 0
-#    dest:
-#      i: 2
-#      j: 2
-#    size: 128
-#    offset: 0
-#    deadline: 0
-#    period: 100
+  - src:
+      i: 0
+      j: 0
+    dest:
+      i: 0
+      j: 2
+    size: 128
+    offset: 0
+    deadline: 0
+    period: 100
 
 #'task': 1
 #'method': 'UuniFast'

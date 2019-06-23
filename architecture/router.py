@@ -213,17 +213,14 @@ class Router:
                 vc.credit_out()
                 self.logger.debug('(%d) - VC (%s) - released' % (self.env.now, vc))
 
+        # print("------------> %s credit after sending :: %d" % (vc, vc.quantum))
+
     def run(self):
         while True:
             yield self.env.timeout(1)
 
-            # reset if VCs are empty
-            self.inEast.reset_slot_table()
-            self.inWest.reset_slot_table()
-            self.inNorth.reset_slot_table()
-            self.inSouth.reset_slot_table()
-
             if self.noc.arbitration == "RR":
+                # TODO : actualiser la slot_table des inputs
                 self.rr_arbitration()
 
             elif self.noc.arbitration == "PRIORITY_PREEMPT":
@@ -252,11 +249,23 @@ class Router:
             self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
             self.send_flit(vc, self.outNorth)
 
+            # re-insert if credit is not finished
+            if vc.quantum > 0 and len(vc.flits) > 0:
+                self.vcs_target_north.insert(0, vc)
+            else:
+                vc.reset_credit()
+
         # VC targeting -> South
         if len(self.vcs_target_south) > 0:
             vc = self.vcs_target_south.pop(0)
             self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
             self.send_flit(vc, self.outSouth)
+
+            # re-insert if credit is not finished
+            if vc.quantum > 0 and len(vc.flits) > 0:
+                self.vcs_target_south.insert(0, vc)
+            else:
+                vc.reset_credit()
 
         # VC targeting -> East
         if len(self.vcs_target_east) > 0:
@@ -264,17 +273,35 @@ class Router:
             self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
             self.send_flit(vc, self.outEast)
 
+            # re-insert if credit is not finished
+            if vc.quantum > 0 and len(vc.flits) > 0:
+                self.vcs_target_east.insert(0, vc)
+            else:
+                vc.reset_credit()
+
         # VC targeting -> West
         if len(self.vcs_target_west) > 0:
             vc = self.vcs_target_west.pop(0)
             self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
             self.send_flit(vc, self.outWest)
 
+            # re-insert if credit is not finished
+            if vc.quantum > 0 and len(vc.flits) > 0:
+                self.vcs_target_west.insert(0, vc)
+            else:
+                vc.reset_credit()
+
         # VC targeting -> PE
         if len(self.vcs_target_pe) > 0:
             vc = self.vcs_target_pe.pop(0)
             self.logger.debug('(%d) - %s From %s -> Elected' % (self.env.now, vc, self))
             self.arrived_flit(vc)
+
+            # re-insert if credit is not finished
+            if vc.quantum > 0 and len(vc.flits) > 0:
+                self.vcs_target_pe.insert(0, vc)
+            else:
+                vc.reset_credit()
 
     def get_highest_preemptive_priority_vc(self, candidates):
 
@@ -345,3 +372,9 @@ class Router:
 
     def __str__(self):
         return 'Router (%d,%d)' % (self.coordinate.i, self.coordinate.j)
+
+    def check_east_inport(self):
+        print("-----> %s EAST inport TDM Table at : %d" % (self, self.env.now))
+        for vc in self.inEast.vcs:
+            print("%s has a credit : %s" % (vc, vc.quantum))
+        print("-------------------------------------------------->")
