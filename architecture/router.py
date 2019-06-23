@@ -250,10 +250,7 @@ class Router:
             self.send_flit(vc, self.outNorth)
 
             # re-insert if credit is not finished
-            if vc.quantum > 0 and len(vc.flits) > 0:
-                self.vcs_target_north.insert(0, vc)
-            else:
-                vc.reset_credit()
+            self.vc_reinsertion(vc, self.vcs_target_north)
 
         # VC targeting -> South
         if len(self.vcs_target_south) > 0:
@@ -262,10 +259,7 @@ class Router:
             self.send_flit(vc, self.outSouth)
 
             # re-insert if credit is not finished
-            if vc.quantum > 0 and len(vc.flits) > 0:
-                self.vcs_target_south.insert(0, vc)
-            else:
-                vc.reset_credit()
+            self.vc_reinsertion(vc, self.vcs_target_south)
 
         # VC targeting -> East
         if len(self.vcs_target_east) > 0:
@@ -274,10 +268,7 @@ class Router:
             self.send_flit(vc, self.outEast)
 
             # re-insert if credit is not finished
-            if vc.quantum > 0 and len(vc.flits) > 0:
-                self.vcs_target_east.insert(0, vc)
-            else:
-                vc.reset_credit()
+            self.vc_reinsertion(vc, self.vcs_target_east)
 
         # VC targeting -> West
         if len(self.vcs_target_west) > 0:
@@ -286,10 +277,7 @@ class Router:
             self.send_flit(vc, self.outWest)
 
             # re-insert if credit is not finished
-            if vc.quantum > 0 and len(vc.flits) > 0:
-                self.vcs_target_west.insert(0, vc)
-            else:
-                vc.reset_credit()
+            self.vc_reinsertion(vc, self.vcs_target_west)
 
         # VC targeting -> PE
         if len(self.vcs_target_pe) > 0:
@@ -298,10 +286,13 @@ class Router:
             self.arrived_flit(vc)
 
             # re-insert if credit is not finished
-            if vc.quantum > 0 and len(vc.flits) > 0:
-                self.vcs_target_pe.insert(0, vc)
-            else:
-                vc.reset_credit()
+            self.vc_reinsertion(vc, self.vcs_target_pe)
+
+    def vc_reinsertion(self, vc, target_queue):
+        if vc.quantum > 0 and len(vc.flits) > 0:
+            target_queue.insert(0, vc)
+        else:
+            vc.reset_credit()
 
     def get_highest_preemptive_priority_vc(self, candidates):
 
