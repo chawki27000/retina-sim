@@ -135,7 +135,10 @@ class Router:
         flit = vc.dequeue()
 
         # Flit Timestamp to avoid premature sending
-        self.timestamp_flit_restore(flit, vc)
+        if flit.timestamp == self.env.now:
+            vc.flits.insert(0, flit)
+            return
+        flit.timestamp = self.env.now
 
         if flit.type == FlitType.tail:
             self.vcs_dictionary.remove(vc)
@@ -161,7 +164,10 @@ class Router:
         flit = vc.dequeue()
 
         # Flit Timestamp to avoid premature sending
-        self.timestamp_flit_restore(flit, vc)
+        if flit.timestamp == self.env.now:
+            vc.flits.insert(0, flit)
+            return
+        flit.timestamp = self.env.now
 
         # if is a Head Flit
         if flit.type == FlitType.head:
@@ -290,12 +296,6 @@ class Router:
             target_queue.insert(0, vc)
         else:
             vc.reset_credit()
-
-    def timestamp_flit_restore(self, flit, vc):
-        if flit.timestamp == self.env.now:
-            vc.flits.insert(0, flit)
-            return
-        flit.timestamp = self.env.now
 
     def get_highest_preemptive_priority_vc(self, candidates):
 
