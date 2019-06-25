@@ -87,6 +87,11 @@ def main():
         # Simulator Settings
         noc.messages = messages
         noc.arbitration = arbitration
+
+        # TODO : tmp
+        for msg in messages:
+            print(msg)
+        # TODO : tmp
         # Starting Simulation
         logging.info('### Simulation --> START - hyperperiod : %d ###' % generation.hyperperiod())
         # env.run(until=generation.hyperperiod())

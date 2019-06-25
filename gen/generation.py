@@ -76,7 +76,7 @@ class Generation:
                                           deadline,
                                           Coordinate(src['i'], src['j']),
                                           Coordinate(dest['i'], dest['j']),
-                                          priority=0)
+                                          priority=priority)
 
                         self.messages.append(message)
                         self.counter += 1

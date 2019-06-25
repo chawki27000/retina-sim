@@ -44,6 +44,16 @@ class Router:
     def noc_settings(self, noc):
         self.noc = noc
 
+    def run(self):
+        while True:
+            yield self.env.timeout(1)
+
+            if self.noc.arbitration == "RR":
+                self.rr_arbitration()
+
+            elif self.noc.arbitration == "PRIORITY_PREEMPT":
+                self.priority_preemptive_arbitration()
+
     def route_computation(self, flit):
         # On X axe (Column)
         # By the West
@@ -124,6 +134,9 @@ class Router:
     def arrived_flit(self, vc):
         flit = vc.dequeue()
 
+        # Flit Timestamp to avoid premature sending
+        self.timestamp_flit_restore(flit, vc)
+
         if flit.type == FlitType.tail:
             self.vcs_dictionary.remove(vc)
             vc.release()
@@ -148,10 +161,7 @@ class Router:
         flit = vc.dequeue()
 
         # Flit Timestamp to avoid premature sending
-        if flit.timestamp == self.env.now:
-            vc.flits.insert(0, flit)
-            return
-        flit.timestamp = self.env.now
+        self.timestamp_flit_restore(flit, vc)
 
         # if is a Head Flit
         if flit.type == FlitType.head:
@@ -212,19 +222,6 @@ class Router:
                 vc.release()
                 vc.credit_out()
                 self.logger.debug('(%d) - VC (%s) - released' % (self.env.now, vc))
-
-        # print("------------> %s credit after sending :: %d" % (vc, vc.quantum))
-
-    def run(self):
-        while True:
-            yield self.env.timeout(1)
-
-            if self.noc.arbitration == "RR":
-                # TODO : actualiser la slot_table des inputs
-                self.rr_arbitration()
-
-            elif self.noc.arbitration == "PRIORITY_PREEMPT":
-                self.priority_preemptive_arbitration()
 
     def rr_arbitration(self):
         # ---------- VC election ----------
@@ -294,11 +291,22 @@ class Router:
         else:
             vc.reset_credit()
 
+    def timestamp_flit_restore(self, flit, vc):
+        if flit.timestamp == self.env.now:
+            vc.flits.insert(0, flit)
+            return
+        flit.timestamp = self.env.now
+
     def get_highest_preemptive_priority_vc(self, candidates):
 
         # No Arbitration
         if len(candidates) == 1:
             return candidates[0]
+
+        # filtering by timestamp
+        for can in candidates:
+            if can.flits[0].timestamp == self.env.now:
+                candidates.remove(can)
 
         priority_vc = candidates[0]
 
@@ -363,9 +371,3 @@ class Router:
 
     def __str__(self):
         return 'Router (%d,%d)' % (self.coordinate.i, self.coordinate.j)
-
-    def check_east_inport(self):
-        print("-----> %s EAST inport TDM Table at : %d" % (self, self.env.now))
-        for vc in self.inEast.vcs:
-            print("%s has a credit : %s" % (vc, vc.quantum))
-        print("-------------------------------------------------->")
