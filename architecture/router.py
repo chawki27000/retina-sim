@@ -1,3 +1,4 @@
+import copy
 import logging
 
 import math
@@ -138,7 +139,7 @@ class Router:
         if flit.timestamp == self.env.now:
             vc.flits.insert(0, flit)
             return
-        flit.timestamp = self.env.now
+        flit.timestamp = copy.copy(self.env.now)
 
         if flit.type == FlitType.tail:
             self.vcs_dictionary.remove(vc)
@@ -167,7 +168,6 @@ class Router:
         if flit.timestamp == self.env.now:
             vc.flits.insert(0, flit)
             return
-        flit.timestamp = self.env.now
 
         # if is a Head Flit
         if flit.type == FlitType.head:
@@ -183,6 +183,7 @@ class Router:
             if vc_allotted is not None:
                 self.logger.debug('(%d) - VC (%s) allotted' % (self.env.now, vc_allotted))
                 vc_allotted.enqueue(flit)
+                flit.timestamp = copy.copy(self.env.now)
                 self.logger.info(
                     '(%d) : %s ON %s- %s -> %s -> %s' % (self.env.now, flit, vc, self, vc_allotted, vc_allotted.router))
                 vc.credit_out()
@@ -211,6 +212,7 @@ class Router:
                 self.logger.info(
                     '(%d) : %s ON %s- %s -> %s -> %s' % (self.env.now, flit, vc, self, vc_allotted, vc_allotted.router))
                 vc.credit_out()
+                flit.timestamp = copy.copy(self.env.now)
 
         # if is a Tail Flit
         elif flit.type == FlitType.tail:
@@ -225,6 +227,7 @@ class Router:
                 self.logger.debug('(%d) - %s was not sent - No Place in VC (%s)' % (self.env.now, flit, vc_allotted))
             else:
                 self.vcs_dictionary.remove(vc)
+                flit.timestamp = copy.copy(self.env.now)
                 vc.release()
                 vc.credit_out()
                 self.logger.debug('(%d) - VC (%s) - released' % (self.env.now, vc))
@@ -305,7 +308,7 @@ class Router:
 
         # filtering by timestamp
         for can in candidates:
-            if can.flits[0].timestamp == self.env.now:
+            if can.flits[-1].timestamp == self.env.now:
                 candidates.remove(can)
 
         priority_vc = candidates[0]
