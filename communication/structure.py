@@ -5,7 +5,7 @@ from collections import namedtuple
 import math
 
 FLIT_DEFAULT_SIZE = 32
-PACKET_DEFAULT_SIZE = 128
+PACKET_DEFAULT_SIZE = 320
 
 
 class Packet:
@@ -83,6 +83,7 @@ class Message:
         self.size = size
         self.priority = priority
         self.packets = []
+        self.instance_number = 0
 
         # Packet construct
         packetNumber = int(math.ceil(float(self.size / PACKET_DEFAULT_SIZE)))
@@ -171,6 +172,9 @@ class MessageInstance(Message):
         if self._arrival_time is None:
             return -1
         return self._arrival_time - self._depart_time
+
+    def is_deadline_met(self):
+        return self._arrival_time <= self.deadline + (self.instance * self.period)
 
     def get_priority(self):
         if hasattr(self, 'priority'):

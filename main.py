@@ -88,14 +88,12 @@ def main():
         noc.messages = messages
         noc.arbitration = arbitration
 
-        # TODO : tmp
         for msg in messages:
             print(msg)
-        # TODO : tmp
         # Starting Simulation
         logging.info('### Simulation --> START - hyperperiod : %d ###' % generation.hyperperiod())
-        # env.run(until=generation.hyperperiod())
-        env.run(until=20)
+        env.run(until=generation.hyperperiod())
+        # env.run(until=20)
         logging.info('### Simulation --> END ###')
 
         # printing
@@ -107,8 +105,8 @@ def main():
         """
 
         # Trace generation : Latency
-        # for message in messages_i:
-        #     print("%s --> latency : %d" % (message, message.get_latency()))
+        for msgi in messages_i:
+            print("%s ---> Sched :: %s" % (msgi, msgi.is_deadline_met()))
         #
         # csv.simulation_trace_csv('input/' + file + '/result_sim.csv')
 

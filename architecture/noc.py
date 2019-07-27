@@ -182,7 +182,8 @@ class NoC:
                 router = self.router_matrix[coord.i][coord.j]
 
                 if self.env.now % message.period == 0:
-                    mi = MessageInstance(message, 0)
+                    mi = MessageInstance(message, message.instance_number)
+                    message.instance_number += 1
                     self.messages_instance.append(mi)
                     router.proc_engine.send_to_router(mi)
 

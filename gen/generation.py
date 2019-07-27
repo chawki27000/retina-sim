@@ -68,6 +68,10 @@ class Generation:
                         if self._arbitration == 'PRIORITY_PREEMPT' or self._arbitration == 'PRIORITY_NON_PREEMPT':
                             priority = random.randint(0, self._nbvc - 1)
 
+                        # Temporary :: Compute the deadline for our task
+                        lower_bound = int(0.7 * period)
+                        deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
+
                         # Message Creation
                         message = Message(self.counter,
                                           period,
@@ -82,7 +86,7 @@ class Generation:
                         self.counter += 1
 
                         # Generate task conflict
-                        # self.conflict_task_by_axe(message, 100, 90, 0)
+                        self.conflict_task_by_axe(message, 20, 10, 0)
 
                 # Automatic generation
                 elif 'task' in data:
