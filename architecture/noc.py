@@ -162,6 +162,16 @@ class NoC:
                 # Link Array filling
                 self.links[str(router_himself.id)][str(temporary_router.id)] = 0
 
+    def resource_augmentation(self, vc_number, slot):
+        # Adding more VCs to ensure deadline-meeting
+        for i in range(self.square_size):
+            for j in range(self.square_size):
+                self.router_matrix[i][j].inNorth.add_more_vcs(vc_number, slot)
+                self.router_matrix[i][j].inSouth.add_more_vcs(vc_number, slot)
+                self.router_matrix[i][j].inWest.add_more_vcs(vc_number, slot)
+                self.router_matrix[i][j].inEast.add_more_vcs(vc_number, slot)
+                self.router_matrix[i][j].inPE.add_more_vcs(vc_number, slot)
+
     def link_array_clean(self):
         for key in self.links.keys():
             for key2 in self.links[key]:

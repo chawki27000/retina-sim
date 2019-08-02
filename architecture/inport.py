@@ -50,3 +50,7 @@ class InPort:
     def vcs_status(self):
         for vc in self.vcs:
             print("%s -- Direction %s -- size : %d" % (vc, vc.direction, len(vc.flits)))
+
+    def add_more_vcs(self, number, slot):
+        for i in range(number):
+            self.vcs.append(VirtualChannel(i, self.direction, self.router, self.vc_size, slot))
