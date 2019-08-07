@@ -175,6 +175,15 @@ On the other hand, The **result_analysis.csv** is stuctured, like :
 | --- | --- |
 | task index  | analysis latency |
 
+Our work is based, on generated the conflictual tasks through an algorithm detailed in the paper. The latter, takes the conflict rate interval, specified on _generation.py_ in _gen_ package through **scenario** function.
+You can edit the conflict rate by modifying the followings function:
+```python
+# The first paramters is our communication task
+# The two following parameters specify the interval (upper, lower) ([50%, 60%])
+# The last, is the rate error (+/-)  
+self.conflict_task_by_axe(message, 60, 50, 0) 
+```
+
 ## Authors
 
 * **Chawki BENCHEHIDA** - [LAPECI Lab](http://lapeci.org/) - Université d'Oran 1
