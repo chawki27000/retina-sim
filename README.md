@@ -13,6 +13,7 @@ The following packages are required to execute the program :
 - Python 3
 - Pip (python package manager)
 - PyYaml
+- Simpy
 
 To install the requirements, you must apply the following instructions (on Ubuntu) :
 ```
@@ -23,7 +24,7 @@ $ pip install -r requirement.txt
 ## Configuration
 #### Simulator scenario
 
-To execute the simulator, it needs a scenario. The latter is a Task Set of several routers communication that's contain :
+A scenario is needed to make a simulation. some parameters must be written to build a communicating task. These parameters are the same of for each task contained in the taskset, and they are enumerated as follows (in order) :
 - Router source coordinate
 - Router destination coordinate
 - Message size
@@ -61,12 +62,20 @@ scenario:
       offset: 30
       deadline: 60
       period: 100
+    
+    ...
+    # Task n
 ```
 	  
-The second way is to generate tasks by using
+The second way is to generate a taskset by using
 [UUniFast-Discard](https://pdfs.semanticscholar.org/24a9/c3297bf08caeceb15777e85f0c3da5c07e26.pdf)
 Algorithm. The number of tasks must be given by the user in the
-simulator CLI.
+simulator CLI, like the following scenario file : 
+```yaml
+task: 7 # Task number 
+method: 'UuniFast' # The unique method (until now)
+load: 0.7 # Load rate (specified in UUnifast documentation)
+```
 
 #### Network-on-Chip settings
 
@@ -79,6 +88,7 @@ noc:
   dimension: 4 # NoC dimension : 4x4
   numberOfVC: 4 # Number of VC in each InPort
   VCBufferSize: 4 # the VC buffer size
+  arbitration: 'RR' # Either in :: RR (TDMA) / PRIORITY_PREEMPT 
 
 quantum: # VCs Quantum configuration (according to numberOfVC)
   1: 1
@@ -97,12 +107,12 @@ _FLIT_DEFAULT_SIZE_ and _PACKET_DEFAULT_SIZE_.
 To run the simulation, go to the project root and execute :
 
 ```
-$ python main.py
+$ python main.py [-i][-d]
 ```
 
-After that, a CLI appears and asks 2 parameters : Task assigning mode (Manuel/UUniFast) and Simulation output mode, that can be one between:
-- DEBUG : Print all NoC actions (PE sending, Router sending, VC allocation and releasing) and alternative cases (full buffer, no idle VC)
-- INFO : Print only router-to-router sending and Flit arriving
+The main program needs a parameter to lunch the simulation, as follows :  
+- DEBUG (-d) : Print all NoC actions (PE sending, Router sending, VC allocation and releasing) and alternative cases (full buffer, no idle VC)
+- INFO (-i) : Print only router-to-router sending and Flit arriving
 
 
 ## Example
@@ -151,14 +161,19 @@ INFO: :(8) : FlitType.body 2-0-0 - Router (2,2) -> ProcessingEngine (2,2)
 INFO: :(9) : FlitType.tail 3-0-0 - Router (2,2) -> ProcessingEngine (2,2)
 ```
 
-A CSV file named **result.csv** (under _output_ package) contains the
-task instances latency (computed by the last packet arriving time
-minus the first packet sending time) and the analysis WCLA. the CSV
-file in structured as :
+The simulation generates Two result files structured like CSV format, named **result_analysis.csv** (contains the analysis part)  and **result_sim.csv**, where it contains the simulation results which express the task latency (computed by the last packet arriving time
+minus the first packet sending time). In the result analysis file, the latency's computed by formulation detailed in the paper. 
+The **result_analysis.csv** is structured like follows :
 
-| i | WCLA | L_1 | L_2 | L_3 | L_4 |
-| --- | --- | --- | --- | --- | --- |
-| task index  | analysis  | inst 1 latency | inst 2 latency | inst 3 latency | inst 4 latency |
+| i | L_1 | L_2 | L_3 | L_4 |
+| --- | --- | --- | --- | --- |
+| task index | inst 1 latency | inst 2 latency | inst 3 latency | inst 4 latency |
+
+On the other hand, The **result_analysis.csv** is stuctured, like :
+
+| i | WCLA |
+| --- | --- |
+| task index  | analysis latency |
 
 ## Authors
 

@@ -76,8 +76,8 @@ def main1():
         """
         Analysis : Begin
         """
-        # csv = CSVWriter(messages, arbitration, noc)
-        # csv.analysis_trace_csv('input/' + file + '/result_analysis.csv', messages)
+        csv = CSVWriter(messages, arbitration, noc)
+        csv.analysis_trace_csv('input/' + file + '/result_analysis.csv', messages)
         """
         Analysis : End
         """
@@ -106,10 +106,10 @@ def main1():
         """
 
         # Trace generation : Latency
-        for msgi in messages_i:
-            print("%s ---> Sched :: %s" % (msgi, msgi.is_deadline_met()))
-        #
-        # csv.simulation_trace_csv('input/' + file + '/result_sim.csv')
+        # for msgi in messages_i:
+        #     print("%s ---> Sched :: %s" % (msgi, msgi.is_deadline_met()))
+
+        csv.simulation_trace_csv('input/' + file + '/result_sim.csv')
 
 
 def main_resource_augmentation():
