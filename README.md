@@ -90,7 +90,7 @@ noc:
   VCBufferSize: 4 # the VC buffer size
   arbitration: 'RR' # Either in :: RR (TDMA) / PRIORITY_PREEMPT 
 
-quantum: # VCs Quantum configuration (according to numberOfVC)
+quantum: # VCs Quantum configuration (TDM Slot)
   1: 1
   2: 2
   3: 1
