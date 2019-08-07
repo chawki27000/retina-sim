@@ -29,7 +29,7 @@ class InPort:
     def priority_vc_allocator(self, priority):
         for vc in self.vcs:
             if vc.isFree() and vc.id == priority:
-                vc.lock = True
+                vc.locked()
                 return vc
         return None
 
@@ -49,7 +49,8 @@ class InPort:
 
     def vcs_status(self):
         for vc in self.vcs:
-            print("%s -- Direction %s -- size : %d" % (vc, vc.direction, len(vc.flits)))
+            print("%s -- Direction %s -- size : %d -- Lock : %s -- credit : %d" % (
+            vc, vc.direction, len(vc.flits), vc.lock, vc.quantum))
 
     def add_more_vcs(self, number, slot):
         for i in range(number):

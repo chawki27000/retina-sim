@@ -77,3 +77,17 @@ class CSVWriter:
                 for msg in messages:
                     latency = qinModel.latency_nth(msg)
                     writer.writerow([msg.id, latency])
+
+    @staticmethod
+    def resource_augmentation_trace_csv(link, tab):
+        # build header row
+        header = ['i', 'VCs']
+
+        with open(link, mode='w') as file:
+            writer = csv.writer(file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+            # File Header
+            writer.writerow(header)
+
+            for i in range(len(tab)):
+                writer.writerow([i, tab[i]])

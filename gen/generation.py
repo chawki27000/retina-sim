@@ -86,7 +86,7 @@ class Generation:
                         self.counter += 1
 
                         # Generate task conflict
-                        self.conflict_task_by_axe(message, 20, 10, 0)
+                        self.conflict_task_by_axe(message, 60, 50, 0)
 
                 # Automatic generation
                 elif 'task' in data:
@@ -316,20 +316,17 @@ class Generation:
     def generate_communicating_task_by_axe(self, min_rate, offset, src, dest):
         while True:
 
-            ######## time.sleep(1)
-
             size = random.randint(structure.PACKET_DEFAULT_SIZE, structure.PACKET_DEFAULT_SIZE * 10)
             period = self.period_array[random.randint(0, len(self.period_array) - 1)]
             lower_bound = int(0.7 * period)
-            deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
+            # deadline = random.randint(0, (period - lower_bound + 1) + lower_bound)
+            deadline = period  # TODO : temporary Harmonic Taskset
 
             priority = random.randint(0, self._nbvc - 1)
             message = Message(self.counter, period, size, offset, deadline, src, dest, priority)
 
             # calculate message Lu
             lu = message.get_link_utilization()
-
-            ######## print("%s -> %s ||| min rate : %d === LU : %f" % (src, dest, min_rate, lu))
 
             if lu > (min_rate / 100):
                 continue

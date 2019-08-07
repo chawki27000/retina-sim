@@ -47,8 +47,7 @@ class NoC:
         inSouth = InPort(router, Direction.south, self.nbvc, self.vc_size, self.vc_quantum)
         inEast = InPort(router, Direction.east, self.nbvc, self.vc_size, self.vc_quantum)
         inWest = InPort(router, Direction.west, self.nbvc, self.vc_size, self.vc_quantum)
-        inPE = InPort(router, Direction.pe, self.nbvc, 10000,
-                      self.vc_quantum)  # TODO : regler le probleme des Nb VC dans PE
+        inPE = InPort(router, Direction.pe, self.nbvc, self.vc_size, self.vc_quantum)
 
         # OutPort
         outNorth = OutPort(Direction.north)

@@ -12,11 +12,11 @@ scenario:
 
 #  - src:
 #      i: 0
-#      j: 1
+#      j: 0
 #    dest:
-#      i: 0
+#      i: 3
 #      j: 2
-#    size: 128
+#    size: 2560
 #    offset: 0
 #    deadline: 0
 #    period: 100

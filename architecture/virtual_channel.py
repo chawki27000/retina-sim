@@ -39,8 +39,7 @@ class VirtualChannel:
 
     def credit_out(self):
         if self.quantum <= 0:
-            return False
-
+            return
         self.quantum -= 1
 
     def reset_credit(self):

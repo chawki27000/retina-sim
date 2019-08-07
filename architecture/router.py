@@ -2,6 +2,7 @@ import copy
 import logging
 
 import math
+import time
 
 from communication.structure import NodeArray, FlitType, Node, PACKET_DEFAULT_SIZE, FLIT_DEFAULT_SIZE
 from engine.simulation import TRACESET
@@ -137,13 +138,16 @@ class Router:
 
         # Flit Timestamp to avoid premature sending
         if flit.timestamp == self.env.now:
-            vc.flits.insert(0, flit)
+            vc.restore(flit)
             return
+
         flit.timestamp = copy.copy(self.env.now)
 
         if flit.type == FlitType.tail:
             self.vcs_dictionary.remove(vc)
             vc.release()
+
+        vc.credit_out()
 
         # Flit store
         self.proc_engine.flit_receiving(flit)
@@ -166,7 +170,7 @@ class Router:
 
         # Flit Timestamp to avoid premature sending
         if flit.timestamp == self.env.now:
-            vc.flits.insert(0, flit)
+            vc.restore(flit)
             return
 
         # if is a Head Flit
@@ -176,7 +180,7 @@ class Router:
             if self.noc.arbitration == "RR":
                 vc_allotted = outport.inPort.vc_allocator()
             elif self.noc.arbitration == "PRIORITY_PREEMPT":
-                vc_allotted = outport.inPort.priority_vc_allocator(flit.priority)
+                vc_allotted = outport.inPort.priority_vc_allocator(flit.packet.priority)
             else:
                 vc_allotted = None
 
@@ -186,7 +190,7 @@ class Router:
                 flit.timestamp = copy.copy(self.env.now)
                 self.logger.info(
                     '(%d) : %s ON %s- %s -> %s -> %s' % (self.env.now, flit, vc, self, vc_allotted, vc_allotted.router))
-                vc.credit_out()
+                # vc.credit_out()
 
                 # registering VC allotted in dictionary
                 self.vcs_dictionary.add(Node(vc, vc_allotted))
@@ -195,6 +199,8 @@ class Router:
                 vc.restore(flit)  # restore
                 self.logger.debug('(%d) - %s was not sent - VC not allotted ON %s' %
                                   (self.env.now, flit, outport.inPort.router))
+                # outport.inPort.vcs_status()
+                # time.sleep(1)
 
         # if is a Body Flit
         elif flit.type == FlitType.body:
@@ -211,7 +217,7 @@ class Router:
             else:
                 self.logger.info(
                     '(%d) : %s ON %s- %s -> %s -> %s' % (self.env.now, flit, vc, self, vc_allotted, vc_allotted.router))
-                vc.credit_out()
+                # vc.credit_out()
                 flit.timestamp = copy.copy(self.env.now)
 
         # if is a Tail Flit
@@ -228,9 +234,11 @@ class Router:
             else:
                 self.vcs_dictionary.remove(vc)
                 flit.timestamp = copy.copy(self.env.now)
+                # vc.credit_out()
                 vc.release()
-                vc.credit_out()
                 self.logger.debug('(%d) - VC (%s) - released' % (self.env.now, vc))
+
+        vc.credit_out()
 
     def rr_arbitration(self):
         # ---------- VC election ----------

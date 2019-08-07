@@ -174,6 +174,8 @@ class MessageInstance(Message):
         return self._arrival_time - self._depart_time
 
     def is_deadline_met(self):
+        if self._arrival_time is None:
+            return None
         return self._arrival_time <= self.deadline + (self.instance * self.period)
 
     def get_priority(self):
