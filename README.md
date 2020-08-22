@@ -191,5 +191,23 @@ self.conflict_task_by_axe(message, 60, 50, 0)
 * **Houssam Eddine ZAHAF** - [CRIStAL](https://www.cristal.univ-lille.fr) - Université de Lille
 * **Giuseppe LIPARI** - [CRIStAL](https://www.cristal.univ-lille.fr) - Université de Lille
 
+## Citation (Bibtex)
+```
+@article{10.1145/3412821.3412822,
+author = {Benchehida, Chawki and Benhaoua, Mohammed Kamel and Zahaf, Houssam-Eddine and Lipari, Giuseppe},
+title = {An Analysis and Simulation Tool of Real-Time Communications in on-Chip Networks: A Comparative Study},
+year = {2020},
+issue_date = {February 2020},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {17},
+number = {1},
+doi = {10.1145/3412821.3412822},
+journal = {SIGBED Rev.},
+month = jul,
+pages = {5–11},
+numpages = {7}
+}
+```
 ## Licence
 [GPL](http://www.gnu.org/licenses/gpl-3.0.html)
